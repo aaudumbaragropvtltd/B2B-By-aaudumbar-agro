@@ -1,0 +1,234 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   B2B BHARAT — GLOBAL DESIGN SYSTEM
+   ============================================================================
+   Premium, high-trust B2B marketplace design tokens and utilities.
+   Uses CSS custom properties for runtime theming support.
+   ============================================================================ */
+
+/* ── Design Tokens ── */
+:root {
+  /* Primary Brand Palette — Deep Navy to Trust Blue */
+  --b2b-primary-50: #eff6ff;
+  --b2b-primary-100: #dbeafe;
+  --b2b-primary-200: #bfdbfe;
+  --b2b-primary-300: #93c5fd;
+  --b2b-primary-400: #60a5fa;
+  --b2b-primary-500: #3b82f6;
+  --b2b-primary-600: #2563eb;
+  --b2b-primary-700: #1d4ed8;
+  --b2b-primary-800: #1e40af;
+  --b2b-primary-900: #1e3a5f;
+  --b2b-primary-950: #0f172a;
+
+  /* Accent — Saffron / India Gold */
+  --b2b-accent-400: #fb923c;
+  --b2b-accent-500: #f97316;
+  --b2b-accent-600: #ea580c;
+
+  /* Success / Verified */
+  --b2b-success-500: #22c55e;
+  --b2b-success-600: #16a34a;
+
+  /* Warning / Stale */
+  --b2b-warning-500: #eab308;
+  --b2b-warning-600: #ca8a04;
+
+  /* Surface & Background */
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --surface-elevated: #f8fafc;
+  --surface-glass: rgba(255, 255, 255, 0.72);
+  --border-subtle: rgba(0, 0, 0, 0.06);
+
+  /* Typography */
+  --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #030712;
+    --foreground: #f1f5f9;
+    --surface-elevated: #111827;
+    --surface-glass: rgba(17, 24, 39, 0.8);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* ── Tailwind v4 Theme Inline Overrides ── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-geist-mono);
+
+  /* Brand colors exposed to Tailwind */
+  --color-brand-50: var(--b2b-primary-50);
+  --color-brand-100: var(--b2b-primary-100);
+  --color-brand-200: var(--b2b-primary-200);
+  --color-brand-300: var(--b2b-primary-300);
+  --color-brand-400: var(--b2b-primary-400);
+  --color-brand-500: var(--b2b-primary-500);
+  --color-brand-600: var(--b2b-primary-600);
+  --color-brand-700: var(--b2b-primary-700);
+  --color-brand-800: var(--b2b-primary-800);
+  --color-brand-900: var(--b2b-primary-900);
+  --color-brand-950: var(--b2b-primary-950);
+
+  --color-accent-400: var(--b2b-accent-400);
+  --color-accent-500: var(--b2b-accent-500);
+  --color-accent-600: var(--b2b-accent-600);
+
+  --color-success-500: var(--b2b-success-500);
+  --color-success-600: var(--b2b-success-600);
+
+  --color-warning-500: var(--b2b-warning-500);
+  --color-warning-600: var(--b2b-warning-600);
+
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-glass: var(--surface-glass);
+  --color-border-subtle: var(--border-subtle);
+}
+
+/* ── Base Styles ── */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-display);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--b2b-primary-200);
+  color: var(--b2b-primary-900);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--b2b-primary-300);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--b2b-primary-500);
+}
+
+/* ── Glassmorphism Utility ── */
+.glass {
+  background: var(--surface-glass);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ── Gradient Text Utility ── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--b2b-primary-600), var(--b2b-accent-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Animated Gradient Background ── */
+.animated-gradient {
+  background: linear-gradient(-45deg, #1e3a5f, #1d4ed8, #2563eb, #0f172a);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Marquee / Ticker Animation ── */
+.ticker-track {
+  display: flex;
+  animation: ticker-scroll 40s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Pulse Dot (Live Status Indicator) ── */
+.pulse-dot {
+  position: relative;
+}
+
+.pulse-dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+
+/* ── Skeleton Loading ── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-elevated) 25%,
+    rgba(148, 163, 184, 0.15) 50%,
+    var(--surface-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Focus Ring (Accessibility) ── */
+*:focus-visible {
+  outline: 2px solid var(--b2b-primary-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Stale Badge Pulse ── */
+.stale-badge {
+  animation: stale-pulse 2s ease-in-out infinite;
+}
+
+@keyframes stale-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
