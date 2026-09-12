@@ -53,13 +53,7 @@ export default function ShippingPolicy() {
               <li>Shipping charges are explicitly itemized in the final invoice prior to payment.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">5. Transit Insurance &amp; Damage in Transit</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Consignments booked through platform logistics can be insured under marine/transit cargo insurance policies.</li>
-              <li>In the rare event of transit damage or pilferage, the buyer must note the discrepancy on the Proof of Delivery (POD) slip before signing and alert our logistics desk within <strong>24 hours</strong> of arrival with photographic evidence.</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">6. Shipping Support &amp; Fleet Tracking</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">5. Shipping Support &amp; Fleet Coordination</h2>
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mt-4">
               <p className="mb-1 font-bold text-gray-900">Aaudumbar Agro Pvt. Ltd. Logistics Cell</p>
               <p className="mb-1"><strong>Email:</strong> <a href="mailto:support@b2bindia.site" className="text-brand-600 hover:underline">support@b2bindia.site</a></p>
