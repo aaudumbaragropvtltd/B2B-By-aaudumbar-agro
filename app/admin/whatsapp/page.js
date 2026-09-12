@@ -1288,19 +1288,42 @@ We noticed your wholesale product prices haven't been updated yet for this month
 
               {/* Result Summary */}
               {bulkResult && (
-                <div className="p-4 rounded-xl bg-slate-950 border border-emerald-500/40">
+                <div className="p-4 rounded-xl bg-slate-950 border border-emerald-500/40 space-y-3">
                   <div className="flex items-center justify-between text-xs font-bold text-emerald-400">
-                    <span>🎉 Broadcast Successfully Completed!</span>
+                    <span>🎉 Server Dispatch Executed!</span>
                     <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-                      {bulkResult.sent} / {bulkResult.total} Delivered
+                      {bulkResult.sent} / {bulkResult.total} Processed
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-300 mt-1">
-                    All {bulkResult.sent} suppliers have been sent their message and marked with green checkmarks in the directory.
-                  </p>
-                  <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
-                    <span>Engine: {bulkResult.twilioUsed ? 'Twilio WhatsApp API' : 'High-Speed Server Dispatcher'}</span>
-                    <span className="text-emerald-400 font-bold">Status: OK</span>
+
+                  {!bulkResult.twilioUsed ? (
+                    <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-200 space-y-2">
+                      <div className="font-bold text-amber-300 flex items-center gap-1.5">
+                        <span>ℹ️ Running in Simulation (Dev) Mode</span>
+                      </div>
+                      <p className="text-slate-300 text-[11px] leading-relaxed">
+                        The server generated and logged all {bulkResult.sent} personalized messages to the local server console. However, delivering messages to a physical mobile phone requires either:
+                      </p>
+                      <div className="space-y-1.5 text-[11px] text-slate-300 pt-1">
+                        <div className="p-2 rounded bg-slate-900 border border-slate-800">
+                          <strong className="text-emerald-400">1. 100% Free (No API keys needed):</strong> Close this modal, maximize your browser, and click the green <strong className="text-white">Web ↗</strong> or <strong className="text-white">Desktop Popout</strong> button on any supplier row to send directly from your WhatsApp account.
+                        </div>
+                        <div className="p-2 rounded bg-slate-900 border border-slate-800">
+                          <strong className="text-indigo-400">2. Real Background Delivery:</strong> Add your <code className="text-white bg-slate-950 px-1 py-0.5 rounded">TWILIO_SID</code> and <code className="text-white bg-slate-950 px-1 py-0.5 rounded">TWILIO_AUTH_TOKEN</code> in your environment settings so Twilio can physically transmit messages across the carrier network.
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-slate-300">
+                      All {bulkResult.sent} suppliers have been dispatched via Twilio WhatsApp Business API.
+                    </p>
+                  )}
+
+                  <div className="text-[10px] text-slate-400 flex items-center justify-between pt-1">
+                    <span>Engine: {bulkResult.twilioUsed ? 'Twilio WhatsApp API (Live)' : 'Local Server Simulator (Mock)'}</span>
+                    <span className={bulkResult.twilioUsed ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+                      {bulkResult.twilioUsed ? 'Delivered to Carrier' : 'Logged to Console'}
+                    </span>
                   </div>
                 </div>
               )}
