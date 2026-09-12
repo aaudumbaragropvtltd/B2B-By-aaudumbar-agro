@@ -178,6 +178,70 @@ We noticed your wholesale product prices haven't been updated yet for this month
     }
   };
 
+  // Bulk "Send to All" Modal & Execution State
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [bulkAudience, setBulkAudience] = useState('outdated'); // 'outdated' | 'all' | 'filtered'
+  const [bulkSending, setBulkSending] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0, currentSupplier: '' });
+  const [bulkResult, setBulkResult] = useState(null);
+
+  // Execute Bulk Dispatch: Sends message to all selected suppliers
+  const handleExecuteSendAll = async () => {
+    let targetList = [];
+    if (bulkAudience === 'outdated') {
+      targetList = suppliers.filter((s) => !s.has_updated_this_month && s.has_valid_whatsapp);
+    } else if (bulkAudience === 'all') {
+      targetList = suppliers.filter((s) => s.has_valid_whatsapp);
+    } else {
+      targetList = filteredSuppliers.filter((s) => s.has_valid_whatsapp);
+    }
+
+    if (targetList.length === 0) {
+      alert('No suppliers with valid WhatsApp numbers found in this audience. You can set real numbers or use the batch convert tool first.');
+      return;
+    }
+
+    setBulkSending(true);
+    setBulkResult(null);
+    setBulkProgress({ current: 0, total: targetList.length, currentSupplier: targetList[0].company_name });
+
+    try {
+      const templateText = selectedTemplate === 'custom' ? customMessage || TEMPLATES.custom.text : TEMPLATES[selectedTemplate].text;
+      
+      const res = await fetch('/api/admin/whatsapp/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send_bulk',
+          suppliers: targetList,
+          messageTemplate: templateText,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Bulk broadcast failed');
+
+      // Update sent session map for all successful deliveries
+      const updatedSent = { ...sentMap };
+      const nowISO = new Date().toISOString();
+      (data.details || []).forEach((item) => {
+        if (item.success && item.supplierId) {
+          updatedSent[item.supplierId] = nowISO;
+        }
+      });
+      setSentMap(updatedSent);
+      try {
+        sessionStorage.setItem('b2b_whatsapp_sent_session', JSON.stringify(updatedSent));
+      } catch {}
+
+      setBulkResult(data);
+    } catch (err) {
+      alert(`Bulk Dispatch Notice: ${err.message}`);
+    } finally {
+      setBulkSending(false);
+    }
+  };
+
   // Copy message to clipboard
   const handleCopyMessage = (text, label = 'Message') => {
     navigator.clipboard.writeText(text);
@@ -333,9 +397,27 @@ We noticed your wholesale product prices haven't been updated yet for this month
           </div>
         </div>
 
-        {/* Quick Launch Next Supplier in Queue */}
-        {nextUnsentSupplier && (
-          <div className="flex items-center gap-2">
+        {/* Action Header Buttons: Send to All & Send Next */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Send to All Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setBulkAudience('outdated');
+              setIsBulkModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-xs rounded-xl shadow-xl shadow-emerald-500/25 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+            title="Broadcast reminder to all suppliers simultaneously"
+          >
+            <span className="text-sm">🚀</span>
+            <span>Send to All Suppliers</span>
+            <span className="bg-black/30 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">
+              {stats.outdated} Pending
+            </span>
+          </button>
+
+          {/* Quick Launch Next Supplier in Queue */}
+          {nextUnsentSupplier && (
             <button
               type="button"
               onClick={() => {
@@ -345,14 +427,14 @@ We noticed your wholesale product prices haven't been updated yet for this month
                 );
                 markAsSent(nextUnsentSupplier.id);
               }}
-              className="flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition-all transform active:scale-95 cursor-pointer"
             >
-              <WhatsAppLogoIcon className="w-4 h-4 fill-current" />
-              <span>Send Next: {nextUnsentSupplier.company_name.slice(0, 16)}...</span>
-              <span className="text-xs bg-black/25 px-1.5 py-0.5 rounded">🚀 Desktop Popout</span>
+              <WhatsAppLogoIcon className="w-3.5 h-3.5 fill-emerald-400" />
+              <span>Next: {nextUnsentSupplier.company_name.slice(0, 14)}...</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-mono">Web ↗</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* 🧪 INSTANT TEST DISPATCH SANDBOX CARD */}
@@ -762,6 +844,37 @@ We noticed your wholesale product prices haven't been updated yet for this month
               )}
             </div>
           </div>
+ 
+          {/* Automated Broadcast to Everyone Banner */}
+          <div className="mb-4 p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-slate-900 border border-emerald-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-emerald-500/5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">
+                🚀
+              </div>
+              <div>
+                <div className="font-extrabold text-white text-xs flex items-center gap-2">
+                  <span>Automated 1-Click Broadcast</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
+                    Everyone Gets Their Message
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Click to broadcast the active monthly reminder to all {activeFilter === 'all' ? stats.total : activeFilter === 'updated' ? stats.updated : stats.outdated} suppliers automatically in the background.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setBulkAudience(activeFilter === 'all' ? 'all' : activeFilter === 'updated' ? 'all' : 'outdated');
+                setIsBulkModalOpen(true);
+              }}
+              className="shrink-0 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition-all transform active:scale-95 cursor-pointer"
+            >
+              <span>🚀 Send to All ({activeFilter === 'all' ? stats.total : activeFilter === 'updated' ? stats.updated : stats.outdated})</span>
+            </button>
+          </div>
 
           {/* Table of Suppliers */}
           <div className="flex-1 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/60">
@@ -1041,6 +1154,192 @@ We noticed your wholesale product prices haven't been updated yet for this month
               >
                 {updatingPhone ? 'Saving...' : 'Save & Update'}
               </button>
+            </div>
+          </div>
+        </div>
+      {/* 🚀 BULK BROADCAST CONFIRMATION & EXECUTION MODAL */}
+      {isBulkModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-xl w-full shadow-2xl animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-lg">
+                  🚀
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">
+                    Send Broadcast to Everyone
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Dispatch automated price update reminders to suppliers in bulk.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!bulkSending) {
+                    setIsBulkModalOpen(false);
+                    setBulkResult(null);
+                  }
+                }}
+                disabled={bulkSending}
+                className="text-slate-400 hover:text-white text-xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="my-5 space-y-4 overflow-y-auto flex-1 pr-1">
+              {/* Audience Selector Tabs */}
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  1. Select Target Audience:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBulkAudience('outdated')}
+                    disabled={bulkSending}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      bulkAudience === 'outdated'
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="font-bold text-xs flex items-center justify-between">
+                      <span>Outdated Only</span>
+                      <span className="bg-amber-500/20 text-amber-400 px-1.5 py-0.2 rounded text-[10px]">
+                        {stats.outdated}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-1">Pending update this month</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBulkAudience('all')}
+                    disabled={bulkSending}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      bulkAudience === 'all'
+                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 ring-1 ring-emerald-500/50'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="font-bold text-xs flex items-center justify-between">
+                      <span>All Suppliers</span>
+                      <span className="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded text-[10px]">
+                        {stats.total}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-1">All verified vendors</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBulkAudience('filtered')}
+                    disabled={bulkSending}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      bulkAudience === 'filtered'
+                        ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300 ring-1 ring-indigo-500/50'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="font-bold text-xs flex items-center justify-between">
+                      <span>Current Filter</span>
+                      <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.2 rounded text-[10px]">
+                        {filteredSuppliers.length}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-1">Matches active search</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Template Preview */}
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  2. Selected Message Template ({TEMPLATES[selectedTemplate].title}):
+                </label>
+                <div className="bg-[#0b141a] border border-slate-800 rounded-xl p-3.5 text-xs text-[#e9edef] whitespace-pre-line leading-relaxed max-h-36 overflow-y-auto font-sans">
+                  {TEMPLATES[selectedTemplate].text.replace(/{{company_name}}/g, 'ABC Exports Pvt Ltd')}
+                </div>
+              </div>
+
+              {/* Live Sending Progress Animation */}
+              {bulkSending && (
+                <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 animate-in fade-in">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-400 mb-2">
+                    <span className="flex items-center gap-2">
+                      <div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                      Sending broadcast in progress...
+                    </span>
+                    <span>Please do not close this window</span>
+                  </div>
+                  <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                    <div className="bg-gradient-to-r from-emerald-500 to-green-400 h-full animate-pulse w-full" />
+                  </div>
+                </div>
+              )}
+
+              {/* Result Summary */}
+              {bulkResult && (
+                <div className="p-4 rounded-xl bg-slate-950 border border-emerald-500/40">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-400">
+                    <span>🎉 Broadcast Successfully Completed!</span>
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                      {bulkResult.sent} / {bulkResult.total} Delivered
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 mt-1">
+                    All {bulkResult.sent} suppliers have been sent their message and marked with green checkmarks in the directory.
+                  </p>
+                  <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
+                    <span>Engine: {bulkResult.twilioUsed ? 'Twilio WhatsApp API' : 'High-Speed Server Dispatcher'}</span>
+                    <span className="text-emerald-400 font-bold">Status: OK</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer Actions */}
+            <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsBulkModalOpen(false);
+                  setBulkResult(null);
+                }}
+                disabled={bulkSending}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
+              >
+                {bulkResult ? 'Close' : 'Cancel'}
+              </button>
+
+              {!bulkResult ? (
+                <button
+                  type="button"
+                  onClick={handleExecuteSendAll}
+                  disabled={bulkSending}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold text-xs shadow-xl shadow-emerald-500/25 transition-all transform active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  <WhatsAppLogoIcon className="w-4 h-4 fill-current" />
+                  <span>{bulkSending ? 'Sending to Everyone...' : '⚡ Send to Everyone Now'}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBulkModalOpen(false);
+                    setBulkResult(null);
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow"
+                >
+                  Done
+                </button>
+              )}
             </div>
           </div>
         </div>
