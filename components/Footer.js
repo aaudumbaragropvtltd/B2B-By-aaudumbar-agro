@@ -76,12 +76,21 @@ export default function Footer() {
           <p className="text-xs text-white/40 font-medium">
             © 2026 Aaudumbar agro pvt.ltd. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-xs text-white/40 font-medium">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/50 font-medium">
+            <Link href="/terms" className="hover:text-white transition-colors">
+              Terms &amp; Conditions
+            </Link>
             <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Terms of Trade
+            <Link href="/refund-policy" className="hover:text-white transition-colors">
+              Cancellation &amp; Refund
+            </Link>
+            <Link href="/shipping-policy" className="hover:text-white transition-colors">
+              Shipping &amp; Delivery
+            </Link>
+            <Link href="/support" className="hover:text-white transition-colors">
+              Contact Us
             </Link>
             <Link href="/cookie" className="hover:text-white transition-colors">
               Cookie Policy
