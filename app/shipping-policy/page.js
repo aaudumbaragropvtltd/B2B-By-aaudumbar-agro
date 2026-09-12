@@ -19,39 +19,61 @@ export default function ShippingPolicy() {
 
           <div className="prose prose-blue max-w-none text-gray-600 space-y-6">
             <p className="text-lg leading-relaxed">
-              <strong>B2B India</strong> (operated by <strong>Aaudumbar Agro Pvt. Ltd.</strong>) facilitates pan-India bulk commodity and wholesale commercial freight. We partner with verified commercial fleet operators and logistics networks to ensure timely and insured delivery.
+              <strong>B2B India</strong> (operated by <strong>Aaudumbar Agro Pvt. Ltd.</strong>) facilitates pan-India bulk commodity and wholesale commercial freight connecting verified suppliers and buyers.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">1. Delivery Modes</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Platform Partner Logistics (Doorstep / Destination):</strong> B2B India coordinates third-party multi-axle freight carriers, generates GST-compliant E-Way bills, and tracks consignments from loading dock to the buyer&apos;s specified warehouse or delivery facility.</li>
-              <li><strong>Self-Pickup / Ex-Godown (FOB):</strong> Buyers may opt to arrange their own transport vehicles from the supplier&apos;s godown or processing plant. Gate pass and loading clearances are provided once milestone payments are confirmed.</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">2. Processing &amp; Dispatch Timeline</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Order Processing:</strong> Standard bulk order processing, batch quality inspection, and packaging at the supplier godown takes <strong>24 to 48 hours</strong> following quotation acceptance and advance payment confirmation.</li>
-              <li><strong>Dispatch:</strong> Consignments are loaded onto transport trucks upon clearance of dockside weighbridge verification. E-Way bill numbers and vehicle details are shared with the buyer instantly via the dashboard and WhatsApp notifications.</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">3. Estimated Delivery Times (Transit Time)</h2>
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-              <ul className="list-disc pl-5 space-y-2 text-sm text-slate-800">
-                <li><strong>Intra-State / Regional (within 300 km):</strong> 1 to 2 business days.</li>
-                <li><strong>Inter-State / Major Commercial Corridors:</strong> 3 to 5 business days.</li>
-                <li><strong>Remote / Long-Haul Freight (North-East, J&amp;K, Islands):</strong> 5 to 8 business days.</li>
-              </ul>
-              <p className="mt-3 text-xs text-slate-500">
-                * Note: Delivery timelines may vary based on weather conditions, seasonal transport demand, road permits, or state border checkpost inspections.
+            {/* Truck Charges Highlight Box */}
+            <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200 text-amber-950">
+              <h3 className="text-lg font-bold text-amber-900 mb-2 flex items-center gap-2">
+                🚚 Doorstep Delivery &amp; Truck Charges Notice
+              </h3>
+              <p className="text-sm leading-relaxed font-medium">
+                If you choose for <strong>B2B India to ship and deliver goods to your doorstep</strong>, 
+                <strong> you (the buyer) need to pay the freight and truck charges</strong>. 
+                Transportation charges are calculated based on the distance, vehicle type, and cargo weight, and must be borne by the buyer.
               </p>
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">4. Shipping Charges &amp; E-Way Bills</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">1. Delivery Options</h2>
             <ul className="list-disc pl-5 space-y-2">
-              <li>Freight charges are calculated dynamically based on cargo weight (metric tons/quintals), distance (km), and vehicle category (tempo, 10-wheeler, multi-axle trailer).</li>
-              <li>All freight quotes include GST on transport (where applicable) and mandatory government E-Way bill documentation.</li>
-              <li>Shipping charges are explicitly itemized in the final invoice prior to payment.</li>
+              <li>
+                <strong>Doorstep Delivery (Arranged by B2B India):</strong> If you choose for B2B India to coordinate transport and ship the consignment directly to your factory, godown, or facility doorstep, <strong>the buyer is required to pay all truck and transportation charges</strong>. We coordinate with commercial logistics operators, generate compliant GST E-Way bills, and schedule the carrier.
+              </li>
+              <li>
+                <strong>Self-Pickup / Ex-Godown:</strong> Buyers may arrange their own transport vehicles from the supplier&apos;s warehouse/godown. Gate pass and dockside loading are provided once 100% full payment is cleared at the warehouse dock. In this case, no freight charges are billed by B2B India.
+              </li>
             </ul>
+
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">2. Truck Freight Calculation &amp; Payment</h2>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>
+                <strong>Payable by Buyer:</strong> When doorstep delivery is selected, the truck freight cost is strictly payable by the buyer.
+              </li>
+              <li>
+                <strong>Transparent Pricing:</strong> Freight charges depend on the distance between the dispatch godown and destination pincode, cargo tonnage (quintals/metric tons), and vehicle category (pickup, 6-wheeler, 10-wheeler, multi-axle trailer).
+              </li>
+              <li>
+                <strong>E-Way Bills:</strong> All dispatches are covered by official government GST E-Way bills with complete vehicle registration and transporter details.
+              </li>
+            </ul>
+
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">3. Processing &amp; Dispatch Timeline</h2>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Order Processing:</strong> Standard order preparation, quality grading, and warehouse bagging takes <strong>24 to 48 hours</strong> following quotation acceptance and advance payment.</li>
+              <li><strong>Truck Loading &amp; Dispatch:</strong> Consignments are loaded onto trucks at the supplier godown after weighbridge and physical inspection. Dispatch credentials and driver contact details are shared immediately via the dashboard and WhatsApp.</li>
+            </ul>
+
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">4. Estimated Transit Times</h2>
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+              <ul className="list-disc pl-5 space-y-2 text-sm text-slate-800">
+                <li><strong>Regional Deliveries (within 300 km):</strong> 1 to 2 business days.</li>
+                <li><strong>Inter-State Commercial Freight:</strong> 3 to 5 business days.</li>
+                <li><strong>Long-Haul / Remote Corridors:</strong> 5 to 8 business days.</li>
+              </ul>
+              <p className="mt-3 text-xs text-slate-500">
+                * Note: Transit times depend on highway regulations, seasonal weather conditions, and state border commercial checkposts.
+              </p>
+            </div>
 
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">5. Shipping Support &amp; Fleet Coordination</h2>
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mt-4">
