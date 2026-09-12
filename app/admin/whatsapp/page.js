@@ -8,17 +8,31 @@ export default function AdminWhatsAppBroadcastPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('outdated'); // 'outdated' | 'all' | 'updated'
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'outdated' | 'updated' | 'real_only'
   const [selectedTemplate, setSelectedTemplate] = useState('1st_of_month');
   const [customMessage, setCustomMessage] = useState('');
   const [sentMap, setSentMap] = useState({}); // { [supplierId]: timestamp }
   const [previewSupplierId, setPreviewSupplierId] = useState(null);
 
+  // Quick Test Sandbox state
+  const [testPhone, setTestPhone] = useState('9226497450');
+  const [testCompanyName, setTestCompanyName] = useState('Demo Agro Foods');
+  const [testCopied, setTestCopied] = useState(false);
+
+  // Edit Phone Modal state
+  const [editingSupplier, setEditingSupplier] = useState(null);
+  const [editPhoneValue, setEditPhoneValue] = useState('');
+  const [updatingPhone, setUpdatingPhone] = useState(false);
+
+  // Bulk Convert State
+  const [convertingDummy, setConvertingDummy] = useState(false);
+  const [convertFeedback, setConvertFeedback] = useState(null);
+
   // Pre-configured templates
   const TEMPLATES = {
     '1st_of_month': {
       title: '1st of Month: Price Update Reminder',
-      description: 'Monthly reminder sent on the 1st to request updated commodity rates.',
+      description: 'Monthly reminder sent on the 1st to request updated wholesale commodity rates.',
       badge: '1st of Month',
       badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
       text: `Namaste {{company_name}}! 🌾
@@ -33,7 +47,7 @@ Thank you for your partnership!
 — Team B2B India (Aaudumbar Agro Pvt. Ltd.)`,
     },
     '5th_of_month': {
-      title: '5th of Month: Follow-up Reminder',
+      title: '5th of Month: Urgent Price Check',
       description: 'Follow-up for suppliers who have not yet refreshed their rates this month.',
       badge: '5th of Month',
       badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
@@ -60,7 +74,6 @@ We noticed your wholesale product prices haven't been updated yet for this month
   // Fetch suppliers list
   useEffect(() => {
     fetchSuppliers();
-    // Load sent history from sessionStorage if available
     try {
       const savedSent = sessionStorage.getItem('b2b_whatsapp_sent_session');
       if (savedSent) setSentMap(JSON.parse(savedSent));
@@ -86,7 +99,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
     }
   };
 
-  // Compile personalized message for a specific supplier
+  // Compile personalized message
   const getCompiledMessage = (templateKey, supplier) => {
     if (!supplier) return '';
     const baseText = templateKey === 'custom' ? customMessage || TEMPLATES.custom.text : TEMPLATES[templateKey].text;
@@ -107,45 +120,94 @@ We noticed your wholesale product prices haven't been updated yet for this month
     } catch {}
   };
 
-  // Trigger 1-Click WhatsApp
-  const handleSendWhatsApp = (supplier) => {
-    if (!supplier.has_valid_whatsapp) {
-      alert(`Invalid phone number: ${supplier.raw_phone || 'No phone'}. Please edit the supplier's phone in Users Data.`);
-      return;
-    }
-    const message = getCompiledMessage(selectedTemplate, supplier);
-    const encodedText = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${supplier.phone}?text=${encodedText}`;
+  // Build WhatsApp URL helpers
+  const getWhatsAppWebUrl = (phone, text) => {
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const finalPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    return `https://web.whatsapp.com/send?phone=${finalPhone}&text=${encodeURIComponent(text)}`;
+  };
 
-    // Open WhatsApp Web/App
-    window.open(whatsappUrl, '_blank');
-    markAsSent(supplier.id);
+  const getWhatsAppAppUrl = (phone, text) => {
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const finalPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    return `https://api.whatsapp.com/send?phone=${finalPhone}&text=${encodeURIComponent(text)}`;
   };
 
   // Copy message to clipboard
-  const handleCopyMessage = (supplier) => {
-    const message = getCompiledMessage(selectedTemplate, supplier);
-    navigator.clipboard.writeText(message);
-    alert(`Message copied to clipboard for ${supplier.company_name}!`);
+  const handleCopyMessage = (text, label = 'Message') => {
+    navigator.clipboard.writeText(text);
+    setTestCopied(true);
+    setTimeout(() => setTestCopied(false), 2500);
+  };
+
+  // Save single supplier phone edit
+  const handleSavePhone = async () => {
+    if (!editingSupplier || !editPhoneValue.trim()) return;
+    setUpdatingPhone(true);
+    try {
+      const res = await fetch('/api/admin/whatsapp/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_single',
+          supplierId: editingSupplier.id,
+          newPhone: editPhoneValue.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update phone');
+      await fetchSuppliers();
+      setEditingSupplier(null);
+      setEditPhoneValue('');
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUpdatingPhone(false);
+    }
+  };
+
+  // Replace dummy suppliers with test phone
+  const handleReplaceAllDummy = async () => {
+    const confirmMsg = `This will update all demo/dummy placeholder suppliers (9999999999) to your test phone (+91 ${testPhone}) so you can test sending to any of them.\n\nProceed?`;
+    if (!confirm(confirmMsg)) return;
+
+    setConvertingDummy(true);
+    setConvertFeedback(null);
+    try {
+      const res = await fetch('/api/admin/whatsapp/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'replace_dummy_with_test',
+          testPhone: testPhone,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to convert numbers');
+      setConvertFeedback(`✓ Successfully updated ${data.updated_count} demo suppliers to +91 ${testPhone}`);
+      await fetchSuppliers();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setConvertingDummy(false);
+    }
   };
 
   // Filter & Search Suppliers
   const filteredSuppliers = useMemo(() => {
     return suppliers.filter((s) => {
-      // 1. Audience filter
       if (activeFilter === 'outdated' && s.has_updated_this_month) return false;
       if (activeFilter === 'updated' && !s.has_updated_this_month) return false;
+      if (activeFilter === 'real_only' && (s.is_dummy || !s.has_valid_whatsapp)) return false;
 
-      // 2. Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchName = s.company_name.toLowerCase().includes(q);
-        const matchContact = s.contact_name.toLowerCase().includes(q);
-        const matchPhone = s.phone.includes(q) || s.raw_phone.includes(q);
-        const matchLoc = s.location.toLowerCase().includes(q);
+        const matchName = s.company_name?.toLowerCase().includes(q);
+        const matchContact = s.contact_name?.toLowerCase().includes(q);
+        const matchPhone = s.phone?.includes(q) || s.raw_phone?.includes(q);
+        const matchLoc = s.location?.toLowerCase().includes(q);
         if (!matchName && !matchContact && !matchPhone && !matchLoc) return false;
       }
-
       return true;
     });
   }, [suppliers, activeFilter, searchQuery]);
@@ -158,64 +220,208 @@ We noticed your wholesale product prices haven't been updated yet for this month
   // Preview Supplier
   const previewSupplier = useMemo(() => {
     return suppliers.find((s) => s.id === previewSupplierId) || suppliers[0] || {
-      company_name: 'Example Agro Foods Ltd.',
-      contact_name: 'Rajesh Kumar',
-      phone: '918408841998',
+      company_name: testCompanyName || 'Aaudumbar Agro Pvt Ltd',
+      contact_name: 'Raghavendra',
+      phone: testPhone || '919226497450',
       location: 'Maharashtra, India',
     };
-  }, [suppliers, previewSupplierId]);
+  }, [suppliers, previewSupplierId, testCompanyName, testPhone]);
 
   const stats = useMemo(() => {
     const total = suppliers.length;
-    const withPhone = suppliers.filter((s) => s.has_valid_whatsapp).length;
+    const realPhones = suppliers.filter((s) => s.has_valid_whatsapp && !s.is_dummy).length;
+    const dummyPhones = suppliers.filter((s) => s.is_dummy).length;
     const outdated = suppliers.filter((s) => !s.has_updated_this_month).length;
     const updated = suppliers.filter((s) => s.has_updated_this_month).length;
     const sentCount = Object.keys(sentMap).length;
-    return { total, withPhone, outdated, updated, sentCount };
+    return { total, realPhones, dummyPhones, outdated, updated, sentCount };
   }, [suppliers, sentMap]);
 
+  // Compiled text for the Test Sandbox
+  const testMessageText = useMemo(() => {
+    const mockSupplier = {
+      company_name: testCompanyName || 'Your Enterprise Partner',
+      contact_name: 'Partner',
+      phone: testPhone,
+      location: 'India',
+    };
+    return getCompiledMessage(selectedTemplate, mockSupplier);
+  }, [selectedTemplate, customMessage, testCompanyName, testPhone]);
+
   return (
-    <div className="h-full flex flex-col bg-slate-950 text-slate-100 overflow-y-auto font-sans p-6 md:p-8">
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+    <div className="h-full flex flex-col bg-slate-950 text-slate-100 overflow-y-auto font-sans p-4 md:p-8">
+      {/* Top Breadcrumb & Return to Admin */}
+      <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80">
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <Link href="/admin" className="hover:text-emerald-400">Admin</Link>
+          <span>/</span>
+          <span className="text-white font-medium">WhatsApp Broadcast Hub</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/users"
+            className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 flex items-center gap-1.5"
+          >
+            👥 Manage Users &amp; Roles
+          </Link>
+        </div>
+      </div>
+
+      {/* Main Header Banner */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <WhatsAppLogoIcon className="w-6 h-6 fill-current" />
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/10">
+              <WhatsAppLogoIcon className="w-7 h-7 fill-current" />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+              <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2.5">
                 WhatsApp Supplier Broadcast Hub
-                <span className="text-xs uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-                  1-Click Direct
+                <span className="text-[11px] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
+                  Zero Cost • Direct
                 </span>
               </h1>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Dispatch monthly price update reminders (1st &amp; 5th of month) and announcements directly to suppliers&apos; WhatsApp with zero API fees.
+              <p className="text-xs text-slate-400 mt-1">
+                Dispatch monthly price update reminders (1st &amp; 5th of month) and custom announcements directly into WhatsApp Web or mobile app.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Quick Launch Next Button */}
+        {/* Quick Launch Next Supplier in Queue */}
         {nextUnsentSupplier && (
-          <button
-            onClick={() => handleSendWhatsApp(nextUnsentSupplier)}
-            className="flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform active:scale-95"
-          >
-            <WhatsAppLogoIcon className="w-5 h-5 fill-current" />
-            <span>Send Next: {nextUnsentSupplier.company_name.slice(0, 18)}...</span>
-            <span className="text-xs bg-black/20 px-2 py-0.5 rounded-md">🚀</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href={getWhatsAppWebUrl(nextUnsentSupplier.phone, getCompiledMessage(selectedTemplate, nextUnsentSupplier))}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => markAsSent(nextUnsentSupplier.id)}
+              className="flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform active:scale-95"
+            >
+              <WhatsAppLogoIcon className="w-4 h-4 fill-current" />
+              <span>Send Next: {nextUnsentSupplier.company_name.slice(0, 16)}...</span>
+              <span className="text-xs bg-black/25 px-1.5 py-0.5 rounded">🚀 WhatsApp Web</span>
+            </a>
+          </div>
         )}
       </div>
 
+      {/* 🧪 INSTANT TEST DISPATCH SANDBOX CARD */}
+      <div className="my-6 p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border-2 border-emerald-500/30 shadow-2xl relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              🧪 Instant Test Sandbox: Verify WhatsApp Directly on Your Phone
+            </h2>
+          </div>
+          <div className="text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+            ✓ Opens in WhatsApp Web or Mobile without popup blocking
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-4 items-center">
+          {/* Phone Input */}
+          <div className="md:col-span-4">
+            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Your Mobile / Test WhatsApp Number:
+            </label>
+            <div className="flex items-center bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs focus-within:border-emerald-500">
+              <span className="text-slate-500 font-mono mr-2 font-bold">+91</span>
+              <input
+                type="text"
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                placeholder="10-digit mobile (e.g. 9226497450)"
+                className="bg-transparent text-white font-mono font-bold w-full outline-none placeholder-slate-600"
+              />
+            </div>
+            <div className="flex gap-2 mt-1.5 text-[10px] text-slate-400">
+              <span>Quick pick:</span>
+              <button
+                type="button"
+                onClick={() => setTestPhone('9226497450')}
+                className="text-emerald-400 hover:underline font-mono"
+              >
+                9226497450
+              </button>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setTestPhone('8408841998')}
+                className="text-emerald-400 hover:underline font-mono"
+              >
+                8408841998 (Aaudumbar)
+              </button>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setTestPhone('9405912371')}
+                className="text-emerald-400 hover:underline font-mono"
+              >
+                9405912371
+              </button>
+            </div>
+          </div>
+
+          {/* Test Name Input */}
+          <div className="md:col-span-3">
+            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Test Company Name:
+            </label>
+            <input
+              type="text"
+              value={testCompanyName}
+              onChange={(e) => setTestCompanyName(e.target.value)}
+              placeholder="e.g. Aaudumbar Agro"
+              className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white w-full outline-none focus:border-emerald-500"
+            />
+          </div>
+
+          {/* Action Dispatch Buttons */}
+          <div className="md:col-span-5 flex flex-wrap items-center gap-2 pt-2 md:pt-4">
+            {/* Direct WhatsApp Web Button */}
+            <a
+              href={getWhatsAppWebUrl(testPhone, testMessageText)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 min-w-[170px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all transform active:scale-95 text-center"
+            >
+              <WhatsAppLogoIcon className="w-4 h-4 fill-current" />
+              <span>Open in WhatsApp Web</span>
+            </a>
+
+            {/* Direct WhatsApp Universal / Mobile Link */}
+            <a
+              href={getWhatsAppAppUrl(testPhone, testMessageText)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition-all text-center"
+              title="Opens via WhatsApp Mobile App or Desktop Application"
+            >
+              <span>📱 App Link</span>
+            </a>
+
+            {/* Copy button */}
+            <button
+              type="button"
+              onClick={() => handleCopyMessage(testMessageText)}
+              className="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition-all"
+            >
+              {testCopied ? '✓ Copied!' : '📋 Copy Text'}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* KPI Stats Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 my-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
           <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Suppliers</div>
           <div className="text-2xl font-black text-white mt-1">{stats.total}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">{stats.withPhone} valid WhatsApp numbers</div>
+          <div className="text-[11px] text-emerald-400 mt-0.5 font-medium">
+            {stats.realPhones} real WhatsApp numbers
+          </div>
         </div>
 
         <div className="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4">
@@ -242,7 +448,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
           <div className="text-[11px] text-indigo-400/80 mt-0.5">Completed chats</div>
         </div>
 
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 col-span-2 md:col-span-1 flex flex-col justify-center">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-col justify-center">
           <button
             onClick={() => {
               if (confirm('Clear session sent markers?')) {
@@ -250,53 +456,84 @@ We noticed your wholesale product prices haven't been updated yet for this month
                 sessionStorage.removeItem('b2b_whatsapp_sent_session');
               }
             }}
-            className="text-xs text-slate-400 hover:text-white border border-slate-700 hover:border-slate-600 rounded-xl py-2 px-3 transition-colors text-center"
+            className="text-xs text-slate-400 hover:text-white underline text-left"
           >
             Reset Sent Markers
+          </button>
+          <button
+            onClick={fetchSuppliers}
+            className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold mt-1 text-left"
+          >
+            ↻ Refresh Supplier List
           </button>
         </div>
       </div>
 
-      {/* Main Workspace: 2 Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Template Selection & Live Preview (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          {/* Template Picker */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center justify-between">
-              <span>Select Reminder Template</span>
-              <span className="text-[10px] text-slate-400 font-normal">Auto-inserts supplier details</span>
-            </h3>
+      {/* Demo Numbers Quick Convert Callout */}
+      {stats.dummyPhones > 0 && (
+        <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div>
+            <div className="font-bold text-amber-300 flex items-center gap-1.5">
+              <span>⚠️ Notice: {stats.dummyPhones} suppliers currently have dummy placeholder numbers (9999999999)</span>
+            </div>
+            <p className="text-slate-300 mt-0.5">
+              WhatsApp shows &quot;Phone number invalid&quot; when messaging fake 9999999999 numbers. You can either edit individual suppliers or batch-convert them to your test phone.
+            </p>
+            {convertFeedback && (
+              <div className="text-emerald-400 font-bold mt-1">{convertFeedback}</div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleReplaceAllDummy}
+            disabled={convertingDummy}
+            className="shrink-0 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shadow transition-all disabled:opacity-50"
+          >
+            {convertingDummy ? 'Updating in Database...' : `⚡ Convert All ${stats.dummyPhones} to +91 ${testPhone}`}
+          </button>
+        </div>
+      )}
 
-            <div className="space-y-3">
+      {/* 2-Column Main Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Template Selection & Live Preview (5 cols) */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Template Selector Card */}
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+              <span>📋 Step 1: Choose Broadcast Template</span>
+            </h2>
+
+            <div className="space-y-2.5">
               {Object.entries(TEMPLATES).map(([key, tpl]) => {
                 const isSelected = selectedTemplate === key;
                 return (
-                  <div
+                  <button
                     key={key}
+                    type="button"
                     onClick={() => setSelectedTemplate(key)}
-                    className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                       isSelected
                         ? 'bg-slate-800/90 border-emerald-500 shadow-md shadow-emerald-500/10 ring-1 ring-emerald-500/50'
-                        : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'
+                        : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-bold text-white">{tpl.title}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${tpl.badgeColor}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white">{tpl.title}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${tpl.badgeColor}`}>
                         {tpl.badge}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{tpl.description}</p>
-                  </div>
+                    <p className="text-[11px] text-slate-400 mt-1 leading-snug">{tpl.description}</p>
+                  </button>
                 );
               })}
             </div>
 
-            {/* Custom Message Editor (if selected) */}
+            {/* Custom message textarea if custom selected */}
             {selectedTemplate === 'custom' && (
               <div className="mt-4 pt-4 border-t border-slate-800">
-                <label className="text-xs font-semibold text-slate-300 mb-1.5 block">
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
                   Custom Message Content:
                 </label>
                 <textarea
@@ -331,7 +568,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
                 Live WhatsApp Chat Preview
               </span>
               <span className="text-[11px] text-slate-400">
-                Showing for: <strong className="text-white">{previewSupplier.company_name}</strong>
+                Previewing for: <strong className="text-white">{previewSupplier.company_name}</strong>
               </span>
             </div>
 
@@ -347,9 +584,10 @@ We noticed your wholesale product prices haven't been updated yet for this month
             </div>
 
             <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-              <span>Recipient: +{previewSupplier.phone || '91XXXXXXXXXX'}</span>
+              <span>Target Phone: +{previewSupplier.phone || '91XXXXXXXXXX'}</span>
               <button
-                onClick={() => handleCopyMessage(previewSupplier)}
+                type="button"
+                onClick={() => handleCopyMessage(getCompiledMessage(selectedTemplate, previewSupplier))}
                 className="text-emerald-400 hover:underline font-medium"
               >
                 Copy Preview Text
@@ -365,6 +603,29 @@ We noticed your wholesale product prices haven't been updated yet for this month
             {/* Filter Pills */}
             <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
               <button
+                type="button"
+                onClick={() => setActiveFilter('all')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                  activeFilter === 'all'
+                    ? 'bg-emerald-500 text-slate-950 font-bold shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                All ({stats.total})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveFilter('real_only')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                  activeFilter === 'real_only'
+                    ? 'bg-emerald-600 text-white font-bold shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Real Phones ({stats.realPhones})
+              </button>
+              <button
+                type="button"
                 onClick={() => setActiveFilter('outdated')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                   activeFilter === 'outdated'
@@ -375,16 +636,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
                 Outdated ({stats.outdated})
               </button>
               <button
-                onClick={() => setActiveFilter('all')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
-                  activeFilter === 'all'
-                    ? 'bg-emerald-500 text-slate-950 font-bold shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                All Suppliers ({stats.total})
-              </button>
-              <button
+                type="button"
                 onClick={() => setActiveFilter('updated')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                   activeFilter === 'updated'
@@ -407,6 +659,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery('')}
                   className="absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-white"
                 >
@@ -421,12 +674,13 @@ We noticed your wholesale product prices haven't been updated yet for this month
             {loading ? (
               <div className="p-12 text-center text-slate-400 text-sm">
                 <div className="inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2" />
-                <div>Loading suppliers and price records...</div>
+                <div>Loading verified suppliers and price records...</div>
               </div>
             ) : error ? (
               <div className="p-8 text-center text-red-400 text-sm">
                 <div>Error loading suppliers: {error}</div>
                 <button
+                  type="button"
                   onClick={fetchSuppliers}
                   className="mt-3 px-3 py-1 bg-red-500/20 text-red-300 rounded-lg border border-red-500/30 text-xs"
                 >
@@ -444,13 +698,16 @@ We noticed your wholesale product prices haven't been updated yet for this month
                     <th className="py-3 px-3">Supplier / Company</th>
                     <th className="py-3 px-3">WhatsApp Number</th>
                     <th className="py-3 px-3">Price Status</th>
-                    <th className="py-3 px-3 text-right">1-Click Dispatch</th>
+                    <th className="py-3 px-3 text-right">Dispatch Options</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {filteredSuppliers.map((supplier) => {
                     const isSent = !!sentMap[supplier.id];
                     const isPreviewing = previewSupplierId === supplier.id;
+                    const compiledText = getCompiledMessage(selectedTemplate, supplier);
+                    const webUrl = getWhatsAppWebUrl(supplier.phone, compiledText);
+                    const appUrl = getWhatsAppAppUrl(supplier.phone, compiledText);
 
                     return (
                       <tr
@@ -463,11 +720,6 @@ We noticed your wholesale product prices haven't been updated yet for this month
                         <td className="py-3 px-3">
                           <div className="font-bold text-white flex items-center gap-1.5">
                             <span>{supplier.company_name}</span>
-                            {supplier.verification_level === 'Diamond' && (
-                              <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
-                                💎 Diamond
-                              </span>
-                            )}
                           </div>
                           <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
                             <span>Contact: {supplier.contact_name}</span>
@@ -476,16 +728,41 @@ We noticed your wholesale product prices haven't been updated yet for this month
                           </div>
                         </td>
 
-                        {/* Phone Number */}
+                        {/* Phone Number & Edit Phone Button */}
                         <td className="py-3 px-3">
                           {supplier.has_valid_whatsapp ? (
-                            <div className="font-mono text-emerald-400 flex items-center gap-1">
-                              <span>+{supplier.phone}</span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono text-emerald-400 font-bold">+{supplier.phone}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingSupplier(supplier);
+                                  setEditPhoneValue(supplier.raw_phone || supplier.phone);
+                                }}
+                                className="text-[10px] text-slate-500 hover:text-slate-300 p-0.5"
+                                title="Edit phone number"
+                              >
+                                ✏️
+                              </button>
                             </div>
                           ) : (
-                            <div className="text-rose-400 font-mono flex items-center gap-1">
-                              <span>{supplier.raw_phone || 'No phone'}</span>
-                              <span className="text-[9px] bg-rose-500/20 px-1 rounded">Invalid</span>
+                            <div className="flex flex-col items-start gap-1">
+                              <span className="text-amber-400 font-mono text-[11px] flex items-center gap-1">
+                                <span>{supplier.raw_phone || 'No phone'}</span>
+                                <span className="text-[9px] bg-amber-500/20 px-1 py-0.2 rounded border border-amber-500/30">
+                                  {supplier.is_dummy ? 'Demo Seed' : 'Invalid'}
+                                </span>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingSupplier(supplier);
+                                  setEditPhoneValue(testPhone);
+                                }}
+                                className="text-[10px] text-emerald-400 hover:underline font-bold"
+                              >
+                                + Set Real Number
+                              </button>
                             </div>
                           )}
                         </td>
@@ -505,36 +782,62 @@ We noticed your wholesale product prices haven't been updated yet for this month
                           )}
                         </td>
 
-                        {/* 1-Click Action Buttons */}
+                        {/* Direct Native Anchor Action Buttons (Never Blocked by Popups) */}
                         <td className="py-3 px-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
                             {/* Preview button */}
                             <button
                               type="button"
                               onClick={() => setPreviewSupplierId(supplier.id)}
-                              className="text-[10px] text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800/80 hover:bg-slate-700 transition-colors"
+                              className="text-[10px] text-slate-400 hover:text-white px-2 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 transition-colors"
                               title="Preview personalized message for this supplier"
                             >
                               Preview
                             </button>
 
-                            {/* 1-Click WhatsApp Button */}
-                            <button
-                              type="button"
-                              onClick={() => handleSendWhatsApp(supplier)}
-                              disabled={!supplier.has_valid_whatsapp}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ${
-                                isSent
-                                  ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-slate-700'
-                                  : supplier.has_valid_whatsapp
-                                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20 active:scale-95'
-                                  : 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                              }`}
-                            >
-                              <WhatsAppLogoIcon className="w-3.5 h-3.5 fill-current" />
-                              <span>{isSent ? 'Resend' : 'Send'}</span>
-                              {isSent && <span className="text-emerald-400 font-bold">✓</span>}
-                            </button>
+                            {/* Direct WhatsApp Web Anchor (Primary) */}
+                            {supplier.has_valid_whatsapp ? (
+                              <>
+                                <a
+                                  href={webUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={() => markAsSent(supplier.id)}
+                                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ${
+                                    isSent
+                                      ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-slate-700'
+                                      : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20 active:scale-95'
+                                  }`}
+                                  title="Open directly in WhatsApp Web"
+                                >
+                                  <WhatsAppLogoIcon className="w-3.5 h-3.5 fill-current" />
+                                  <span>{isSent ? 'Resend' : 'Web'}</span>
+                                  {isSent && <span className="text-emerald-400 font-bold">✓</span>}
+                                </a>
+
+                                <a
+                                  href={appUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={() => markAsSent(supplier.id)}
+                                  className="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-medium border border-slate-700"
+                                  title="Open in WhatsApp Mobile / Desktop App"
+                                >
+                                  App
+                                </a>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingSupplier(supplier);
+                                  setEditPhoneValue(testPhone);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold hover:bg-amber-500/30"
+                              >
+                                Fix Phone
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -545,10 +848,10 @@ We noticed your wholesale product prices haven't been updated yet for this month
             )}
           </div>
 
-          {/* Footer Info / Reminder Notes */}
+          {/* Footer Guidance */}
           <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2">
             <span>
-              💡 <strong>How it works:</strong> Clicking <strong>Send</strong> opens WhatsApp Web with the pre-filled personalized reminder for that supplier. Zero API fees.
+              💡 <strong>Why WhatsApp Web is Recommended:</strong> On desktop browsers, WhatsApp Web opens directly with the pre-filled reminder without asking to install Windows software.
             </span>
             <span className="text-slate-500 font-mono">
               Showing {filteredSuppliers.length} of {suppliers.length} suppliers
@@ -556,6 +859,87 @@ We noticed your wholesale product prices haven't been updated yet for this month
           </div>
         </div>
       </div>
+
+      {/* Edit Supplier Phone Modal */}
+      {editingSupplier && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>✏️ Update Supplier WhatsApp Number</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditingSupplier(null)}
+                className="text-slate-400 hover:text-white text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="my-4 space-y-3">
+              <div>
+                <span className="text-xs text-slate-400">Supplier:</span>
+                <div className="text-sm font-bold text-white">{editingSupplier.company_name}</div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  10-Digit Mobile Number (India):
+                </label>
+                <div className="flex items-center bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm focus-within:border-emerald-500">
+                  <span className="text-slate-500 font-mono mr-2 font-bold">+91</span>
+                  <input
+                    type="text"
+                    value={editPhoneValue}
+                    onChange={(e) => setEditPhoneValue(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="e.g. 9226497450"
+                    className="bg-transparent text-white font-mono font-bold w-full outline-none"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 text-[11px] text-slate-400 pt-1">
+                <span>Fill with:</span>
+                <button
+                  type="button"
+                  onClick={() => setEditPhoneValue('9226497450')}
+                  className="text-emerald-400 hover:underline font-mono"
+                >
+                  9226497450
+                </button>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => setEditPhoneValue('8408841998')}
+                  className="text-emerald-400 hover:underline font-mono"
+                >
+                  8408841998
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setEditingSupplier(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSavePhone}
+                disabled={updatingPhone || editPhoneValue.length !== 10}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+              >
+                {updatingPhone ? 'Saving...' : 'Save & Update'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
