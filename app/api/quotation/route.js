@@ -2,8 +2,8 @@
 // QUOTATION API ROUTE
 // ============================================================================
 // Generates instant quotations with logistics cost calculation,
-// GST computation, and creates trade orders in Supabase.
-// Protected: requires valid authentication.
+// GST computation, and commission-adjusted pricing.
+// Commission rates: Agriculture 2%, Textile 7%, Others 5%.
 // ============================================================================
 
 import { NextResponse } from 'next/server';
@@ -11,10 +11,10 @@ import { NextResponse } from 'next/server';
 
 /**
  * Calculate logistics cost based on weight.
- * Calculation: cost = weightKg * 2.5
+ * Calculation: cost = weightKg * 2.3
  */
 function calculateLogisticsCost(weightKg) {
-  const cost = weightKg * 2.5;
+  const cost = weightKg * 2.3;
   return Math.round(cost);
 }
 
@@ -29,7 +29,7 @@ export async function POST(request) {
     } = body;
 
     // Validate required fields
-    if (!productId || !quantity || !weightKg || !inputDistanceKm) {
+    if (!productId || !quantity || weightKg === undefined || inputDistanceKm === undefined) {
       return NextResponse.json(
         { error: 'Missing required fields: productId, quantity, weightKg, distanceKm' },
         { status: 400 }
@@ -62,13 +62,16 @@ export async function POST(request) {
 
     // Fallback demo calculation if Supabase isn't configured
     if (!product) {
-      const demoPrice = 115; // ₹/kg (HDPE default)
+      const demoPrice = 121; // ₹/kg (HDPE with 5% commission baked in)
       const subtotal = quantity * demoPrice;
       const distanceKm = inputDistanceKm;
       const logisticsCost = calculateLogisticsCost(weightKg);
       const taxRate = 18;
       const taxAmount = (subtotal + logisticsCost) * (taxRate / 100);
-      const total = subtotal + logisticsCost + taxAmount;
+      
+      const baseTotal = subtotal + logisticsCost + taxAmount;
+      const platformFee = 0; // Commission baked into base price
+      const total = baseTotal + platformFee;
 
       return NextResponse.json({
         quotation: {
@@ -82,6 +85,7 @@ export async function POST(request) {
           distanceKm: distanceKm,
           taxRatePercent: taxRate,
           taxAmount: Math.round(taxAmount),
+          platformFee: platformFee,
           totalContractValue: Math.round(total),
           advanceRequired10: Math.round(total * 0.1),
           balanceDue90: Math.round(total * 0.9),
@@ -93,15 +97,17 @@ export async function POST(request) {
     }
 
     // Real calculation with Supabase data
+    // Commission is already baked into base_price_per_unit in the database
     const unitPrice = Number(product.base_price_per_unit);
     const subtotal = quantity * unitPrice;
     const distanceKm = inputDistanceKm;
 
     const logisticsCost = calculateLogisticsCost(weightKg);
-    const taxRate = 18;
+    const taxRate = body.taxRate || 18;
     const taxableAmount = subtotal + logisticsCost;
     const taxAmount = taxableAmount * (taxRate / 100);
     const totalContractValue = taxableAmount + taxAmount;
+    const platformFee = 0; // Commission baked into base price
 
     // Estimate delivery based on distance
     const estimatedDeliveryDays = distanceKm < 200 ? 3 : distanceKm < 500 ? 5 : distanceKm < 1000 ? 7 : 10;
@@ -120,6 +126,7 @@ export async function POST(request) {
       distanceKm: Math.round(distanceKm),
       taxRatePercent: taxRate,
       taxAmount: Math.round(taxAmount),
+      platformFee: platformFee,
       totalContractValue: Math.round(totalContractValue),
       advanceRequired10: Math.round(totalContractValue * 0.1),
       balanceDue90: Math.round(totalContractValue * 0.9),

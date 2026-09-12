@@ -1,35 +1,186 @@
 // ============================================================================
-// B2B BHARAT — LANDING PAGE
+// B2B INDIA — LANDING PAGE (Overhauled)
 // ============================================================================
-// High-trust landing hub with:
-// 1. Animated hero section with trust counters & live transaction feed
-// 2. Supplier ticker marquee
-// 3. Interactive category grid (10 sectors)
-// 4. Platform value proposition section
-// 5. Escrow flow explainer
-// 6. Footer
+// Clean, product-focused homepage:
+// 1. Hero with search bar
+// 2. Category strip (horizontal scrollable)
+// 3. Featured products grid
+// 4. Trending products carousel
+// 5. Category showcase (top 4 categories)
+// 6. All categories grid
+// 7. Footer
 // ============================================================================
 
 import Navbar from '@/components/Navbar';
-import TrustHeroSection from '@/components/TrustHeroSection';
-import SupplierTicker from '@/components/SupplierTicker';
+import EcommerceHero from '@/components/EcommerceHero';
+import FeaturedProducts from '@/components/FeaturedProducts';
+import LiveRFQsSection from '@/components/LiveRFQsSection';
+import TrendingProductsSection from '@/components/TrendingProductsSection';
+import TopSuppliersSection from '@/components/TopSuppliersSection';
+import CategoryShowcase from '@/components/CategoryShowcase';
 import AnimatedCategoryGrid from '@/components/AnimatedCategoryGrid';
-import PlatformValueSection from '@/components/PlatformValueSection';
-import EscrowFlowSection from '@/components/EscrowFlowSection';
 import Footer from '@/components/Footer';
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default async function HomePage() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://b2bindia.site/#website',
+        url: 'https://b2bindia.site/',
+        name: 'B2B India',
+        description: "India's Largest B2B Marketplace — Find Products, Connect with Suppliers",
+        potentialAction: [
+          {
+            '@type': 'SearchAction',
+            target: {
+              '@type': 'EntryPoint',
+              urlTemplate: 'https://b2bindia.site/directory?q={search_term_string}',
+            },
+            'query-input': 'required name=search_term_string',
+          },
+        ],
+        inLanguage: 'en-IN',
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://b2bindia.site/#organization',
+        name: 'B2B India',
+        url: 'https://b2bindia.site/',
+        logo: {
+          '@type': 'ImageObject',
+          inLanguage: 'en-IN',
+          '@id': 'https://b2bindia.site/#logo',
+          url: 'https://b2bindia.site/og-image.jpg',
+          contentUrl: 'https://b2bindia.site/og-image.jpg',
+          width: 1200,
+          height: 630,
+          caption: 'B2B India',
+        },
+        image: {
+          '@id': 'https://b2bindia.site/#logo',
+        },
+      },
+    ],
+  };
+
+  let featuredProducts = [];
+  let trendingProducts = [];
+  let topSuppliers = [];
+  let liveRfqs = [];
+  let categoryCounts = {};
+
+  try {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const { createAdminClient } = await import('@/services/supabaseServer');
+      const supabase = createAdminClient();
+      
+      // Fetch featured/trending
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          id, title, base_price_per_unit, unit_label, bulk_minimum_order, quality_grade, hero_image_url, technical_specifications,
+          sector_id (slug),
+          supplier_id (company_name)
+        `)
+        .limit(20);
+        
+      if (!error && data) {
+        const mapped = data.map(p => ({
+          id: p.id,
+          name: p.title,
+          price: p.base_price_per_unit,
+          unit: p.unit_label,
+          moq: p.bulk_minimum_order,
+          badge: p.quality_grade === 'Premium' ? 'Trade Assurance' : (p.quality_grade ? 'Verified' : null),
+          image: (p.hero_image_url && p.hero_image_url.trim() !== '') 
+            ? p.hero_image_url 
+            : 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80',
+          category: p.sector_id?.slug || 'general',
+          supplierName: p.technical_specifications?.['Supplier Name'] || p.supplier_id?.company_name || 'Verified Supplier'
+        }));
+        
+        featuredProducts = mapped.slice(0, 8);
+        trendingProducts = mapped.slice(8, 20);
+      }
+
+      // Fetch Live Open RFQs
+      const { data: rfqData, error: rfqError } = await supabase
+        .from('rfqs')
+        .select(`
+          id, product_name, quantity, unit, target_price, destination, deadline, notes, status, created_at,
+          users:buyer_id (company_name, city, state, verification_level)
+        `)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (!rfqError && rfqData && rfqData.length > 0) {
+        liveRfqs = rfqData;
+      }
+
+      // Fetch all category counts
+      const { data: countData, error: countError } = await supabase
+        .from('products')
+        .select('sector_id(slug)');
+      
+      if (!countError && countData) {
+        countData.forEach(p => {
+          const slug = p.sector_id?.slug;
+          if (slug) {
+            categoryCounts[slug] = (categoryCounts[slug] || 0) + 1;
+          }
+        });
+      }
+
+      // Fetch Top Suppliers
+      const { data: supplierData, error: supplierError } = await supabase
+        .from('users')
+        .select('id, company_name, city, state, categories, created_at, verification_level')
+        .eq('role', 'supplier')
+        .eq('onboarding_complete', true)
+        .limit(6);
+        
+      if (!supplierError && supplierData) {
+        topSuppliers = supplierData.map(s => ({
+          id: s.id,
+          name: s.company_name || 'Verified Supplier',
+          location: [s.city, s.state].filter(Boolean).join(', ') || 'India',
+          sector: s.categories?.[0] || 'Industrial',
+          tier: s.verification_level === 'Diamond' ? 'Diamond' : (s.verification_level === 'Platinum' ? 'Platinum' : 'Gold'),
+          yearEstablished: new Date(s.created_at).getFullYear(),
+          responseRate: '98%',
+          responseTime: '< 2h',
+          products: 24,
+          icon: '🏭',
+        }));
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch data for homepage", e);
+  }
+
   return (
-    <>
+    <div className="bg-gray-50 min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
       <main className="flex-1">
-        <TrustHeroSection />
-        <SupplierTicker />
-        <AnimatedCategoryGrid />
-        <PlatformValueSection />
-        <EscrowFlowSection />
+        <EcommerceHero />
+        <FeaturedProducts initialProducts={featuredProducts} />
+        <LiveRFQsSection initialRfqs={liveRfqs} />
+        <TrendingProductsSection initialProducts={trendingProducts} />
+        <TopSuppliersSection initialSuppliers={topSuppliers} />
+        <CategoryShowcase initialProducts={[...featuredProducts, ...trendingProducts]} />
+        <AnimatedCategoryGrid categoryCounts={categoryCounts} />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

@@ -1,410 +1,566 @@
 // ============================================================================
-// PRODUCT DETAIL PAGE
+// PRODUCT DETAIL PAGE — SEO & CONVERSION OPTIMIZED
 // ============================================================================
-// Full product detail with technical specifications, supplier info card,
-// routing agent, and quotation request form. Server Component.
+// Features:
+// - Programmatic Next.js Dynamic SEO Metadata
+// - Schema.org Product, Offer, AggregateRating, Breadcrumbs, and FAQ JSON-LD
+// - Technical Specifications Table
+// - Pan-India Logistics & Haversine Distance Router
+// - Realtime Quotation Dock & RFQ Conversion
+// - Related Products Cluster for PageRank & Internal Link Equity
+// - Procurement FAQs for Google Rich Snippets
 // ============================================================================
 
 import React from 'react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CommodityImage from '@/components/CommodityImage';
+import ProductImageGallery from '@/components/ProductImageGallery';
 import QuotationDock from './QuotationDock';
+import ProductViewTracker from '@/components/ProductViewTracker';
+import FavoriteButton from '@/components/FavoriteButton';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import { getProductGstRate } from '@/utils/gstUtils';
+import { getProductById, getRelatedProducts, getProductSlug, getProductUrl } from '@/utils/catalogResolver';
+import {
+  generateProductMetadata,
+  generateProductJsonLd,
+  generateBreadcrumbJsonLd,
+  generateFaqJsonLd,
+  getProductFaqs,
+  formatInrPrice,
+  SITE_URL,
+} from '@/utils/seoUtils';
 
-// ── Serverless Mathematical Routing Agent (Haversine) ──
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+/**
+ * Next.js Dynamic Metadata for Rank #1 Google SEO
+ */
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const product = await getProductById(id);
+  if (!product) {
+    return { title: 'Product Details | B2B India' };
+  }
+  return generateProductMetadata(product);
+}
+
+function formatSpecKey(key) {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatSpecValue(key, value) {
+  if (value === null || value === undefined) return '-';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (Array.isArray(value)) return value.join(', ');
+  if (typeof value === 'object') {
+    const village = value.village?.trim();
+    const city = value.city?.trim();
+    const district = value.district?.trim();
+    const state = value.state?.trim();
+    const locationParts = [village, city, district, state].filter(Boolean);
+    if (locationParts.length > 0) {
+      return locationParts.join(', ');
+    }
+    const entries = Object.entries(value)
+      .filter(([_, v]) => v !== null && v !== undefined && String(v).trim() !== '')
+      .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`);
+    return entries.length > 0 ? entries.join(', ') : '-';
+  }
+  return String(value);
+}
+
+// ── Haversine Distance Router ──
 function calculateDistance(lat1, lon1, lat2, lon2) {
   if (!lat1 || !lon1 || !lat2 || !lon2) return null;
-  const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round(R * c);
 }
 
-// Demo products for fallback
-const DEMO_PRODUCTS = [
-  {
-    id: 'demo-1',
-    title: 'Drip Irrigation System Kit (1 Hectare)',
-    description: 'Complete drip irrigation system for 1 hectare coverage with inline drippers, main lines, sub-mains, laterals, and filtration unit.',
-    base_price_per_unit: 45000,
-    unit_label: 'kit',
-    bulk_minimum_order: 10,
-    quality_grade: 'Premium',
-    hsn_code: '84248990',
-    certifications: ['ISO 9001:2015', 'BIS IS 12786'],
-    technical_specifications: {
-      coverage_area: '1 hectare',
-      dripper_spacing_cm: 30,
-      flow_rate_lph: 4,
-      pipe_material: 'LLDPE',
-      filtration: 'Sand + Disc',
-      pressure_rating_bar: 2.5,
-    },
-    hero_image_url: 'https://images.unsplash.com/photo-1592982537447-6f2a6a0c8b39?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Jain Irrigation Systems Ltd', city: 'Jalgaon', state: 'Maharashtra', geo_lat: 21.0077, geo_lng: 75.5626 },
-    sector_id: { name: 'Agriculture', slug: 'agriculture' }
-  },
-  {
-    id: 'demo-2',
-    title: 'Three-Phase Electric Motor 5HP',
-    description: 'Industrial grade 5HP three-phase electric motor suitable for heavy machinery.',
-    base_price_per_unit: 12500,
-    unit_label: 'piece',
-    bulk_minimum_order: 5,
-    quality_grade: 'Industrial',
-    hsn_code: '85015210',
-    certifications: ['ISO 9001:2015', 'CE Certified'],
-    technical_specifications: { power: '5 HP / 3.7 kW', voltage: '415V', phase: '3 Phase', speed: '1440 RPM' },
-    hero_image_url: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Bharat Motors Pvt Ltd', city: 'Pune', state: 'Maharashtra', geo_lat: 18.5204, geo_lng: 73.8567 },
-    sector_id: { name: 'Electronics', slug: 'electronics-electrical' }
-  },
-  {
-    id: 'p2',
-    title: 'Agricultural Submersible Pumping Kit (5HP)',
-    description: 'High-efficiency submersible pump designed for deep wells and boreholes.',
-    base_price_per_unit: 38500,
-    unit_label: 'unit',
-    bulk_minimum_order: 2,
-    quality_grade: 'Industrial',
-    hsn_code: '84137010',
-    certifications: ['ISO 9001:2015'],
-    technical_specifications: { power: '5 HP', head: '100m', phase: '3 Phase' },
-    hero_image_url: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Jain Irrigation Systems Ltd', city: 'Jalgaon', state: 'Maharashtra', geo_lat: 21.0077, geo_lng: 75.5626 },
-    sector_id: { name: 'Agriculture', slug: 'agriculture' }
-  },
-  {
-    id: 'p3',
-    title: 'High-Yield Hybrid Tomato Seeds (Arka Rakshak)',
-    description: 'Triple disease resistant hybrid tomato seeds, suitable for long-distance transport.',
-    base_price_per_unit: 1200,
-    unit_label: 'packet',
-    bulk_minimum_order: 50,
-    quality_grade: 'Premium',
-    hsn_code: '12099140',
-    certifications: ['NSSO Certified'],
-    technical_specifications: { yield: '90-100 tons/hectare', duration: '140 days', resistance: 'ToLCV, BW, EB' },
-    hero_image_url: 'https://images.unsplash.com/photo-1592921870789-04563d55041c?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Jain Irrigation Systems Ltd', city: 'Jalgaon', state: 'Maharashtra', geo_lat: 21.0077, geo_lng: 75.5626 },
-    sector_id: { name: 'Agriculture', slug: 'agriculture' }
-  },
-  {
-    id: 'p4',
-    title: 'Premium Selvedge Denim Fabric (12oz Indigo)',
-    description: 'Authentic ring-spun selvedge denim fabric, perfect for premium jeans.',
-    base_price_per_unit: 850,
-    unit_label: 'meter',
-    bulk_minimum_order: 500,
-    quality_grade: 'Premium',
-    hsn_code: '52094200',
-    certifications: ['Oeko-Tex Standard 100'],
-    technical_specifications: { weight: '12 oz', width: '32 inches', material: '100% Cotton' },
-    hero_image_url: 'https://images.unsplash.com/photo-1565084888279-aca607ecce0c?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Arvind Mills Ltd', city: 'Ahmedabad', state: 'Gujarat', geo_lat: 23.0225, geo_lng: 72.5714 },
-    sector_id: { name: 'Apparel & Fashion', slug: 'apparel-fashion' }
-  },
-  {
-    id: 'p5',
-    title: 'Combed Cotton Yarn (40s Count, Ring Spun)',
-    description: 'High-quality combed cotton yarn for knitting and weaving applications.',
-    base_price_per_unit: 285,
-    unit_label: 'kg',
-    bulk_minimum_order: 1000,
-    quality_grade: 'A',
-    hsn_code: '52052310',
-    certifications: ['GOTS Certified'],
-    technical_specifications: { count: '40s Ne', type: 'Ring Spun Combed', strength: 'High' },
-    hero_image_url: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Arvind Mills Ltd', city: 'Ahmedabad', state: 'Gujarat', geo_lat: 23.0225, geo_lng: 72.5714 },
-    sector_id: { name: 'Apparel & Fashion', slug: 'apparel-fashion' }
-  },
-  {
-    id: 'p6',
-    title: 'Handloom Khadi Fabric (Muslin Grade)',
-    description: 'Authentic hand-spun and hand-woven khadi muslin fabric.',
-    base_price_per_unit: 420,
-    unit_label: 'meter',
-    bulk_minimum_order: 200,
-    quality_grade: 'Premium',
-    hsn_code: '52083110',
-    certifications: ['Khadi Mark'],
-    technical_specifications: { weave: 'Plain', width: '44 inches', material: 'Hand-spun Cotton' },
-    hero_image_url: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Arvind Mills Ltd', city: 'Ahmedabad', state: 'Gujarat', geo_lat: 23.0225, geo_lng: 72.5714 },
-    sector_id: { name: 'Apparel & Fashion', slug: 'apparel-fashion' }
-  },
-  {
-    id: 'p7',
-    title: 'High-Tensile Hex Bolt Set (Grade 10.9, M10)',
-    description: 'Heavy-duty hex bolts for automotive and industrial machinery.',
-    base_price_per_unit: 145,
-    unit_label: 'kg',
-    bulk_minimum_order: 50,
-    quality_grade: 'Automotive OEM',
-    hsn_code: '73181500',
-    certifications: ['ISO/TS 16949'],
-    technical_specifications: { size: 'M10', grade: '10.9', finish: 'Zinc Plated' },
-    hero_image_url: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Sundram Fasteners Ltd', city: 'Chennai', state: 'Tamil Nadu', geo_lat: 13.0827, geo_lng: 80.2707 },
-    sector_id: { name: 'Automobile Parts', slug: 'automobile-ev' }
-  },
-  {
-    id: 'p8',
-    title: 'BLDC Motor Controller Kit (48V/72V, 3KW)',
-    description: 'Intelligent motor controller for 2-wheeler and 3-wheeler EVs.',
-    base_price_per_unit: 8500,
-    unit_label: 'unit',
-    bulk_minimum_order: 10,
-    quality_grade: 'Premium',
-    hsn_code: '85044090',
-    certifications: ['ARAI Approved'],
-    technical_specifications: { voltage: '48V/72V', power: '3 kW', efficiency: '>92%' },
-    hero_image_url: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Sundram Fasteners Ltd', city: 'Chennai', state: 'Tamil Nadu', geo_lat: 13.0827, geo_lng: 80.2707 },
-    sector_id: { name: 'Automobile Parts', slug: 'automobile-ev' }
-  },
-  {
-    id: 'p9',
-    title: 'Disc Brake Assembly (Ventilated, 280mm)',
-    description: 'High-performance ventilated disc brake assembly for passenger vehicles.',
-    base_price_per_unit: 3200,
-    unit_label: 'set',
-    bulk_minimum_order: 20,
-    quality_grade: 'OEM Replacement',
-    hsn_code: '87083000',
-    certifications: ['ISO/TS 16949'],
-    technical_specifications: { diameter: '280 mm', type: 'Ventilated', material: 'Cast Iron' },
-    hero_image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200',
-    is_stale: false,
-    supplier_id: { company_name: 'Sundram Fasteners Ltd', city: 'Chennai', state: 'Tamil Nadu', geo_lat: 13.0827, geo_lng: 80.2707 },
-    sector_id: { name: 'Automobile Parts', slug: 'automobile-ev' }
-  }
-];
-
 export default async function ProductDetailPage({ params }) {
   const { id } = await params;
-  let product = DEMO_PRODUCTS.find(p => p.id === id);
-  if (!product) {
-    product = {
-      ...DEMO_PRODUCTS[0],
-      id: id,
-      title: `Mock Product (${id})`,
-      description: 'This is an auto-generated mock product because Supabase is not connected and this product ID is not explicitly mocked.',
-    };
-  }
+  const product = await getProductById(id);
 
-  try {
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      const { createAdminClient } = await import('@/services/supabaseServer');
-      const supabase = createAdminClient();
-      
-      const { data, error } = await supabase
-        .from('products')
-        .select(`
-          *,
-          supplier_id (id, company_name, city, state, status, year_established, gst_number, geo_lat, geo_lng),
-          sector_id (name, slug)
-        `)
-        .eq('id', id)
-        .single();
-        
-      if (!error && data) {
-        product = data;
-      }
+  // Canonical slug redirect:
+  // If user visits via raw UUID or non-canonical format (e.g. spaces/different casing),
+  // redirect immediately to the clean, human-readable product name URL!
+  if (product && !product.is_fallback_mock) {
+    const canonicalSlug = getProductSlug(product);
+    let rawDecoded = id;
+    try {
+      rawDecoded = decodeURIComponent(id);
+    } catch (e) {}
+
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawDecoded);
+    const hasSpaces = rawDecoded.includes(' ') || rawDecoded.includes('+');
+
+    if (canonicalSlug && (isUUID || hasSpaces || rawDecoded !== canonicalSlug)) {
+      redirect(`/directory/product/${canonicalSlug}`);
     }
-  } catch (e) {
-    console.error("Failed to fetch product, using fallback demo product.", e);
   }
 
-  // Parse technical specs (handle JSON string if it comes as text, or object if JSONB is automatically parsed)
-  // Accommodating both 'specifications' and 'technical_specifications' per instructions
+  // Fetch related products for internal linking and crawl optimization
+  const sectorSlug = product.sector_id?.slug || 'general';
+  const relatedProducts = await getRelatedProducts(product.id, sectorSlug, 4);
+
+  // Parse technical specs
   let specs = {};
   const rawSpecs = product.specifications || product.technical_specifications;
-  
+
   if (rawSpecs) {
     if (typeof rawSpecs === 'string') {
       try {
         specs = JSON.parse(rawSpecs);
       } catch (e) {
-        console.error("Failed to parse technical specs", e);
+        console.error('Failed to parse technical specs', e);
       }
     } else {
-      specs = rawSpecs;
+      specs = { ...rawSpecs };
+    }
+
+    // Disintermediation Protection: Remove direct private phone/tax numbers
+    if (specs) {
+      const SENSITIVE_SUPPLIER_KEYS = [
+        'Supplier Address', 'supplier_address', 'Address', 'address', 'Warehouse Address', 'warehouse_address',
+        'Supplier Street', 'supplier_street', 'Street', 'Factory Address',
+        'Supplier Phone', 'supplier_phone', 'Phone', 'phone', 'Mobile', 'mobile', 'Contact Number', 'contact_number',
+        'Supplier Email', 'supplier_email', 'Email', 'email', 'Registered Email',
+        'GSTIN', 'gstin', 'Gst_number', 'gst_number', 'GST Number', 'GST Rate',
+        'PAN', 'pan', 'Pan Number', 'PAN Number', 'Bank Details', 'Account Number', 'IFSC',
+        'supplier_net_price', 'platform_commission_percent', 'platform_fee_per_unit',
+      ];
+      SENSITIVE_SUPPLIER_KEYS.forEach((k) => delete specs[k]);
     }
   }
 
-  // Calculate Spatial Routing (Haversine)
-  // Simulated Buyer Location (Delhi) for demo purposes
+  // Enrich standard B2B attributes
+  const gstDetails = getProductGstRate(product);
+  if (!specs['Applicable GST']) {
+    specs['Applicable GST'] = gstDetails.label;
+  }
+  if (product.bulk_minimum_order && !specs['Minimum Order Quantity'] && !specs['MOQ']) {
+    specs['Minimum Order Quantity'] = `${product.bulk_minimum_order} ${product.unit_label || 'units'}`;
+  }
+  if (product.hsn_code && !specs['HSN Code']) {
+    specs['HSN Code'] = product.hsn_code;
+  }
+  if (product.quality_grade && !specs['Quality / Grade']) {
+    specs['Quality / Grade'] = product.quality_grade;
+  }
+  if (product.inventory_count && !specs['Available Stock']) {
+    specs['Available Stock'] = `${product.inventory_count} ${product.unit_label || 'units'}`;
+  }
+
+  // Logistics calculations
+  const isLogisticsEligible = ['agriculture', 'food-beverage', 'food_beverage', 'food-agriculture'].includes(sectorSlug);
   const buyerLat = 28.6139;
   const buyerLng = 77.2090;
   const supplierLat = product.supplier_id?.geo_lat;
   const supplierLng = product.supplier_id?.geo_lng;
-  
-  const distanceKm = calculateDistance(buyerLat, buyerLng, supplierLat, supplierLng);
-  // Estimate: ₹4 per km per MT (Metric Ton). Assuming average bulk order is 1 MT for display.
-  const shippingEstimate = distanceKm ? distanceKm * 4 : 0;
+  const distanceKm = isLogisticsEligible ? calculateDistance(buyerLat, buyerLng, supplierLat, supplierLng) : null;
+  const shippingEstimate = 0;
+
+  // Schema.org Structured Data
+  const productJsonLd = generateProductJsonLd(product);
+  const breadcrumbItems = [
+    { name: 'Home', url: '/' },
+    { name: 'Directory', url: '/directory' },
+  ];
+  if (product.sector_id) {
+    breadcrumbItems.push({
+      name: product.sector_id.name,
+      url: `/directory/${product.sector_id.slug || 'all'}`,
+    });
+  }
+  breadcrumbItems.push({
+    name: product.title,
+    url: `/directory/product/${getProductSlug(product)}`,
+  });
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd(breadcrumbItems);
+
+  const productFaqs = getProductFaqs(product);
+  const faqJsonLd = generateFaqJsonLd(productFaqs);
+
+  const supplierLocation = [product.supplier_id?.city, product.supplier_id?.state].filter(Boolean).join(', ') || 'India';
+  const supplierId = product.supplier_id?.id || 'demo-supplier-1';
+  const supplierName = product.supplier_id?.company_name || 'Aaudumbar Agro';
 
   return (
     <>
-      <Navbar />
-      <main className="flex-1 pt-24 pb-16 bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 mb-6 text-sm">
-            <Link href="/directory" className="text-gray-500 hover:text-brand-600 transition-colors">
-              Directory
-            </Link>
-            <span className="text-gray-400">/</span>
-            {product.sector_id && (
-              <>
-                <Link href={`/directory?sector=${product.sector_id.slug}`} className="text-gray-500 hover:text-brand-600 transition-colors">
-                  {product.sector_id.name}
-                </Link>
-                <span className="text-gray-400">/</span>
-              </>
-            )}
-            <span className="text-gray-900 font-medium truncate max-w-[200px] sm:max-w-md">{product.title}</span>
-          </div>
+      {/* Schema.org Structured Data for Google Rich Snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left: Image, Specs & Logistics */}
-            <div className="lg:col-span-2 space-y-6">
-              
-              {/* Hero Image */}
-              <div className="relative rounded-2xl overflow-hidden bg-white shadow-sm border border-gray-200">
-                <CommodityImage
-                  src={product.hero_image_url || 'https://images.unsplash.com/photo-1592982537447-6f2a6a0c8b39?w=1200'}
-                  category={product.sector_id?.name || 'Industrial Product'}
-                  className="w-full h-80 sm:h-96"
-                />
-                {product.is_stale && (
-                  <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-warning-500 text-white text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 shadow-md">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                    Price Updating (Fallback)
+      <Navbar />
+      <ProductViewTracker 
+        productId={product?.id || id} 
+        productTitle={product?.title || ''} 
+        category={product?.sector_id?.name || product?.sector_id?.slug || 'General'} 
+        price={product?.base_price_per_unit || 0}
+        unit={product?.unit_label || 'unit'}
+        image={product?.hero_image_url || product?.gallery_image_urls?.[0] || null}
+        slug={getProductSlug(product)}
+      />
+
+      <main suppressHydrationWarning className="flex-1 pt-24 pb-16 bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb Navigation (SEO & User Flow) */}
+          <Breadcrumbs
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Directory', href: '/directory' },
+              ...(product.sector_id
+                ? [{ label: product.sector_id.name, href: `/directory/${product.sector_id.slug}` }]
+                : []),
+              { label: product.title }
+            ]}
+            className="mb-6"
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+            {/* Product Image Gallery (Up to 5 Pictures) */}
+            <div className="lg:col-span-2 order-1">
+              <ProductImageGallery
+                images={product.gallery_image_urls || (product.hero_image_url ? [product.hero_image_url] : [])}
+                heroImage={product.hero_image_url}
+                title={product.title}
+                category={product.sector_id?.name || 'Industrial Product'}
+                qualityGrade={product.quality_grade}
+                isStale={product.is_stale}
+              />
+            </div>
+
+            {/* Title, Badges & Supplier Info */}
+            <div className="lg:col-span-2 order-3 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 mb-2">
+                    <span>Verified B2B Listing</span>
+                    <span>•</span>
+                    <Link
+                      href={`/directory/supplier/${supplierId}`}
+                      className="hover:underline text-gray-700 font-semibold"
+                    >
+                      {supplierName} ({supplierLocation})
+                    </Link>
                   </div>
+
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+                    {product.title}
+                  </h1>
+                </div>
+
+                <div className="flex-shrink-0 pt-1">
+                  <FavoriteButton
+                    product={{
+                      id: product.id || id,
+                      title: product.title,
+                      price: product.base_price_per_unit,
+                      unit: product.unit_label,
+                      image: product.hero_image_url || product.gallery_image_urls?.[0],
+                      slug: getProductSlug(product),
+                      sector: product.sector_id?.name || 'General'
+                    }}
+                    size="large"
+                    showLabel={true}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-100 font-semibold">
+                  <span>🛡️</span> Escrow Protected
+                </div>
+                <div className="flex items-center gap-1.5 text-blue-700 bg-blue-50 px-3 py-1 rounded-lg border border-blue-100 font-semibold">
+                  <span>🧾</span> 100% GST Invoice
+                </div>
+                <div className="flex items-center gap-1.5 text-purple-700 bg-purple-50 px-3 py-1 rounded-lg border border-purple-100 font-semibold">
+                  <span>🚚</span> Pan-India Logistics
+                </div>
+              </div>
+
+              <p className="mt-6 text-gray-600 leading-relaxed text-base whitespace-pre-wrap">
+                {product.description?.split(/(\*\*.*?\*\*)/g).map((part, i) => {
+                  if (part.startsWith('**') && part.endsWith('**')) {
+                    return (
+                      <strong key={i} className="font-semibold text-gray-900">
+                        {part.slice(2, -2)}
+                      </strong>
+                    );
+                  }
+                  return <span key={i}>{part}</span>;
+                })}
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                {product.certifications?.map((cert) => (
+                  <span
+                    key={cert}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100 flex items-center gap-1.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {cert}
+                  </span>
+                ))}
+                {product.hsn_code && (
+                  <span className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold border border-gray-200">
+                    HSN Code: {product.hsn_code}
+                  </span>
                 )}
                 {product.quality_grade && (
-                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-gray-900 text-xs font-bold shadow-sm border border-gray-100">
-                    {product.quality_grade} Grade
-                  </div>
+                  <span className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold border border-gray-200">
+                    Grade: {product.quality_grade}
+                  </span>
                 )}
-              </div>
-
-              {/* Title & Description */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{product.title}</h1>
-                <p className="mt-4 text-gray-600 leading-relaxed text-base">{product.description}</p>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {product.certifications?.map((cert) => (
-                    <span key={cert} className="px-3 py-1.5 rounded-lg bg-success-50 text-success-700 text-xs font-semibold border border-success-100 flex items-center gap-1.5">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                      {cert}
-                    </span>
-                  ))}
-                  {product.hsn_code && (
-                    <span className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-semibold border border-gray-200">
-                      HSN: {product.hsn_code}
-                    </span>
-                  )}
-                </div>
-              </div>
-              
-              {/* Logistics & Spatial Routing Agent */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-border-subtle overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                  <svg className="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
-                </div>
-                
-                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4 relative z-10">
-                  <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  Spatial Routing & Logistics
-                </h2>
-                
-                {distanceKm ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                      <div className="text-xs text-gray-500 font-medium mb-1 uppercase tracking-wider">Transport Path</div>
-                      <div className="text-lg font-extrabold text-gray-900">{distanceKm} <span className="text-sm font-medium text-gray-500">km</span></div>
-                      <div className="text-xs text-gray-400 mt-1 line-clamp-1">{product.supplier_id?.city} → Delhi (Simulated)</div>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                      <div className="text-xs text-gray-500 font-medium mb-1 uppercase tracking-wider">Bulk Freight (Per MT)</div>
-                      <div className="text-lg font-extrabold text-brand-600">₹{shippingEstimate.toLocaleString('en-IN')}</div>
-                      <div className="text-[10px] text-gray-400 mt-1 uppercase">Calculated at ₹4/km</div>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                      <div className="text-xs text-gray-500 font-medium mb-1 uppercase tracking-wider">Estimated Transit</div>
-                      <div className="text-lg font-extrabold text-gray-900">{Math.max(1, Math.ceil(distanceKm / 400))} <span className="text-sm font-medium text-gray-500">Days</span></div>
-                      <div className="text-xs text-gray-400 mt-1">Standard Surface</div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-500 text-center">
-                    Precise routing unavailable. Destination or Origin coordinates missing.
-                  </div>
-                )}
-              </div>
-
-              {/* Technical Specifications */}
-              <div className="rounded-2xl bg-white shadow-sm border border-gray-200 overflow-hidden">
-                <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
-                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    Technical Specifications
-                  </h2>
-                </div>
-                
-                <div className="p-0">
-                  {Object.keys(specs).length > 0 ? (
-                    <table className="w-full text-sm text-left">
-                      <tbody className="divide-y divide-gray-100">
-                        {Object.entries(specs).map(([key, value], index) => (
-                          <tr key={key} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}>
-                            <th scope="row" className="px-6 py-4 font-medium text-gray-500 capitalize w-1/3 align-top">
-                              {key.replace(/_/g, ' ')}
-                            </th>
-                            <td className="px-6 py-4 text-gray-900 font-medium">
-                              {typeof value === 'boolean' 
-                                ? (value ? 'Yes' : 'No') 
-                                : Array.isArray(value) 
-                                  ? value.join(', ') 
-                                  : String(value)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <div className="p-6 text-gray-500 text-sm text-center">
-                      No technical specifications available for this product.
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
 
-            {/* Right: Pricing & Supplier Card via Client Component */}
-            <QuotationDock product={{...product, shippingEstimate, distanceKm}} />
+            {/* Right: Quotation & Checkout Dock */}
+            <div className="order-2 lg:order-none lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:row-span-6 h-full">
+              <QuotationDock product={{ ...product, shippingEstimate, distanceKm }} />
+            </div>
+
+            {/* Logistics Calculator */}
+            {isLogisticsEligible ? (
+              <div className="lg:col-span-2 order-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+                  <span className="text-xl">🚚</span>
+                  Agriculture & Bulk Commodity Logistics
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                    ₹2.3 - 4 / kg (Location Dependent)
+                  </span>
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
+                    <div className="text-xs text-emerald-700 font-medium mb-1 uppercase tracking-wider">
+                      Freight Rate
+                    </div>
+                    <div className="text-xl font-extrabold text-emerald-900 leading-tight">
+                      ₹2.3 / kg - 4 / kg
+                    </div>
+                    <div className="text-xs font-semibold text-emerald-700 mt-0.5">
+                      Depending upon location
+                    </div>
+                    <div className="text-xs text-emerald-600 mt-1">Inter-state & local freight</div>
+                  </div>
+                  <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
+                    <div className="text-xs text-emerald-700 font-medium mb-1 uppercase tracking-wider">
+                      Sample 10,000 kg Truck
+                    </div>
+                    <div className="text-xl font-extrabold text-emerald-900">₹23,000 - ₹40,000</div>
+                    <div className="text-xs text-emerald-600 mt-1">Doorstep delivery estimate</div>
+                  </div>
+                  <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
+                    <div className="text-xs text-emerald-700 font-medium mb-1 uppercase tracking-wider">
+                      Pan-India Coverage
+                    </div>
+                    <div className="text-xl font-extrabold text-emerald-900">All Pincodes</div>
+                    <div className="text-xs text-emerald-600 mt-1">GPS-tracked fleet</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="lg:col-span-2 order-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-2">
+                  <span className="text-xl">📦</span>
+                  Pan-India Direct Factory Logistics
+                </h2>
+                <p className="text-sm text-gray-600 mb-3">
+                  Industrial freight is calculated per destination truckload or courier weight upon order confirmation. Full transit insurance is provided.
+                </p>
+                <div className="text-xs font-semibold text-brand-600 flex items-center gap-1.5">
+                  <span>📞</span> Dedicated Freight Coordination: +91 8408841998
+                </div>
+              </div>
+            )}
+
+            {/* Technical Specifications Table */}
+            <div className="lg:col-span-2 order-5 rounded-2xl bg-white shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Product Technical Specifications & Commercial Terms
+                </h2>
+                <span className="text-xs text-gray-500">Verified by B2B India</span>
+              </div>
+
+              <div className="p-0">
+                {Object.keys(specs).length > 0 ? (
+                  <table className="w-full text-sm text-left table-auto">
+                    <tbody className="divide-y divide-gray-100">
+                      {Object.entries(specs).map(([key, value]) => (
+                        <tr key={key} className="bg-white hover:bg-gray-50 transition-colors">
+                          <th scope="row" className="px-6 py-4 font-semibold text-gray-600 w-1/3 align-top border-r border-gray-50">
+                            {formatSpecKey(key)}
+                          </th>
+                          <td className="px-6 py-4 text-gray-900 font-medium whitespace-pre-wrap">
+                            {formatSpecValue(key, value)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="p-6 text-gray-500 text-sm text-center">
+                    Standard technical specifications available upon quotation request.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Supplier Verification Profile Card */}
+            <div className="lg:col-span-2 order-6 bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 text-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-700/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-xs font-extrabold border border-amber-400/30 flex items-center gap-1">
+                    <span>⭐</span> Verified Manufacturer & Supplier
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30 flex items-center gap-1">
+                    <span>✓</span> Active GSTIN Verified
+                  </span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{supplierName}</h3>
+                <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs sm:text-sm text-gray-300 mt-2">
+                  <div className="flex items-center gap-1">
+                    <span>📍</span> <strong>Location:</strong> {supplierLocation}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span>🏭</span> <strong>Industry:</strong> {product.sector_id?.name || 'Industrial Supplies'}
+                  </div>
+                  <div className="flex items-center gap-1 text-emerald-400 font-semibold">
+                    <span>🛡️</span> 10% Escrow Supported
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                href={`/directory/supplier/${supplierId}`}
+                className="w-full md:w-auto px-6 py-4 rounded-xl bg-white hover:bg-amber-50 text-gray-900 transition-all shadow-md hover:shadow-xl flex flex-col items-center md:items-end justify-center group flex-shrink-0 cursor-pointer border border-white/80 active:scale-95"
+              >
+                <div className="flex items-center gap-2 text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-amber-900">
+                  <span>View {supplierName} Catalog</span>
+                  <span className="text-brand-600 group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+                <span className="text-[11px] font-semibold text-gray-500 group-hover:text-amber-800 mt-0.5">
+                  📍 {supplierLocation} • Direct Manufacturer
+                </span>
+              </Link>
+            </div>
+
+            {/* Procurement FAQs for Google Rich Snippets */}
+            <div className="lg:col-span-2 order-7 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <span className="text-brand-600">❓</span>
+                Frequently Asked Procurement Questions about {product.title}
+              </h2>
+              <div className="space-y-4">
+                {productFaqs.map((faq, index) => (
+                  <div key={index} className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                    <h3 className="font-bold text-gray-900 text-base mb-2">
+                      {faq.question}
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Related Products Cluster (Internal Linking for SEO Rank #1) */}
+            {relatedProducts.length > 0 && (
+              <div className="lg:col-span-3 order-8 mt-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-gray-900">
+                      Related Products in {product.sector_id?.name || 'this Category'}
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Compare verified wholesale quotes and bulk manufacturer pricing
+                    </p>
+                  </div>
+                  {product.sector_id?.slug && (
+                    <Link
+                      href={`/directory/${product.sector_id.slug}`}
+                      className="text-sm font-bold text-brand-600 hover:text-brand-700"
+                    >
+                      View All in {product.sector_id.name} →
+                    </Link>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {relatedProducts.map((rel) => (
+                    <Link
+                      key={rel.id}
+                      href={`/directory/product/${getProductSlug(rel)}`}
+                      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                    >
+                      <div className="h-44 overflow-hidden bg-gray-100 relative">
+                        <CommodityImage
+                          src={rel.hero_image_url}
+                          category={rel.sector_id?.name || 'Product'}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        {rel.quality_grade && (
+                          <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-white/90 backdrop-blur text-gray-900 text-[10px] font-bold">
+                            {rel.quality_grade}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4 flex-1 flex flex-col">
+                        <h3 className="font-bold text-gray-900 text-sm line-clamp-2 group-hover:text-brand-600 transition-colors">
+                          {rel.title}
+                        </h3>
+                        <div className="mt-auto pt-3 flex items-baseline justify-between border-t border-gray-100">
+                          <div>
+                            <span className="text-lg font-extrabold text-gray-900">
+                              ₹{formatInrPrice(rel.base_price_per_unit)}
+                            </span>
+                            <span className="text-xs text-gray-500 ml-1">/{rel.unit_label}</span>
+                          </div>
+                          <span className="text-xs font-semibold text-brand-600">Quote →</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
+
       <Footer />
     </>
   );

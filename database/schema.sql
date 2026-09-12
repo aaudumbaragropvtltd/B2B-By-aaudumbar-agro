@@ -1,5 +1,5 @@
 -- ============================================================================
--- B2B BHARAT — SUPABASE POSTGRESQL SCHEMA
+-- B2B INDIA — SUPABASE POSTGRESQL SCHEMA
 -- ============================================================================
 -- Execute this script in Supabase SQL Editor to provision the core relational
 -- matrix handling 38+ industry configurations, dynamic price indexing,
@@ -114,7 +114,7 @@ CREATE TABLE products (
 );
 
 -- ============================================================================
--- TABLE 4: B2B BHARAT TRANSACTIONAL ORDER & ESCROW MATRIX
+-- TABLE 4: B2B INDIA TRANSACTIONAL ORDER & ESCROW MATRIX
 -- Full lifecycle tracking from quotation issuance through escrow settlement.
 -- The advance_paid_10 is a generated column computed from total_contract_value.
 -- ============================================================================
@@ -266,3 +266,466 @@ CREATE TRIGGER update_products_updated_at
 CREATE TRIGGER update_orders_updated_at
     BEFORE UPDATE ON trade_orders
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- ============================================================================
+-- RFQ SYSTEM MIGRATION
+-- ============================================================================
+
+CREATE TYPE rfq_status AS ENUM ('open', 'closed');
+CREATE TYPE quote_status AS ENUM ('pending', 'accepted', 'rejected');
+
+CREATE TABLE rfqs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    buyer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_name VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL,
+    unit VARCHAR(50) NOT NULL,
+    target_price NUMERIC(12, 2) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
+    deadline DATE,
+    notes TEXT,
+    status rfq_status NOT NULL DEFAULT 'open',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE rfq_quotes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    rfq_id UUID NOT NULL REFERENCES rfqs(id) ON DELETE CASCADE,
+    supplier_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    quoted_price NUMERIC(12, 2) NOT NULL,
+    notes TEXT,
+    status quote_status NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS
+ALTER TABLE rfqs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rfq_quotes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "RFQs readable by all"
+    ON rfqs FOR SELECT
+    USING (true);
+
+CREATE POLICY "Buyers can insert RFQs"
+    ON rfqs FOR INSERT
+    WITH CHECK (buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+CREATE POLICY "Buyers can update their RFQs"
+    ON rfqs FOR UPDATE
+    USING (buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+CREATE POLICY "Quotes readable by involved parties"
+    ON rfq_quotes FOR SELECT
+    USING (
+        supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        OR 
+        rfq_id IN (SELECT id FROM rfqs WHERE buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)))
+    );
+
+CREATE POLICY "Suppliers can insert quotes"
+    ON rfq_quotes FOR INSERT
+    WITH CHECK (supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+CREATE POLICY "Suppliers can update their quotes"
+    ON rfq_quotes FOR UPDATE
+    USING (supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+-- Triggers for updated_at
+CREATE TRIGGER update_rfqs_updated_at
+    BEFORE UPDATE ON rfqs
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_rfq_quotes_updated_at
+    BEFORE UPDATE ON rfq_quotes
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- ============================================================================
+-- MESSAGING SYSTEM MIGRATION
+-- ============================================================================
+
+CREATE TABLE conversations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    buyer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    supplier_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id UUID REFERENCES products(id) ON DELETE SET NULL, -- optional reference to specific product
+    rfq_id UUID REFERENCES rfqs(id) ON DELETE SET NULL, -- optional reference to specific RFQ
+    last_message_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(buyer_id, supplier_id, product_id) -- Only one thread per product pair
+);
+
+CREATE TABLE messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Conversations visible to involved parties"
+    ON conversations FOR SELECT
+    USING (
+        buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        OR 
+        supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+    );
+
+CREATE POLICY "Users can create conversations"
+    ON conversations FOR INSERT
+    WITH CHECK (
+        buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        OR
+        supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+    );
+
+CREATE POLICY "Conversations updateable by involved parties"
+    ON conversations FOR UPDATE
+    USING (
+        buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        OR 
+        supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+    );
+
+CREATE POLICY "Messages visible to conversation participants"
+    ON messages FOR SELECT
+    USING (
+        conversation_id IN (
+            SELECT id FROM conversations WHERE 
+            buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+            OR 
+            supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        )
+    );
+
+CREATE POLICY "Users can send messages to their conversations"
+    ON messages FOR INSERT
+    WITH CHECK (
+        sender_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        AND
+        conversation_id IN (
+            SELECT id FROM conversations WHERE 
+            buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+            OR 
+            supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        )
+    );
+
+CREATE POLICY "Users can mark messages as read"
+    ON messages FOR UPDATE
+    USING (
+        conversation_id IN (
+            SELECT id FROM conversations WHERE 
+            buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+            OR 
+            supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        )
+    );
+
+-- Triggers for updated_at
+CREATE TRIGGER update_conversations_updated_at
+    BEFORE UPDATE ON conversations
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger to update conversation's last_message_at on new message
+CREATE OR REPLACE FUNCTION update_conversation_last_message()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE conversations
+    SET last_message_at = NEW.created_at, updated_at = CURRENT_TIMESTAMP
+    WHERE id = NEW.conversation_id;
+-- ============================================================================
+-- RFQ SYSTEM MIGRATION
+-- ============================================================================
+
+CREATE TYPE rfq_status AS ENUM ('open', 'closed');
+CREATE TYPE quote_status AS ENUM ('pending', 'accepted', 'rejected');
+
+CREATE TABLE rfqs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    buyer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_name VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL,
+    unit VARCHAR(50) NOT NULL,
+    target_price NUMERIC(12, 2) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
+    deadline DATE,
+    notes TEXT,
+    status rfq_status NOT NULL DEFAULT 'open',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE rfq_quotes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    rfq_id UUID NOT NULL REFERENCES rfqs(id) ON DELETE CASCADE,
+    supplier_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    quoted_price NUMERIC(12, 2) NOT NULL,
+    notes TEXT,
+    status quote_status NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS
+ALTER TABLE rfqs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rfq_quotes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "RFQs readable by all"
+    ON rfqs FOR SELECT
+    USING (true);
+
+CREATE POLICY "Buyers can insert RFQs"
+    ON rfqs FOR INSERT
+    WITH CHECK (buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+CREATE POLICY "Buyers can update their RFQs"
+    ON rfqs FOR UPDATE
+    USING (buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+CREATE POLICY "Quotes readable by involved parties"
+    ON rfq_quotes FOR SELECT
+    USING (
+        supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        OR 
+        rfq_id IN (SELECT id FROM rfqs WHERE buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)))
+    );
+
+CREATE POLICY "Suppliers can insert quotes"
+    ON rfq_quotes FOR INSERT
+    WITH CHECK (supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+CREATE POLICY "Suppliers can update their quotes"
+    ON rfq_quotes FOR UPDATE
+    USING (supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+-- Triggers for updated_at
+CREATE TRIGGER update_rfqs_updated_at
+    BEFORE UPDATE ON rfqs
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_rfq_quotes_updated_at
+    BEFORE UPDATE ON rfq_quotes
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- ============================================================================
+-- MESSAGING SYSTEM MIGRATION
+-- ============================================================================
+
+CREATE TABLE conversations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    buyer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    supplier_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id UUID REFERENCES products(id) ON DELETE SET NULL, -- optional reference to specific product
+    rfq_id UUID REFERENCES rfqs(id) ON DELETE SET NULL, -- optional reference to specific RFQ
+    last_message_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(buyer_id, supplier_id, product_id) -- Only one thread per product pair
+);
+
+CREATE TABLE messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Conversations visible to involved parties"
+    ON conversations FOR SELECT
+    USING (
+        buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        OR 
+        supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+    );
+
+CREATE POLICY "Users can create conversations"
+    ON conversations FOR INSERT
+    WITH CHECK (
+        buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        OR
+        supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+    );
+
+CREATE POLICY "Conversations updateable by involved parties"
+    ON conversations FOR UPDATE
+    USING (
+        buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        OR 
+        supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+    );
+
+CREATE POLICY "Messages visible to conversation participants"
+    ON messages FOR SELECT
+    USING (
+        conversation_id IN (
+            SELECT id FROM conversations WHERE 
+            buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+            OR 
+            supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        )
+    );
+
+CREATE POLICY "Users can send messages to their conversations"
+    ON messages FOR INSERT
+    WITH CHECK (
+        sender_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        AND
+        conversation_id IN (
+            SELECT id FROM conversations WHERE 
+            buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+            OR 
+            supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        )
+    );
+
+CREATE POLICY "Users can mark messages as read"
+    ON messages FOR UPDATE
+    USING (
+        conversation_id IN (
+            SELECT id FROM conversations WHERE 
+            buyer_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+            OR 
+            supplier_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true))
+        )
+    );
+
+-- Triggers for updated_at
+CREATE TRIGGER update_conversations_updated_at
+    BEFORE UPDATE ON conversations
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger to update conversation's last_message_at on new message
+CREATE OR REPLACE FUNCTION update_conversation_last_message()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE conversations
+    SET last_message_at = NEW.created_at, updated_at = CURRENT_TIMESTAMP
+    WHERE id = NEW.conversation_id;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER on_new_message
+    AFTER INSERT ON messages
+    FOR EACH ROW EXECUTE FUNCTION update_conversation_last_message();
+
+-- ============================================================================
+-- USER CRM / ACTIVITY TRACKING
+-- ============================================================================
+
+CREATE TABLE user_product_views (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    viewed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS
+ALTER TABLE user_product_views ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can insert their own views"
+    ON user_product_views FOR INSERT
+    WITH CHECK (user_id IN (SELECT id FROM users WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)));
+
+CREATE POLICY "Admins can view all"
+    ON user_product_views FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM users 
+            WHERE firebase_uid = current_setting('request.jwt.claim.sub', true) 
+            AND role = 'admin'
+        )
+    );
+
+CREATE INDEX idx_user_views_user_id ON user_product_views(user_id, viewed_at DESC);
+
+-- ============================================================================
+-- SEARCH LOGS & LEAD INTELLIGENCE
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS search_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    query TEXT NOT NULL,
+    sector_slug VARCHAR(255),
+    results_count INT DEFAULT 0,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE search_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public insert on search_logs"
+    ON search_logs FOR INSERT
+    WITH CHECK (true);
+
+CREATE POLICY "Admins can view all search logs"
+    ON search_logs FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM users 
+            WHERE firebase_uid = current_setting('request.jwt.claim.sub', true) 
+            AND role = 'admin'
+        )
+    );
+
+CREATE INDEX IF NOT EXISTS idx_search_logs_user ON search_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_search_logs_created ON search_logs(created_at DESC);
+
+-- ============================================================================
+-- PAYMENTS TRANSACTIONS TABLE
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS payments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    order_id UUID REFERENCES trade_orders(id) ON DELETE SET NULL,
+    amount NUMERIC(12, 2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'INR',
+    payment_method VARCHAR(50) DEFAULT 'Razorpay',
+    status VARCHAR(50) NOT NULL DEFAULT 'pending', -- 'successful', 'failed', 'pending', 'refunded'
+    transaction_reference VARCHAR(255),            -- Razorpay payment ID or Bank UTR
+    payment_type VARCHAR(50) DEFAULT 'advance_10_percent', -- 'advance_10_percent', 'dock_final_90_percent', 'manual_settlement', 'sample_order'
+    failure_reason TEXT,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own payments"
+    ON payments FOR SELECT
+    USING (
+        user_id IN (
+            SELECT id FROM users 
+            WHERE firebase_uid = current_setting('request.jwt.claim.sub', true)
+        )
+    );
+
+CREATE POLICY "Admins can view and manage all payments"
+    ON payments FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM users 
+            WHERE firebase_uid = current_setting('request.jwt.claim.sub', true) 
+            AND role = 'admin'
+        )
+    );
+
+CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_order_id ON payments(order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+CREATE INDEX IF NOT EXISTS idx_payments_created_at ON payments(created_at DESC);

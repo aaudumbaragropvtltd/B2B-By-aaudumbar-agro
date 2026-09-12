@@ -3,10 +3,18 @@
 // ============================================================================
 // Used in Server Components, Server Actions, and API Route Handlers.
 // Manages session via HTTP-only cookies for secure server-side operations.
+// Includes strict timeout to prevent Next.js from hanging when Supabase is paused.
 // ============================================================================
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+
+const DB_TIMEOUT_MS = 6000;
+
+function resilientFetch(url, options = {}) {
+  const signal = options.signal || (typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(DB_TIMEOUT_MS) : undefined);
+  return fetch(url, { ...options, signal });
+}
 
 /**
  * Creates a Supabase client for server-side operations.
@@ -19,22 +27,20 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
+      global: {
+        fetch: resilientFetch
+      },
       cookies: {
-        get(name) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name, value, options) {
+        setAll(cookiesToSet) {
           try {
-            cookieStore.set(name, value, options);
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
           } catch (error) {
-            // set() is not available in Server Components — ignore gracefully
-          }
-        },
-        remove(name, options) {
-          try {
-            cookieStore.delete(name, options);
-          } catch (error) {
-            // delete() is not available in Server Components — ignore gracefully
+            // setAll was called from a Server Component — ignore gracefully
           }
         },
       },
@@ -51,6 +57,11 @@ export function createAdminClient() {
   const { createClient: createSupabaseClient } = require('@supabase/supabase-js');
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      global: {
+        fetch: resilientFetch
+      }
+    }
   );
 }

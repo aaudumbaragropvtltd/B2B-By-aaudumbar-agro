@@ -1,0 +1,46 @@
+// ============================================================================
+// SECTOR CONSTANTS — IndiaMART-Style Categories
+// ============================================================================
+// Maps to the categories defined in data/products.js
+// ============================================================================
+
+export const STATIC_SECTORS = [
+  { id: '1', slug: 'building-construction', name: 'Building & Construction' },
+  { id: '2', slug: 'electronics-electrical', name: 'Electronics & Electrical' },
+  { id: '3', slug: 'industrial-machinery', name: 'Industrial Machinery & Equipment' },
+  { id: '4', slug: 'apparel-garments', name: 'Apparel & Garments' },
+  { id: '5', slug: 'food-agriculture', name: 'Food & Agriculture' },
+  { id: '6', slug: 'chemicals-dyes', name: 'Chemicals, Dyes & Solvents' },
+  { id: '7', slug: 'medical-healthcare', name: 'Medical & Healthcare' },
+  { id: '8', slug: 'furniture-interiors', name: 'Furniture & Interior Products' },
+  { id: '9', slug: 'packaging-paper', name: 'Packaging Materials & Paper' },
+  { id: '10', slug: 'automobile-parts', name: 'Automobile Parts & Accessories' },
+  { id: '11', slug: 'solar-renewable', name: 'Solar & Renewable Energy' },
+  { id: '12', slug: 'pipes-fittings', name: 'Pipes, Valves & Fittings' },
+  { id: '13', slug: 'safety-security', name: 'Safety & Security Equipment' },
+  { id: '14', slug: 'textiles-fabrics', name: 'Textiles, Yarn & Fabrics' },
+  { id: '15', slug: 'pharma-drugs', name: 'Pharmaceutical & Drug Intermediates' },
+  { id: '16', slug: 'rubber-products', name: 'Rubber & Rubber Products' },
+  { id: '17', slug: 'plastic-products', name: 'Plastic Products & Moulding' },
+  { id: '18', slug: 'gems-jewellery', name: 'Gems, Jewellery & Precious Metals' },
+  { id: '19', slug: 'printing-stationery', name: 'Printing & Stationery' },
+  { id: '20', slug: 'oil-gas', name: 'Oil, Gas & Petroleum Products' },
+  { id: '21', slug: 'metals-steel', name: 'Iron, Steel & Metal Products' },
+  { id: '22', slug: 'water-treatment', name: 'Water Treatment & Purification' },
+  { id: '23', slug: 'hvac-refrigeration', name: 'HVAC & Refrigeration' },
+  { id: '24', slug: 'lab-instruments', name: 'Laboratory & Scientific Instruments' },
+  { id: '25', slug: 'leather-products', name: 'Leather Products & Accessories' },
+  { id: '26', slug: 'sports-fitness', name: 'Sports, Fitness & Outdoor' },
+  { id: '27', slug: 'gifts-handicrafts', name: 'Gift Articles & Handicrafts' },
+  { id: '28', slug: 'telecom-equipment', name: 'Telecom & Communication Equipment' },
+  { id: '29', slug: 'mining-minerals', name: 'Mining & Mineral Processing' },
+  { id: '30', slug: 'timber-wood', name: 'Timber, Plywood & Wood Products' },
+  { id: '31', slug: 'power-generation', name: 'Power Generation & Transmission' },
+  { id: '32', slug: 'ayurvedic-herbal', name: 'Ayurvedic & Herbal Products' },
+  { id: '33', slug: 'glass-ceramics', name: 'Glass & Ceramics' },
+  { id: '34', slug: 'logistics-handling', name: 'Logistics & Material Handling' },
+  { id: '35', slug: 'marine-ship', name: 'Marine & Ship Equipment' },
+  { id: '36', slug: 'waste-recycling', name: 'Waste Management & Recycling' },
+  { id: '37', slug: 'cosmetics-personal', name: 'Cosmetics & Personal Care' },
+  { id: '38', slug: 'education-training', name: 'Education & Training Supplies' },
+];

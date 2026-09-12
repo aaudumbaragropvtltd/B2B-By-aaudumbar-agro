@@ -1,7 +1,7 @@
 // ============================================================================
 // ESCROW FLOW SECTION
 // ============================================================================
-// Visual step-by-step explainer of the B2B Bharat escrow lifecycle:
+// Visual step-by-step explainer of the B2B India escrow lifecycle:
 // 1. Quotation → 2. 10% Advance → 3. Warehouse Loading → 4. QR Settlement
 // ============================================================================
 
@@ -21,21 +21,21 @@ const ESCROW_STEPS = [
   {
     step: '02',
     title: '10% Price Lock',
-    description: 'Commit a 10% non-refundable advance to lock the agreed price. The supplier confirms stock availability and estimated dispatch timeline.',
+    description: 'Commit a 10% non-refundable advance to lock the agreed price. The supplier confirms stock availability and warehouse packaging starts.',
     icon: '🔒',
     color: 'bg-amber-500',
   },
   {
     step: '03',
-    title: 'Warehouse Loading',
-    description: 'Goods are prepared at the supplier warehouse. Real-time status updates via WhatsApp keep both parties informed through loading completion.',
+    title: 'Warehouse Truck Loading',
+    description: 'Goods are verified for quality and weight, then loaded into the transport truck at our central warehouse/godown.',
     icon: '🏗️',
     color: 'bg-purple-500',
   },
   {
     step: '04',
-    title: 'QR Dock Settlement',
-    description: 'At the loading dock, scan the dynamic QR code to clear the final 90% balance. Funds split instantly — supplier payout, platform commission, and digital invoices generated.',
+    title: '90% Balance at Truck Loading',
+    description: 'The remaining 90% balance is payable strictly at the time of loading goods into the truck at the warehouse/godown before departure.',
     icon: '✅',
     color: 'bg-emerald-500',
   },
@@ -94,13 +94,13 @@ export default function EscrowFlowSection() {
                 transition={{ delay: i * 0.15, type: 'spring', stiffness: 80 }}
                 className="relative"
               >
-                <div className="bg-white rounded-2xl border border-border-subtle p-6 h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div className="bg-white rounded-2xl border border-border-subtle p-6 h-full card-glow hover-lift transition-all duration-300">
                   {/* Step Number & Icon */}
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`w-10 h-10 rounded-xl ${step.color} text-white flex items-center justify-center text-lg font-bold shadow-lg`}>
                       {step.step}
                     </div>
-                    <span className="text-2xl">{step.icon}</span>
+                    <span className="text-2xl group-hover:scale-125 transition-transform">{step.icon}</span>
                   </div>
 
                   {/* Content */}

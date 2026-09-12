@@ -29,29 +29,39 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
-  // Fetch user profile from profiles table
+  // Fetch user profile via our backend API
   const fetchProfile = useCallback(async (userId) => {
     if (!userId) {
       setProfile(null);
       return;
     }
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (!error && data) {
-        setProfile(data);
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/dashboard/profile', {
+        headers: session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data.profile);
+      } else {
+        console.warn('Failed to fetch profile API:', res.status);
       }
     } catch (e) {
-      console.warn('Failed to fetch profile:', e);
+      console.warn('Network error fetching profile:', e);
     }
-  }, [supabase]);
+  }, []);
 
   // Listen to auth state changes
   useEffect(() => {
+    // Intercept password recovery redirects (e.g. from Supabase verification)
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      if (hash.includes('type=recovery') && !window.location.pathname.startsWith('/reset-password')) {
+        window.location.href = `/reset-password${hash}`;
+        return;
+      }
+    }
+
     // Get initial session
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -68,6 +78,13 @@ export function useAuth() {
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/reset-password')) {
+            window.location.href = `/reset-password?recovery=true${window.location.hash}`;
+            return;
+          }
+        }
+
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         if (currentUser) {
@@ -92,46 +109,62 @@ export function useAuth() {
     return data;
   }, [supabase]);
 
-  // Sign up with email/password
+  // Sign up with email/password via backend email dispatch engine
   const signUp = useCallback(async (email, password, metadata = {}) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: metadata,
-      },
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, metadata }),
     });
-    if (error) throw error;
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to register');
     return data;
-  }, [supabase]);
+  }, []);
 
   // Sign in with Google OAuth
   const signInWithGoogle = useCallback(async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    });
-    if (error) throw error;
-    return data;
-  }, [supabase]);
+    window.location.href = '/api/auth/google';
+  }, []);
 
   // Sign out
   const signOut = useCallback(async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch {}
+    if (typeof document !== 'undefined') {
+      document.cookie = 'b2b_admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('b2b_buyer_email');
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('b2b_buyer_phone');
+        localStorage.removeItem('b2b_user_phone');
+      } catch (e) {}
+    }
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setUser(null);
     setProfile(null);
   }, [supabase]);
 
+  // STRICT SUPERADMIN POLICY: Only rsevmail@gmail.com is authorized as admin
+  const ADMIN_EMAIL = 'rsevmail@gmail.com';
+  const isAdmin = Boolean(
+    user?.email &&
+    user.email.toLowerCase() === ADMIN_EMAIL &&
+    (profile?.role === 'admin' || (profile?.registered_email ? profile.registered_email.toLowerCase() === ADMIN_EMAIL : true))
+  );
+
   return {
     user,
     profile,
+    isAdmin,
     loading,
     signIn,
     signUp,
     signInWithGoogle,
     signOut,
+    refreshProfile: () => user?.id && fetchProfile(user.id),
   };
 }

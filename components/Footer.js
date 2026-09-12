@@ -1,137 +1,69 @@
 // ============================================================================
 // FOOTER COMPONENT
 // ============================================================================
-// Enterprise-grade footer with sector links, platform info, certifications,
-// and contact details. Supports dark theme natively.
+// Simplified footer matching the requested information only.
 // ============================================================================
 
 import React from 'react';
 import Link from 'next/link';
-
-const FOOTER_SECTORS = [
-  { name: 'Agriculture', slug: 'agriculture' },
-  { name: 'Apparel & Fashion', slug: 'apparel-fashion' },
-  { name: 'Automobile & EV', slug: 'automobile-ev' },
-  { name: 'Chemicals & Polymers', slug: 'chemicals-polymers' },
-  { name: 'Electronics & Electrical', slug: 'electronics-electrical' },
-  { name: 'Food & Beverages', slug: 'food-beverage' },
-  { name: 'Industrial CNC', slug: 'industrial-cnc' },
-  { name: 'Medical & Surgical', slug: 'medical-surgical' },
-];
-
-const PLATFORM_LINKS = [
-  { name: 'Trade Directory', href: '/directory' },
-  { name: 'Supplier Dashboard', href: '/dashboard' },
-  { name: 'Buyer Dashboard', href: '/dashboard' },
-  { name: 'Pricing Engine', href: '#' },
-  { name: 'Escrow Settlement', href: '#' },
-];
+import B2BLogo from '@/components/B2BLogo';
 
 export default function Footer() {
   return (
-    <footer className="bg-brand-950 text-white/70">
+    <footer className="relative bg-brand-950 text-white/70 pt-8 mt-12">
+      {/* Wave Divider */}
+      <div className="absolute top-0 left-0 right-0 h-4 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDMyIj48cGF0aCBmaWxsPSIjMWUzYTVmIiBmaWxsLW9wYWNpdHk9IjEiIGQ9Ik0wLDE2TDQ4LDE4LjdDOTYsMjEsMTkyLDI3LDI4OCwyNC41QzM4NCwyMiw0ODAsMTEsNTc2LDguNUM2NzIsNSw3NjgsMTEsODY0LDE2Qzk2MCwyMSwxMDU2LDIxLDExNTIsMTguN0MxMjQ4LDE2LDEzNDQsOCwxMzkyLDRMMTQ0MCwwTDE0NDAsMzJMMTM5MiwzMkMxMzQ0LDMyLDEyNDgsMzIsMTE1MiwzMkMxMDU2LDMyLDk2MCwzMiw4NjQsMzJDNzY4LDMyLDY3MiwzMiw1NzYsMzJDNDgwLDMyLDM4NCwzMiwyODgsMzJDMTkyLDMyLDk2LDMyLDQ4LDMyTDAsMzJaIj48L3BhdGg+PC9zdmc+')] bg-cover -mt-4 opacity-50 z-10" />
+
       {/* Main Footer */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-12 relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">B</span>
-              </div>
+              <B2BLogo className="w-10 h-10" />
               <div>
-                <div className="text-lg font-bold text-white">B2B Bharat</div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+                <div className="text-lg font-bold text-white">B2B INDIA</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-accent-400 font-bold">
                   Conglomerate Marketplace
                 </div>
               </div>
             </div>
-            <p className="text-sm leading-relaxed text-white/50 mb-6">
+            <p className="text-sm leading-relaxed text-white/60">
               India&apos;s premier cross-industry B2B platform connecting verified
               manufacturers, automated escrow settlements, and AI-driven
               pricing resilience across 38 sectors.
             </p>
-            {/* Trust Badges */}
-            <div className="flex flex-wrap gap-2">
-              {['GST Verified', 'Escrow Protected', 'AI Pricing'].map((badge) => (
-                <span
-                  key={badge}
-                  className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold uppercase tracking-wider text-white/40"
-                >
-                  {badge}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Sectors Column */}
-          <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
-              Trade Sectors
-            </h4>
-            <ul className="space-y-2.5">
-              {FOOTER_SECTORS.map((sector) => (
-                <li key={sector.slug}>
-                  <Link
-                    href={`/directory/${sector.slug}`}
-                    className="text-sm hover:text-white transition-colors duration-200"
-                  >
-                    {sector.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Platform Column */}
-          <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
-              Platform
-            </h4>
-            <ul className="space-y-2.5">
-              {PLATFORM_LINKS.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm hover:text-white transition-colors duration-200"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* Contact Column */}
-          <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
+          <div className="lg:col-span-1 flex flex-col text-left">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
               Enterprise Support
             </h4>
-            <div className="space-y-4 text-sm">
+            <div className="space-y-4 text-sm text-white/60">
               <div>
                 <div className="text-white/40 text-xs uppercase tracking-wider mb-1">
                   Email
                 </div>
-                <a
-                  href="mailto:enterprise@b2bbharat.com"
-                  className="hover:text-white transition-colors"
-                >
-                  enterprise@b2bbharat.com
-                </a>
+                <div className="flex flex-col gap-1">
+                  <a href="mailto:support@b2bindia.site" className="hover:text-white transition-colors">
+                    support@b2bindia.site
+                  </a>
+                </div>
               </div>
               <div>
                 <div className="text-white/40 text-xs uppercase tracking-wider mb-1">
                   Helpline
                 </div>
-                <a href="tel:+911800123456" className="hover:text-white transition-colors">
-                  1800-123-456 (Toll Free)
+                <a href="tel:+918408841998" className="hover:text-accent-400 font-semibold transition-colors">
+                  +91 8408841998
                 </a>
               </div>
               <div>
                 <div className="text-white/40 text-xs uppercase tracking-wider mb-1">
                   Head Office
                 </div>
-                <p>Connaught Place, New Delhi 110001</p>
+                <p className="leading-relaxed">Plot No.5, Prerna Nagar,<br/>Garkheda Parisar,<br/>Chhatrapati Sambhajinagar 431009</p>
               </div>
             </div>
           </div>
@@ -139,20 +71,20 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/30">
-            © {new Date().getFullYear()} B2B Bharat Conglomerate Marketplace. All rights reserved.
+      <div className="border-t border-white/10 bg-black/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-white/40 font-medium">
+            © 2026 Aaudumbar agro pvt.ltd. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-xs text-white/30">
-            <Link href="#" className="hover:text-white/60 transition-colors">
+          <div className="flex items-center gap-6 text-xs text-white/40 font-medium">
+            <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="hover:text-white/60 transition-colors">
+            <Link href="/terms" className="hover:text-white transition-colors">
               Terms of Trade
             </Link>
-            <Link href="#" className="hover:text-white/60 transition-colors">
-              Grievance Redressal
+            <Link href="/cookie" className="hover:text-white transition-colors">
+              Cookie Policy
             </Link>
           </div>
         </div>

@@ -63,6 +63,7 @@ const FREIGHT_RATES = {
 export function useLogisticsCalculator() {
   const [distanceKm, setDistanceKm] = useState('');
   const [weightKg, setWeightKg] = useState(1000);
+  const [quantity, setQuantity] = useState(1);
   const [mode, setMode] = useState('road');
 
   const availableModes = Object.entries(FREIGHT_RATES).map(([key, rate]) => ({
@@ -73,6 +74,14 @@ export function useLogisticsCalculator() {
   const result = useMemo(() => {
     const distNum = parseFloat(distanceKm);
     if (!distNum || isNaN(distNum) || weightKg <= 0) return null;
+
+    // Hardcoded Asset constraint threshold: MOQ of 10 Tons or 1,000 units
+    if (weightKg < 10000 && quantity < 1000) {
+      return {
+        error: "MOQ Not Met: Calculator disabled for orders under 10 Tons (10,000 kg) or 1,000 units.",
+        disabled: true
+      };
+    }
 
     const rateConfig = FREIGHT_RATES[mode] || FREIGHT_RATES.road;
     const weightTons = weightKg / 1000;
@@ -100,13 +109,15 @@ export function useLogisticsCalculator() {
       modeLabel: rateConfig.label,
       costPerKg: Math.round((cost / weightKg) * 100) / 100,
     };
-  }, [distanceKm, weightKg, mode]);
+  }, [distanceKm, weightKg, quantity, mode]);
   return {
     distanceKm,
     weightKg,
+    quantity,
     mode,
     setDistanceKm,
     setWeightKg,
+    setQuantity,
     setMode,
     result,
     availableModes,

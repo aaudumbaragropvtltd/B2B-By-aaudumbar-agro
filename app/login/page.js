@@ -1,18 +1,20 @@
 // ============================================================================
 // LOGIN PAGE
 // ============================================================================
-// Supabase Email/Password + Google OAuth authentication with role selection.
-// Supports both login and registration flows with animated transitions.
-// All user data stored in Supabase.
+// Supabase Email/Password + Google OAuth authentication.
+// Login: email + password → dashboard (if onboarded) or onboarding
+// Register: email + password → onboarding page
+// Google: OAuth → onboarding (new) or dashboard (existing)
 // ============================================================================
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/services/supabase';
+import B2BLogo from '@/components/B2BLogo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,76 +22,199 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    companyName: '',
-    role: 'buyer',
-    gstNumber: '',
-    phone: '',
   });
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1); // 1 = Enter Email, 2 = Enter OTP & New Password
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotOtp, setForgotOtp] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
+  const [forgotShowPassword, setForgotShowPassword] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotResetLoading, setForgotResetLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState('');
+  const [forgotError, setForgotError] = useState('');
+
+  // Email verification & registration states
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
+
+  // Detect verification callback query params and reset recovery requests
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const hash = window.location.hash || '';
+
+      if (params.get('verified') === 'true') {
+        setSuccess('🎉 Your email has been verified successfully! Please sign in to access your dashboard.');
+        setIsLogin(true);
+      } else if (params.get('error') === 'verification_failed') {
+        const msg = params.get('message');
+        setError(msg ? `Email verification failed: ${msg}. Please request a new confirmation email below.` : 'The verification link was invalid or expired. Please request a new confirmation email below.');
+      } else if (params.get('reset') === 'true' || params.get('mode') === 'reset' || hash.includes('type=recovery')) {
+        setIsLogin(true);
+        setShowForgotPassword(true);
+        if (params.get('email')) setForgotEmail(params.get('email'));
+        if (params.get('otp')) {
+          setForgotOtp(params.get('otp'));
+          setForgotStep(2);
+        }
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError('');
+    setSuccess('');
+    setUnconfirmedEmail('');
+    setResendMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
+    setResendMessage('');
+
+    const emailTrimmed = formData.email.trim();
+    const passwordTrimmed = formData.password;
+
+    // Check for reserved domains that Supabase GoTrue blocks
+    if (emailTrimmed.endsWith('@example.com') || emailTrimmed.endsWith('@test.com') || emailTrimmed.endsWith('@example.org') || emailTrimmed.endsWith('@invalid.com')) {
+      setError('Please use an active business email address such as name@company.in or name@gmail.com.');
+      setLoading(false);
+      return;
+    }
 
     try {
       if (isLogin) {
         // ── Sign In with Email/Password ──
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
+          email: emailTrimmed,
+          password: passwordTrimmed,
         });
 
-        if (signInError) throw signInError;
+        if (signInError) {
+          if (signInError.message?.toLowerCase().includes('email not confirmed')) {
+            setUnconfirmedEmail(emailTrimmed);
+            throw new Error('Your email address has not been confirmed yet. Please check your inbox or click the button below to resend confirmation email.');
+          }
+          throw signInError;
+        }
+
+        // Redirect to dashboard
         router.push('/dashboard');
         router.refresh();
       } else {
-        // ── Sign Up with Email/Password ──
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              company_name: formData.companyName,
-              role: formData.role,
-              gst_number: formData.gstNumber,
-              phone: formData.phone,
-            },
-          },
+        // ── Sign Up with Email/Password via Backend Dispatch Engine ──
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: emailTrimmed,
+            password: passwordTrimmed,
+          }),
         });
 
-        if (signUpError) throw signUpError;
-
-        // Insert profile into profiles table
-        if (data.user) {
-          const { error: profileError } = await supabase.from('profiles').upsert({
-            id: data.user.id,
-            company_name: formData.companyName,
-            role: formData.role,
-            gst_number: formData.gstNumber,
-            phone: formData.phone,
-            email: formData.email,
-          });
-
-          if (profileError) {
-            console.warn('Profile creation warning:', profileError.message);
-          }
+        let data = {};
+        try {
+          data = await res.json();
+        } catch {
+          data = { error: 'Server returned an invalid response. Please try again.' };
         }
 
-        router.push('/dashboard');
-        router.refresh();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to complete registration.');
+        }
+
+        setRegisteredEmail(emailTrimmed);
+        setRegistrationSuccess(true);
+        setSuccess('📬 Verification email dispatched! Please check your inbox.');
       }
     } catch (err) {
-      setError(err.message);
+      console.error("Authentication failed:", err.message);
+      setError(err.message || "Authentication failed. Please check your credentials and try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async (targetEmail) => {
+    const emailToUse = targetEmail || registeredEmail || formData.email.trim();
+    if (!emailToUse) return;
+
+    setResendLoading(true);
+    setResendMessage('');
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailToUse }),
+      });
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: 'Server returned an invalid response. Please try again.' };
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to resend verification email.');
+      }
+
+      setResendMessage(data.message || `Fresh verification email sent to ${emailToUse}! Please check your inbox.`);
+    } catch (err) {
+      setError(err.message || 'Failed to resend confirmation email.');
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otpCode || !otpCode.trim()) {
+      setOtpError('Please enter the 8-digit verification code.');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError('');
+    setError('');
+
+    try {
+      const emailToUse = registeredEmail || formData.email.trim();
+      const { data, error: verifyErr } = await supabase.auth.verifyOtp({
+        email: emailToUse,
+        token: otpCode.trim(),
+        type: 'signup',
+      });
+
+      if (verifyErr) throw verifyErr;
+
+      setSuccess('🎉 Account verified successfully! Redirecting...');
+      setTimeout(() => {
+        router.push('/onboarding');
+        router.refresh();
+      }, 800);
+    } catch (err) {
+      setOtpError(err.message || 'Invalid or expired verification code. Please check your code or click resend.');
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -97,17 +222,141 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      });
-
-      if (oauthError) throw oauthError;
-      // The browser will redirect to Google — no need to push route
+      // Redirect to our custom Google OAuth endpoint
+      window.location.href = '/api/auth/google';
     } catch (err) {
       setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    if (e) e.preventDefault();
+    if (!forgotEmail || !forgotEmail.trim()) {
+      setForgotError('Please enter your email address.');
+      return;
+    }
+    setForgotLoading(true);
+    setForgotMessage('');
+    setForgotError('');
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail.trim().toLowerCase() }),
+      });
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: 'Server returned an invalid response. Please try again.' };
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send reset email');
+      }
+
+      setForgotMessage(data.message || '8-digit password reset OTP has been sent to your email!');
+      setForgotStep(2);
+    } catch (err) {
+      setForgotError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setForgotResetLoading(true);
+    setForgotError('');
+    setForgotMessage('');
+
+    const emailTrimmed = forgotEmail.trim().toLowerCase();
+    const otpTrimmed = forgotOtp.trim();
+    const newPassTrimmed = forgotNewPassword.trim();
+    const confirmPassTrimmed = forgotConfirmPassword.trim();
+
+    if (!otpTrimmed || otpTrimmed.length < 6) {
+      setForgotError('Please enter the 8-digit OTP code sent to your email.');
+      setForgotResetLoading(false);
+      return;
+    }
+
+    if (!newPassTrimmed || newPassTrimmed.length < 6) {
+      setForgotError('Password must be at least 6 characters long.');
+      setForgotResetLoading(false);
+      return;
+    }
+
+    if (newPassTrimmed !== confirmPassTrimmed) {
+      setForgotError('Passwords do not match. Please verify both passwords match.');
+      setForgotResetLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailTrimmed,
+          otp: otpTrimmed,
+          newPassword: newPassTrimmed,
+        }),
+      });
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: 'Server returned an invalid response. Please try again.' };
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to reset password.');
+      }
+
+      setForgotMessage('🎉 Password updated successfully! Logging you in...');
+
+      // Attempt automatic sign-in with newly set password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: emailTrimmed,
+        password: newPassTrimmed,
+      });
+
+      if (signInError) {
+        setShowForgotPassword(false);
+        setSuccess('🎉 Password reset successfully! Please log in with your new password.');
+        setFormData(prev => ({ ...prev, email: emailTrimmed, password: '' }));
+      } else {
+        router.push('/dashboard');
+        router.refresh();
+      }
+    } catch (err) {
+      console.error('Password reset error:', err);
+      setForgotError(err.message || 'Failed to update password. Please check your OTP code and try again.');
+    } finally {
+      setForgotResetLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (email) => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'password123',
+      });
+      if (signInError) throw signInError;
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err) {
+      setError(err.message || 'Demo login failed');
+    } finally {
       setLoading(false);
     }
   };
@@ -125,10 +374,8 @@ export default function LoginPage() {
 
         <div className="relative z-10 max-w-md">
           <Link href="/" className="flex items-center gap-3 mb-12">
-            <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center">
-              <span className="text-white font-bold text-xl">B</span>
-            </div>
-            <span className="text-2xl font-bold text-white">B2B Bharat</span>
+            <B2BLogo className="w-12 h-12" />
+            <span className="text-2xl font-bold text-white">B2B INDIA</span>
           </Link>
 
           <h1 className="text-4xl font-extrabold text-white leading-tight mb-6">
@@ -164,10 +411,8 @@ export default function LoginPage() {
         >
           {/* Mobile Logo */}
           <Link href="/" className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-accent-500 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">B</span>
-            </div>
-            <span className="text-xl font-bold text-foreground">B2B Bharat</span>
+            <B2BLogo className="w-10 h-10" />
+            <span className="text-xl font-bold text-foreground">B2B INDIA</span>
           </Link>
 
           {/* Header */}
@@ -177,17 +422,25 @@ export default function LoginPage() {
           <p className="text-gray-500 mb-8">
             {isLogin
               ? 'Sign in to access your trade dashboard'
-              : 'Register as a buyer or supplier to start trading'}
+              : 'Register to start trading on B2B India'}
           </p>
 
           {/* Toggle */}
-          <div className="flex rounded-xl bg-white border border-border-subtle p-1 mb-8">
+          <div className="flex rounded-xl bg-white border border-border-subtle p-1 mb-8" suppressHydrationWarning>
             {['Login', 'Register'].map((tab) => (
               <button
                 key={tab}
+                type="button"
+                suppressHydrationWarning
                 onClick={() => {
-                  setIsLogin(tab === 'Login');
+                  const isLog = tab === 'Login';
+                  setIsLogin(isLog);
                   setError('');
+                  setSuccess('');
+                  setShowForgotPassword(false);
+                  setForgotError('');
+                  setForgotMessage('');
+                  setForgotStep(1);
                 }}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   (tab === 'Login') === isLogin
@@ -207,107 +460,142 @@ export default function LoginPage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"
+                className="mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"
               >
-                {error}
+                <div>{error}</div>
+                {unconfirmedEmail && (
+                  <div className="mt-2.5 pt-2 border-t border-red-200/80 flex items-center justify-between gap-2">
+                    <span className="text-xs text-red-600 font-medium">Haven&apos;t received it?</span>
+                    <button
+                      type="button"
+                      disabled={resendLoading}
+                      suppressHydrationWarning
+                      onClick={() => handleResendVerification(unconfirmedEmail)}
+                      className="text-xs font-bold text-brand-600 hover:text-brand-700 underline disabled:opacity-50"
+                    >
+                      {resendLoading ? 'Sending email...' : 'Resend confirmation email →'}
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <AnimatePresence mode="wait">
-              {!isLogin && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-4 overflow-hidden"
+          {/* Resend Notice */}
+          <AnimatePresence>
+            {resendMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-700 font-semibold"
+              >
+                📬 {resendMessage}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Success */}
+          <AnimatePresence>
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mb-4 p-3 rounded-xl bg-green-50 border border-green-200 text-sm text-green-700 font-semibold"
+              >
+                {success}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Registration Success & Verification Card */}
+          {registrationSuccess ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm space-y-5"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-500 text-white flex items-center justify-center text-2xl mx-auto shadow-md shadow-brand-500/20">
+                📬
+              </div>
+
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-foreground">
+                  Check Your Inbox to Activate
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  We sent an official activation email &amp; verification code to:
+                </p>
+                <div className="inline-block mt-2 px-3 py-1 bg-brand-50 text-brand-700 font-bold rounded-lg text-sm border border-brand-100 break-all">
+                  {registeredEmail}
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-800 leading-relaxed">
+                💡 <strong>Instructions:</strong> Open the email from <strong>B2B India</strong> and click the <strong>&quot;Confirm Email &amp; Activate Account&quot;</strong> button to proceed. (Please check your Spam or Promotions tab if not seen in 1 minute).
+              </div>
+
+              {/* OTP Direct Entry Option */}
+              <form onSubmit={handleVerifyOtp} suppressHydrationWarning className="pt-3 border-t border-gray-100 space-y-3">
+                <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider text-center">
+                  Or enter 8-digit OTP from email
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={otpCode}
+                    onChange={(e) => { setOtpCode(e.target.value); setOtpError(''); }}
+                    placeholder="e.g. 12345678"
+                    maxLength={10}
+                    suppressHydrationWarning
+                    className="flex-1 px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-center font-mono font-bold tracking-widest text-base text-foreground focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={otpLoading || !otpCode.trim()}
+                    suppressHydrationWarning
+                    className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                  >
+                    {otpLoading ? 'Verifying...' : 'Verify OTP'}
+                  </button>
+                </div>
+                {otpError && (
+                  <p className="text-xs text-red-600 font-medium text-center">{otpError}</p>
+                )}
+              </form>
+
+              {/* Resend and Return Actions */}
+              <div className="pt-3 border-t border-gray-100 space-y-2 text-center">
+                <button
+                  type="button"
+                  disabled={resendLoading}
+                  suppressHydrationWarning
+                  onClick={() => handleResendVerification(registeredEmail)}
+                  className="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-semibold border border-gray-200 transition-all disabled:opacity-50 cursor-pointer"
                 >
-                  {/* Company Name */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      name="companyName"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                      required={!isLogin}
-                      placeholder="e.g. Acme Industries Pvt Ltd"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-border-subtle text-foreground placeholder:text-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm"
-                    />
-                  </div>
+                  {resendLoading ? 'Sending new email...' : 'Didn\'t receive email? Resend verification'}
+                </button>
 
-                  {/* Role Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      I am a
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { value: 'buyer', label: '🛒 Buyer', desc: 'I want to purchase' },
-                        { value: 'supplier', label: '🏭 Supplier', desc: 'I want to sell' },
-                      ].map((role) => (
-                        <label
-                          key={role.value}
-                          className={`flex flex-col items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                            formData.role === role.value
-                              ? 'border-brand-500 bg-brand-50'
-                              : 'border-border-subtle hover:border-brand-200'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="role"
-                            value={role.value}
-                            checked={formData.role === role.value}
-                            onChange={handleChange}
-                            className="sr-only"
-                          />
-                          <span className="text-lg mb-1">{role.label}</span>
-                          <span className="text-xs text-gray-400">{role.desc}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* GST & Phone */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        GST Number
-                      </label>
-                      <input
-                        type="text"
-                        name="gstNumber"
-                        value={formData.gstNumber}
-                        onChange={handleChange}
-                        required={!isLogin}
-                        placeholder="22AAAAA0000A1Z5"
-                        className="w-full px-4 py-3 rounded-xl bg-white border border-border-subtle text-foreground placeholder:text-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Phone
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        required={!isLogin}
-                        placeholder="+91-98765-43210"
-                        className="w-full px-4 py-3 rounded-xl bg-white border border-border-subtle text-foreground placeholder:text-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm"
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
+                <div>
+                  <button
+                    type="button"
+                    suppressHydrationWarning
+                    onClick={() => {
+                      setRegistrationSuccess(false);
+                      setIsLogin(true);
+                      setError('');
+                    }}
+                    className="text-xs text-brand-600 hover:text-brand-700 font-semibold cursor-pointer"
+                  >
+                    ← Return to Login
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+          /* Normal Form */
+          <form onSubmit={handleSubmit} suppressHydrationWarning className="space-y-4">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -319,6 +607,7 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                suppressHydrationWarning
                 placeholder="you@company.com"
                 className="w-full px-4 py-3 rounded-xl bg-white border border-border-subtle text-foreground placeholder:text-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm"
               />
@@ -336,16 +625,234 @@ export default function LoginPage() {
                 onChange={handleChange}
                 required
                 minLength={6}
+                suppressHydrationWarning
                 placeholder="Min 6 characters"
                 className="w-full px-4 py-3 rounded-xl bg-white border border-border-subtle text-foreground placeholder:text-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm"
               />
+              {isLogin && (
+                <button
+                  type="button"
+                  suppressHydrationWarning
+                  onClick={() => { setShowForgotPassword(true); setForgotMessage(''); setForgotError(''); setForgotEmail(formData.email); }}
+                  className="mt-1.5 text-xs text-brand-600 hover:text-brand-700 font-semibold transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              )}
             </div>
+
+            {/* Forgot Password Modal */}
+            <AnimatePresence>
+              {isLogin && showForgotPassword && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 shadow-sm space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🔑</span>
+                        <h3 className="text-sm font-bold text-blue-950">
+                          {forgotStep === 1 ? 'Reset Your Password' : 'Enter OTP & Set New Password'}
+                        </h3>
+                      </div>
+                      <button
+                        type="button"
+                        suppressHydrationWarning
+                        onClick={() => {
+                          setShowForgotPassword(false);
+                          setForgotStep(1);
+                          setForgotError('');
+                          setForgotMessage('');
+                        }}
+                        className="text-gray-400 hover:text-gray-600 text-lg leading-none p-1 rounded-md cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {forgotError && (
+                      <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-semibold leading-relaxed">
+                        ⚠️ {forgotError}
+                      </div>
+                    )}
+
+                    {forgotMessage && (
+                      <div className="p-2.5 rounded-xl bg-green-50 border border-green-200 text-xs text-green-700 font-semibold leading-relaxed">
+                        ✅ {forgotMessage}
+                      </div>
+                    )}
+
+                    {/* Step 1: Enter Email */}
+                    {forgotStep === 1 ? (
+                      <div className="space-y-2.5">
+                        <p className="text-xs text-blue-800/80 leading-relaxed">
+                          Enter your registered email address. We will immediately dispatch an 8-digit OTP code to verify your identity.
+                        </p>
+                        <div className="flex gap-2">
+                          <input
+                            type="email"
+                            value={forgotEmail}
+                            onChange={(e) => { setForgotEmail(e.target.value); setForgotError(''); }}
+                            placeholder="you@company.com"
+                            required
+                            suppressHydrationWarning
+                            className="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-blue-200 text-foreground placeholder:text-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm outline-none"
+                          />
+                          <button
+                            type="button"
+                            suppressHydrationWarning
+                            onClick={handleForgotPassword}
+                            disabled={forgotLoading || !forgotEmail}
+                            className="px-4 py-2.5 rounded-xl bg-brand-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-brand-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-sm cursor-pointer"
+                          >
+                            {forgotLoading ? 'Sending...' : 'Send OTP'}
+                          </button>
+                        </div>
+                        <div className="text-right">
+                          <button
+                            type="button"
+                            onClick={() => { setForgotStep(2); setForgotError(''); }}
+                            className="text-[11px] text-blue-700 hover:underline font-semibold cursor-pointer"
+                          >
+                            Already have an OTP? Click here →
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Step 2: Enter OTP & New Password */
+                      <div className="space-y-3 bg-white p-3.5 rounded-xl border border-blue-100 shadow-xs">
+                        <div className="flex items-center justify-between text-xs text-gray-500 pb-1 border-b border-gray-100">
+                          <span>Email: <strong className="text-foreground">{forgotEmail}</strong></span>
+                          <button
+                            type="button"
+                            onClick={() => { setForgotStep(1); setForgotError(''); }}
+                            className="text-brand-600 hover:underline text-[11px] font-semibold cursor-pointer"
+                          >
+                            Change Email
+                          </button>
+                        </div>
+
+                        {/* OTP Input */}
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1">
+                            8-Digit OTP Code (From Email)
+                          </label>
+                          <input
+                            type="text"
+                            value={forgotOtp}
+                            onChange={(e) => { setForgotOtp(e.target.value); setForgotError(''); }}
+                            placeholder="e.g. 12345678"
+                            maxLength={10}
+                            suppressHydrationWarning
+                            className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-center font-mono font-bold tracking-widest text-base text-foreground focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all outline-none"
+                          />
+                        </div>
+
+                        {/* New Password */}
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1">
+                            New Password
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={forgotShowPassword ? 'text' : 'password'}
+                              value={forgotNewPassword}
+                              onChange={(e) => { setForgotNewPassword(e.target.value); setForgotError(''); }}
+                              placeholder="Minimum 6 characters"
+                              minLength={6}
+                              suppressHydrationWarning
+                              className="w-full pl-3 pr-9 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-foreground focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all outline-none"
+                            />
+                            <button
+                              type="button"
+                              tabIndex={-1}
+                              onClick={() => setForgotShowPassword(!forgotShowPassword)}
+                              className="absolute right-2.5 top-2 text-gray-400 hover:text-gray-600 cursor-pointer p-0.5"
+                            >
+                              {forgotShowPassword ? '🙈' : '👁️'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Confirm Password */}
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1">
+                            Confirm New Password
+                          </label>
+                          <input
+                            type={forgotShowPassword ? 'text' : 'password'}
+                            value={forgotConfirmPassword}
+                            onChange={(e) => { setForgotConfirmPassword(e.target.value); setForgotError(''); }}
+                            placeholder="Re-enter new password"
+                            minLength={6}
+                            suppressHydrationWarning
+                            className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-foreground focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all outline-none"
+                          />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="pt-1 space-y-2">
+                          <button
+                            type="button"
+                            onClick={handleResetPasswordSubmit}
+                            disabled={forgotResetLoading || !forgotOtp || !forgotNewPassword}
+                            suppressHydrationWarning
+                            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white font-bold text-xs shadow-md transition-all active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
+                          >
+                            {forgotResetLoading ? (
+                              <>
+                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Updating Password...
+                              </>
+                            ) : (
+                              '🔐 Update Password & Sign In'
+                            )}
+                          </button>
+
+                          <div className="flex items-center justify-between pt-1">
+                            <button
+                              type="button"
+                              onClick={handleForgotPassword}
+                              disabled={forgotLoading}
+                              className="text-[11px] text-gray-500 hover:text-brand-600 font-semibold cursor-pointer"
+                            >
+                              {forgotLoading ? 'Resending...' : 'Resend OTP Code'}
+                            </button>
+                            <Link
+                              href={`/reset-password?email=${encodeURIComponent(forgotEmail)}&otp=${encodeURIComponent(forgotOtp)}`}
+                              className="text-[11px] text-brand-600 hover:underline font-semibold"
+                            >
+                              Open Full Page →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Registration note */}
+            {!isLogin && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-700"
+              >
+                💡 After creating your account, you&apos;ll complete your business profile with GST verification and category selection.
+              </motion.div>
+            )}
 
             {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              suppressHydrationWarning
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm cursor-pointer"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -358,7 +865,7 @@ export default function LoginPage() {
               ) : isLogin ? (
                 'Sign In to Dashboard'
               ) : (
-                'Create Trade Account'
+                'Create Account →'
               )}
             </button>
 
@@ -375,7 +882,8 @@ export default function LoginPage() {
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white border border-gray-300 text-gray-700 font-semibold shadow-sm hover:bg-gray-50 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              suppressHydrationWarning
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white border border-gray-300 text-gray-700 font-semibold shadow-sm hover:bg-gray-50 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm cursor-pointer"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -386,10 +894,11 @@ export default function LoginPage() {
               Google
             </button>
           </form>
+          )}
 
           {/* Footer */}
           <p className="mt-8 text-center text-xs text-gray-400">
-            By continuing, you agree to B2B Bharat&apos;s Terms of Trade and Privacy Policy.
+            By continuing, you agree to B2B India&apos;s Terms of Trade and Privacy Policy.
           </p>
         </motion.div>
       </div>

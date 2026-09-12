@@ -1,0 +1,44 @@
+[
+  {
+    "id": "banner-1",
+    "title": "India’s Verified B2B Wholesale Marketplace",
+    "subtitle": "Direct ex-factory bulk procurement with 100% Escrow Price Protection, dock inspections, and automated GST billing.",
+    "badge_text": "100% Escrow Protected",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "cta_text": "Explore 38+ Wholesale Sectors",
+    "cta_link": "/directory",
+    "sector_slug": "all",
+    "display_order": 1,
+    "is_active": true,
+    "created_at": "2026-08-28T17:34:46.354Z",
+    "updated_at": "2026-09-11T06:33:44.548Z"
+  },
+  {
+    "id": "banner-2",
+    "title": "APMC Mandi Direct Agro & Spice Sourcing",
+    "subtitle": "Connect directly with certified agricultural aggregators in Nashik, Erode, Unjha, and Guntur with daily live mandi rates.",
+    "badge_text": "Live Mandi Intelligence",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108587/b2b-bharat/banners/1789108583730_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "cta_text": "View Live Mandi Rates",
+    "cta_link": "/market-rates",
+    "sector_slug": "food-agriculture",
+    "display_order": 2,
+    "is_active": true,
+    "created_at": "2026-08-28T17:34:46.354Z",
+    "updated_at": "2026-09-11T06:36:30.989Z"
+  },
+  {
+    "id": "banner-3",
+    "title": "Heavy Industrial & Raw Materials Exchange",
+    "subtitle": "Bulk TMT steel, polymers, textile fabrics, and chemicals with verified factory lab certificates and dock logistics.",
+    "badge_text": "Verified Industrial Hub",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108718/b2b-bharat/banners/1789108715249_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "cta_text": "Post Enterprise RFQ",
+    "cta_link": "/#rfq-form",
+    "sector_slug": "metals-mining",
+    "display_order": 3,
+    "is_active": true,
+    "created_at": "2026-08-28T17:34:46.354Z",
+    "updated_at": "2026-09-11T06:38:40.107Z"
+  }
+]

@@ -13,13 +13,80 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import SearchAutocomplete from '@/components/SearchAutocomplete';
+import B2BLogo from '@/components/B2BLogo';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { user, loading, signOut } = useAuth();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const { user, profile, isAdmin, loading, signOut } = useAuth();
   const router = useRouter();
+
+  // Fetch notifications when user is logged in
+  useEffect(() => {
+    if (!user) return;
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch('/api/notifications?limit=10');
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data.notifications || []);
+          setUnreadCount(data.unreadCount || 0);
+        }
+      } catch (e) { /* silent */ }
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const markAllRead = async () => {
+    try {
+      await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markAllRead: true }),
+      });
+      setUnreadCount(0);
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    } catch (e) { /* silent */ }
+  };
+
+  const handleSearch = (e, customQuery) => {
+    if (e?.preventDefault) e.preventDefault();
+    const query = (typeof customQuery === 'string' ? customQuery : searchQuery).trim();
+    const sector = selectedCategory || null;
+    if (!query && !sector) return;
+    
+    // Asynchronously log search activity with full user profile and contact details
+    try {
+      fetch('/api/search/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          sectorSlug: sector,
+          userId: profile?.id || null,
+          email: profile?.registered_email || user?.email || null,
+          phone: profile?.corporate_phone || profile?.phone_number || null,
+        }),
+      }).catch(() => {});
+    } catch (err) {}
+
+    let url = '/directory?';
+    const params = new URLSearchParams();
+    if (query) params.append('q', query);
+    if (sector) params.append('sector', sector);
+    
+    router.push(url + params.toString());
+    setIsMobileMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -27,14 +94,17 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close user menu when clicking outside
+  // Close user menu and notification panel when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => setShowUserMenu(false);
-    if (showUserMenu) {
+    const handleClickOutside = () => {
+      setShowUserMenu(false);
+      setShowNotifications(false);
+    };
+    if (showUserMenu || showNotifications) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [showUserMenu]);
+  }, [showUserMenu, showNotifications]);
 
   const handleSignOut = async () => {
     try {
@@ -47,23 +117,28 @@ export default function Navbar() {
   };
 
   // Auth-aware nav links
-  const navLinks = user
-    ? [
-        { href: '/directory', label: 'Trade Directory' },
-        { href: '/dashboard/orders', label: 'Orders' },
-        { href: '/dashboard/support', label: 'Support' },
-        { href: '/dashboard/settings', label: 'Settings' },
-      ]
-    : [
-        { href: '/directory', label: 'Trade Directory' },
-        { href: '/login', label: 'Partner Login' },
-      ];
+  let navLinks = [];
+  if (user) {
+    navLinks = [
+      { href: '/directory', label: 'Trade Directory' },
+      { href: '/orders', label: 'My Orders' },
+      { href: '/support', label: 'Support Desk' },
+      { href: '/dashboard?tab=settings', label: 'Settings' },
+    ];
+  } else {
+    navLinks = [
+      { href: '/directory', label: 'Trade Directory' },
+      { href: '/orders', label: 'My Orders' },
+      { href: '/support', label: 'Support Desk' },
+      { href: '/login', label: 'Partner Login' },
+    ];
+  }
 
   const pathname = usePathname();
-  const isLightPage = pathname?.startsWith('/directory') || pathname?.startsWith('/login');
+  const isHomePage = pathname === '/';
+  const isHeroTransparent = isHomePage && !isScrolled;
   const isDarkPage = pathname?.startsWith('/dashboard');
-  const shouldBeSolid = isScrolled || isLightPage;
-  const isDark = isDarkPage && !isScrolled;
+  const isDark = isDarkPage; // Keep dashboard dark theme
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -79,135 +154,235 @@ export default function Navbar() {
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 100, damping: 20 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isDark
+        isHeroTransparent
+          ? 'bg-transparent border-b border-transparent'
+          : isDark
           ? 'bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60'
-          : shouldBeSolid
-          ? 'glass shadow-lg shadow-black/5 bg-white/80 backdrop-blur-md border-b border-gray-200'
-          : 'bg-transparent'
+          : 'bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm'
       }`}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/25 group-hover:shadow-brand-500/40 transition-shadow">
-              <span className="text-white font-bold text-lg">B</span>
-              {/* Live status dot */}
-              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-success-500 rounded-full border-2 border-white pulse-dot" />
-            </div>
+            <B2BLogo className="w-10 h-10" />
             <div className="flex flex-col">
-              <span className={`text-lg font-bold tracking-tight transition-colors ${
-                isDark ? 'text-white' : shouldBeSolid ? 'text-brand-950' : 'text-white'
+              <span className={`text-lg font-extrabold tracking-tight transition-colors ${
+                (isDark || isHeroTransparent) ? 'text-white drop-shadow-md' : 'gradient-text-premium'
               }`}>
-                B2B Bharat
+                B2B INDIA
               </span>
-              <span className={`text-[10px] font-medium tracking-widest uppercase transition-colors ${
-                isDark ? 'text-slate-400' : shouldBeSolid ? 'text-gray-400' : 'text-white/60'
+              <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${
+                (isDark || isHeroTransparent) ? 'text-white/80 drop-shadow-sm' : 'text-brand-600'
               }`}>
                 Conglomerate Marketplace
               </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-white/10 ${
-                  pathname === link.href
-                    ? isDark
-                      ? 'text-white bg-slate-800/60'
-                      : 'text-brand-700 bg-brand-50'
-                    : isDark
-                    ? 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                    : shouldBeSolid
-                    ? 'text-gray-700 hover:text-brand-700 hover:bg-brand-50'
-                    : 'text-white/80 hover:text-white'
-                }`}
+          {/* Central Search Bar (Desktop) */}
+          <div className="hidden lg:flex flex-1 max-w-2xl mx-8 relative z-30">
+            <form onSubmit={handleSearch} suppressHydrationWarning className="flex w-full rounded-xl bg-white/90 backdrop-blur-md shadow-sm border border-gray-200 focus-within:ring-2 focus-within:ring-brand-500/50 hover:shadow-md transition-all card-glow relative group">
+              <div className="absolute inset-0 rounded-xl gradient-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                suppressHydrationWarning
+                className="w-40 px-3 py-2 bg-transparent border-r border-gray-200 text-xs text-gray-700 outline-none cursor-pointer font-bold relative z-10 rounded-l-xl"
               >
-                {link.label}
+                <option value="">All Categories</option>
+                <option value="building-construction">Building & Construction</option>
+                <option value="electronics-electrical">Electronics & Electrical</option>
+                <option value="industrial-machinery">Industrial Machinery</option>
+                <option value="apparel-garments">Apparel & Garments</option>
+                <option value="food-agriculture">Food & Agriculture</option>
+              </select>
+              <SearchAutocomplete
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                onSearch={(q) => handleSearch(null, q)}
+                placeholder="Search products or commodities (e.g. Turmeric)..."
+              />
+              <button
+                type="submit"
+                suppressHydrationWarning
+                className="px-6 py-2 animated-gradient text-white font-bold text-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2 relative z-10 rounded-r-xl flex-shrink-0"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                Search
+              </button>
+            </form>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-2">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              const isTransparentLight = isHeroTransparent;
+              
+              let linkClass = '';
+              if (isActive) {
+                linkClass = isDark ? 'text-white bg-slate-800' : 'text-brand-700 bg-brand-50';
+              } else if (isDark) {
+                linkClass = 'text-slate-300 hover:text-white hover:bg-slate-800';
+              } else if (isTransparentLight) {
+                linkClass = 'text-white/90 hover:text-white hover:bg-white/10';
+              } else {
+                linkClass = 'text-gray-600 hover:text-brand-700 hover:bg-gray-100';
+              }
+              
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-all duration-200 ${linkClass}`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+
+            {/* Admin Panel Quick Access (Desktop) */}
+            {user && isAdmin && user.email?.toLowerCase() === 'rsevmail@gmail.com' && (
+              <Link
+                href="/admin/dashboard"
+                className="ml-1 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-700 hover:to-indigo-800 text-white shadow-md shadow-purple-600/25 flex items-center gap-1.5 border border-purple-400/40 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                title="Superadmin Control Center"
+              >
+                <span>🛡️</span>
+                <span>Admin Panel</span>
               </Link>
-            ))}
+            )}
 
             {/* Auth Section */}
             {!loading && (
               <>
                 {user ? (
-                  <div className="flex items-center gap-3 ml-3">
-                    {/* Dashboard Button */}
-                    <Link
-                      href="/dashboard"
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white text-sm font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 hover:from-brand-500 hover:to-brand-600 transition-all duration-200 active:scale-95 whitespace-nowrap"
-                    >
-                      Dashboard →
-                    </Link>
+                  <div className="flex items-center gap-2 ml-2">
+                    <div className="relative">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); setShowUserMenu(false); }}
+                        suppressHydrationWarning
+                        className={`relative p-2 rounded-lg transition-all ${isDark ? 'text-slate-300 hover:bg-white/10' : isHeroTransparent ? 'text-white/90 hover:bg-white/10' : 'text-gray-500 hover:bg-gray-100'}`}
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center border-2 border-white dark:border-slate-950 animate-pulse">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </span>
+                        )}
+                      </button>
 
-                    {/* User Avatar Dropdown */}
+                      {/* Notification Dropdown */}
+                      <AnimatePresence>
+                        {showNotifications && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black/50 z-50"
+                          >
+                            <div className="flex items-center justify-between p-3 border-b border-slate-700">
+                              <h3 className="text-sm font-bold text-white">Notifications</h3>
+                              {unreadCount > 0 && (
+                                <button onClick={markAllRead} suppressHydrationWarning className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
+                                  Mark all read
+                                </button>
+                              )}
+                            </div>
+                            {notifications.length === 0 ? (
+                              <div className="p-6 text-center text-slate-400 text-sm">No notifications yet</div>
+                            ) : (
+                              notifications.map(n => (
+                                <Link
+                                  key={n.id}
+                                  href={n.link || '/dashboard'}
+                                  onClick={() => setShowNotifications(false)}
+                                  className={`block px-3 py-3 border-b border-slate-800 hover:bg-slate-800/60 transition-colors ${!n.is_read ? 'bg-indigo-500/5' : ''}`}
+                                >
+                                  <div className="flex items-start gap-2">
+                                    {!n.is_read && <span className="w-2 h-2 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />}
+                                    <div className={!n.is_read ? '' : 'ml-4'}>
+                                      <p className="text-xs font-semibold text-white">{n.title}</p>
+                                      <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-2">{n.body}</p>
+                                      <p className="text-[10px] text-slate-500 mt-1">{new Date(n.created_at).toLocaleString()}</p>
+                                    </div>
+                                  </div>
+                                </Link>
+                              ))
+                            )}
+                            <Link
+                              href="/dashboard"
+                              onClick={() => setShowNotifications(false)}
+                              className="block p-2 text-center text-xs text-indigo-400 hover:text-indigo-300 font-semibold border-t border-slate-700"
+                            >
+                              View all in Dashboard →
+                            </Link>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <Link href="/orders" className={`relative p-2 rounded-lg transition-all ${isDark ? 'text-slate-300 hover:bg-white/10' : isHeroTransparent ? 'text-white/90 hover:bg-white/10' : 'text-gray-500 hover:bg-gray-100'}`} title="My Orders & Receipts">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    </Link>
                     <div className="relative">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowUserMenu(!showUserMenu);
                         }}
-                        className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold transition-all ring-2 ring-offset-2 ${
+                        suppressHydrationWarning
+                        className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold transition-all ring-2 ring-offset-1 ${
                           isDark
-                            ? 'bg-indigo-600 text-white hover:bg-indigo-500 ring-indigo-400/30 ring-offset-slate-950'
-                            : 'bg-brand-600 text-white hover:bg-brand-500 ring-brand-300/30 ring-offset-white'
+                            ? 'bg-indigo-600 text-white ring-indigo-400/30 ring-offset-slate-950'
+                            : 'bg-brand-600 text-white ring-brand-300/30 ring-offset-white'
                         }`}
                       >
                         {user.user_metadata?.avatar_url ? (
-                          <img
-                            src={user.user_metadata.avatar_url}
-                            alt="Avatar"
-                            className="w-9 h-9 rounded-full object-cover"
-                          />
+                          <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
                         ) : (
                           getUserInitials()
                         )}
                       </button>
 
-                    {/* Dropdown Menu */}
                     <AnimatePresence>
                       {showUserMenu && (
                         <motion.div
-                          initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
-                          className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50"
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          className="absolute right-0 mt-3 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden z-50 animate-slide-up"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-                            <p className="text-sm font-bold text-gray-900 truncate">
+                          <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-br from-gray-50/80 to-white/50">
+                            <p className="text-sm font-extrabold text-gray-900 truncate">
                               {user.user_metadata?.full_name || user.user_metadata?.company_name || 'User'}
                             </p>
-                            <p className="text-xs text-gray-500 truncate mt-0.5">
-                              {user.email}
-                            </p>
+                            <p className="text-xs text-brand-600 font-medium truncate mt-0.5">{user.email}</p>
                           </div>
-                          <div className="py-1">
-                            <Link
-                              href="/dashboard/settings"
-                              className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                              onClick={() => setShowUserMenu(false)}
-                            >
-                              ⚙️ Account Settings
-                            </Link>
-                            <Link
-                              href="/dashboard/orders"
-                              className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                              onClick={() => setShowUserMenu(false)}
-                            >
-                              📦 My Orders
-                            </Link>
-                            <button
-                              onClick={handleSignOut}
-                              className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
-                            >
-                              🚪 Sign Out
-                            </button>
+                          <div className="py-2 px-2">
+                            {isAdmin && user?.email?.toLowerCase() === 'rsevmail@gmail.com' && (
+                              <Link
+                                href="/admin/dashboard"
+                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-all mb-1 cursor-pointer"
+                                onClick={() => setShowUserMenu(false)}
+                              >
+                                <span>🛡️</span>
+                                <span>Admin Panel</span>
+                                <span className="ml-auto text-[10px] bg-purple-200 text-purple-800 font-black px-1.5 py-0.5 rounded-md">PRO</span>
+                              </Link>
+                            )}
+                            <Link href="/dashboard" className="block px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-all" onClick={() => setShowUserMenu(false)}>📊 Trade Dashboard</Link>
+                            <Link href="/dashboard/rfqs" className="block px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-all" onClick={() => setShowUserMenu(false)}>⚡ Live RFQs (Buy / Quote)</Link>
+                            <Link href="/dashboard?tab=products" className="block px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-all" onClick={() => setShowUserMenu(false)}>📦 My Products (Sell)</Link>
+                            <Link href="/orders" className="block px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700 transition-all" onClick={() => setShowUserMenu(false)}>📋 Order History</Link>
+                            <div className="h-px bg-gray-100 my-1 mx-3" />
+                            <button onClick={handleSignOut} suppressHydrationWarning className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all">🚪 Sign Out</button>
                           </div>
                         </motion.div>
                       )}
@@ -217,9 +392,9 @@ export default function Navbar() {
                 ) : (
                   <Link
                     href="/login"
-                    className="ml-3 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white text-sm font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 hover:from-brand-500 hover:to-brand-600 transition-all duration-200 active:scale-95"
+                    className="ml-2 px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-colors shadow-lg"
                   >
-                    Get Started →
+                    Sign In
                   </Link>
                 )}
               </>
@@ -229,8 +404,9 @@ export default function Navbar() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            suppressHydrationWarning
             className={`lg:hidden p-2 rounded-xl transition-colors ${
-              isDark ? 'text-slate-300' : shouldBeSolid ? 'text-gray-700' : 'text-white'
+              isDark ? 'text-slate-300' : isHeroTransparent ? 'text-white' : 'text-gray-800'
             }`}
             aria-label="Toggle menu"
           >
@@ -254,7 +430,23 @@ export default function Navbar() {
               transition={{ duration: 0.3 }}
               className="lg:hidden overflow-hidden"
             >
-              <div className="glass rounded-2xl p-4 mb-4 space-y-1">
+              <div className="bg-white rounded-2xl p-4 mb-4 space-y-2 shadow-xl border border-gray-200">
+                {/* Mobile Search */}
+                <form onSubmit={handleSearch} suppressHydrationWarning className="flex mb-4 rounded-xl bg-gray-50 border border-gray-200 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all relative z-20">
+                  <SearchAutocomplete
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    onSearch={(q) => handleSearch(null, q)}
+                    placeholder="Search products (e.g. Turmeric)..."
+                    isMobile={true}
+                  />
+                  <button type="submit" suppressHydrationWarning className="px-4 text-brand-600 font-bold bg-brand-50 hover:bg-brand-100 transition-colors flex items-center justify-center rounded-r-xl flex-shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  </button>
+                </form>
+
                 {navLinks.map((link) => (
                   <Link
                     key={link.label}
@@ -288,6 +480,15 @@ export default function Navbar() {
                     >
                       Dashboard →
                     </Link>
+                    {isAdmin && user?.email?.toLowerCase() === 'rsevmail@gmail.com' && (
+                      <Link
+                        href="/admin/dashboard"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 text-center mt-2 shadow-md cursor-pointer"
+                      >
+                        🛡️ Admin Panel →
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         setIsMobileMenuOpen(false);

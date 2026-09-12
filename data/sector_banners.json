@@ -1,0 +1,247 @@
+{
+  "building-construction": {
+    "name": "Building & Construction",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109205/b2b-bharat/banners/1789109201221_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Source bulk cement, structural TMT steel, architectural tiles, sanitaryware, and heavy earthmoving machinery.",
+    "badge_text": "Verified Construction Hub",
+    "updated_at": "2026-09-11T06:46:47.955Z"
+  },
+  "electronics-electrical": {
+    "name": "Electronics & Electrical",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109266/b2b-bharat/banners/1789109262454_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Industrial grade switchgear, distribution transformers, control panels, HT/LT copper cables, and semiconductor components.",
+    "badge_text": "BIS & ISO Certified",
+    "updated_at": "2026-09-11T06:48:01.511Z"
+  },
+  "industrial-machinery": {
+    "name": "Industrial Machinery & Equipment",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109371/b2b-bharat/banners/1789109364252_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "CNC lathes, high-precision hydraulic presses, industrial pumps, gearboxes, and automated manufacturing lines.",
+    "badge_text": "Factory Direct Sourcing",
+    "updated_at": "2026-09-11T06:49:35.481Z"
+  },
+  "apparel-garments": {
+    "name": "Apparel & Garments",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109470/b2b-bharat/banners/1789109467333_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Ready-made woven garments, knitwear, institutional uniforms, and textile manufacturing from Tirupur and Surat.",
+    "badge_text": "Export Quality Garments",
+    "updated_at": "2026-09-11T06:51:13.896Z"
+  },
+  "food-agriculture": {
+    "name": "Food & Agriculture",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109491/b2b-bharat/banners/1789109486433_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Certified APMC mandi grains, export-grade spices, organic pulses, fresh agro commodities, and cold-chain produce.",
+    "badge_text": "APMC & FSSAI Certified",
+    "updated_at": "2026-09-11T06:51:36.618Z"
+  },
+  "chemicals-dyes": {
+    "name": "Chemicals, Dyes & Solvents",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109601/b2b-bharat/banners/1789109597734_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Industrial solvents, organic chemical intermediates, reactive dyes, pigments, and bulk specialty formulations.",
+    "badge_text": "MSDS Verified Chemicals",
+    "updated_at": "2026-09-11T06:53:30.822Z"
+  },
+  "medical-healthcare": {
+    "name": "Medical & Healthcare",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109837/b2b-bharat/banners/1789109834088_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Hospital diagnostic equipment, sterile surgical consumables, PPE, monitoring devices, and pharmaceutical supplies.",
+    "badge_text": "CDSCO & CE Approved",
+    "updated_at": "2026-09-11T06:57:21.755Z"
+  },
+  "furniture-interiors": {
+    "name": "Furniture & Interior Products",
+    "hero_image_url": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1600",
+    "subtitle": "Modular commercial office furniture, solid wood fit-outs, acoustic interior panels, and luxury turnkey fittings.",
+    "badge_text": "Commercial Interiors"
+  },
+  "packaging-paper": {
+    "name": "Packaging Materials & Paper",
+    "hero_image_url": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600",
+    "subtitle": "Corrugated 3/5-ply shipping boxes, kraft liner paper, flexible barrier pouches, and biodegradable packaging solutions.",
+    "badge_text": "Bulk Packaging Supply"
+  },
+  "automobile-parts": {
+    "name": "Automobile Parts & Accessories",
+    "hero_image_url": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1600",
+    "subtitle": "Precision automotive forgings, friction brakes, transmission gears, EV battery packs, and commercial fleet spares.",
+    "badge_text": "IATF 16949 Verified"
+  },
+  "solar-renewable": {
+    "name": "Solar & Renewable Energy",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109944/b2b-bharat/banners/1789109938439_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Monocrystalline solar PV modules, grid-tie central inverters, lithium energy storage systems, and rooftop structures.",
+    "badge_text": "MNRE & ALMM Approved",
+    "updated_at": "2026-09-11T06:59:07.804Z"
+  },
+  "pipes-fittings": {
+    "name": "Pipes, Valves & Fittings",
+    "hero_image_url": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1600",
+    "subtitle": "Seamless carbon steel pipes, industrial ball & butterfly valves, ductile iron fittings, and HDPE conduits.",
+    "badge_text": "IBR & API Certified"
+  },
+  "safety-security": {
+    "name": "Safety & Security Equipment",
+    "hero_image_url": "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=1600",
+    "subtitle": "Industrial PPE safety shoes, fall protection harnesses, fire suppression hydrants, and IP surveillance cameras.",
+    "badge_text": "OSHA & EN Certified"
+  },
+  "textiles-fabrics": {
+    "name": "Textiles, Yarn & Fabrics",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110109/b2b-bharat/banners/1789110095103_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Combed cotton yarn, polyester textured filament, denim fabrics, jacquard weaves, and technical industrial textiles.",
+    "badge_text": "Textile Mill Direct",
+    "updated_at": "2026-09-11T07:01:52.505Z"
+  },
+  "pharma-drugs": {
+    "name": "Pharmaceutical & Drug Intermediates",
+    "hero_image_url": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=1600",
+    "subtitle": "Active pharmaceutical ingredients (APIs), excipients, sterile injectable vials, and regulatory drug intermediates.",
+    "badge_text": "WHO-GMP Compliant"
+  },
+  "rubber-products": {
+    "name": "Rubber & Rubber Products",
+    "hero_image_url": "https://images.unsplash.com/photo-1578844251758-2f71da64c96f?w=1600",
+    "subtitle": "High-tensile industrial conveyor belts, hydraulic hoses, Viton gaskets, automotive molded seals, and silicone sheets.",
+    "badge_text": "Industrial Rubber Line"
+  },
+  "plastic-products": {
+    "name": "Plastic Products & Moulding",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789111111/b2b-bharat/banners/1789111109252_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Custom plastic injection moulding, HDPE drums, polymer masterbatches, engineering granules, and acrylic sheets.",
+    "badge_text": "Polymer & Moulding Hub",
+    "updated_at": "2026-09-11T07:18:45.678Z"
+  },
+  "gems-jewellery": {
+    "name": "Gems, Jewellery & Precious Metals",
+    "hero_image_url": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1600",
+    "subtitle": "Hallmarked gold & silver bullion, certified loose diamonds, precision gemstones, and casting equipment.",
+    "badge_text": "BIS Hallmarked Sourcing"
+  },
+  "printing-stationery": {
+    "name": "Printing & Stationery",
+    "hero_image_url": "https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?w=1600",
+    "subtitle": "High-speed commercial offset printing, security stationery, coated art paper, and packaging print plates.",
+    "badge_text": "Commercial Press Direct"
+  },
+  "oil-gas": {
+    "name": "Oil, Gas & Petroleum Products",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110999/b2b-bharat/banners/1789110997138_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Refined industrial lubricants, bitumen VG-30/40, furnace oils, base oils, and refinery process hydrocarbons.",
+    "badge_text": "Petroleum Bulk Terminal",
+    "updated_at": "2026-09-11T07:16:42.151Z"
+  },
+  "metals-steel": {
+    "name": "Iron, Steel & Metal Products",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110529/b2b-bharat/banners/1789110522815_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Hot rolled coils, cold rolled sheets, stainless steel 304/316 tubes, aluminum ingots, and brass billets.",
+    "badge_text": "Primary Steel Mills",
+    "updated_at": "2026-09-11T07:09:00.137Z"
+  },
+  "water-treatment": {
+    "name": "Water Treatment & Purification",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110866/b2b-bharat/banners/1789110861226_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Industrial reverse osmosis (RO) plants, ultrafiltration membranes, effluent treatment chemicals, and dosing pumps.",
+    "badge_text": "Zero Liquid Discharge",
+    "updated_at": "2026-09-11T07:14:30.518Z"
+  },
+  "hvac-refrigeration": {
+    "name": "HVAC & Refrigeration",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110341/b2b-bharat/banners/1789110338335_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Central air-cooled chillers, cold storage refrigeration compressors, ducting ventilation, and cooling towers.",
+    "badge_text": "Cold Chain & Climate",
+    "updated_at": "2026-09-11T07:05:46.691Z"
+  },
+  "lab-instruments": {
+    "name": "Laboratory & Scientific Instruments",
+    "hero_image_url": "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1600",
+    "subtitle": "Spectrophotometers, analytical laboratory balances, autoclaves, laminar flow hoods, and glassware.",
+    "badge_text": "NABL Calibrated Instruments"
+  },
+  "leather-products": {
+    "name": "Leather Products & Accessories",
+    "hero_image_url": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1600",
+    "subtitle": "Finished full-grain tanned leather hides, industrial safety gloves, footwear components, and leather goods.",
+    "badge_text": "Tannery Direct Supply"
+  },
+  "sports-fitness": {
+    "name": "Sports, Fitness & Outdoor",
+    "hero_image_url": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=1600",
+    "subtitle": "Commercial gym fitness equipment, synthetic turf flooring, tournament balls, and outdoor athletic gear.",
+    "badge_text": "Institutional Sports Hub"
+  },
+  "gifts-handicrafts": {
+    "name": "Gift Articles & Handicrafts",
+    "hero_image_url": "https://images.unsplash.com/photo-1606744824163-985d376605aa?w=1600",
+    "subtitle": "Handmade brass artware, Moradabad metal crafts, corporate executive gifts, and artisan home decor.",
+    "badge_text": "Indian Artisan Handicrafts"
+  },
+  "telecom-equipment": {
+    "name": "Telecom & Communication Equipment",
+    "hero_image_url": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1600",
+    "subtitle": "Fiber optic cabling, 5G wireless base station transceivers, network routers, and telecom tower hardware.",
+    "badge_text": "TEC Certified Telecom"
+  },
+  "mining-minerals": {
+    "name": "Mining & Mineral Processing",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110230/b2b-bharat/banners/1789110225059_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Industrial quartz silica, limestone powder, bentonite clay, bauxite, and heavy crushing jaw equipment.",
+    "badge_text": "Minehead Direct Supply",
+    "updated_at": "2026-09-11T07:03:55.464Z"
+  },
+  "timber-wood": {
+    "name": "Timber, Plywood & Wood Products",
+    "hero_image_url": "https://images.unsplash.com/photo-1546484396-fb3fc6f95f98?w=1600",
+    "subtitle": "Marine grade BWR/BWP plywood, teak logs, MDF/HDF engineered boards, and structural timber framing.",
+    "badge_text": "FSC Certified Timber"
+  },
+  "power-generation": {
+    "name": "Power Generation & Transmission",
+    "hero_image_url": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1600",
+    "subtitle": "Silent diesel generator sets (DG sets), HT transmission porcelain insulators, step-down substations, and AVRs.",
+    "badge_text": "Heavy Power Infrastructure"
+  },
+  "ayurvedic-herbal": {
+    "name": "Ayurvedic & Herbal Products",
+    "hero_image_url": "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=1600",
+    "subtitle": "Standardized herbal extracts, raw botanical herbs, essential oils, and AYUSH certified contract formulations.",
+    "badge_text": "AYUSH Certified Herbs"
+  },
+  "glass-ceramics": {
+    "name": "Glass & Ceramics",
+    "hero_image_url": "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=1600",
+    "subtitle": "Architectural toughened glass, vitrified ceramic floor tiles, laboratory silica glassware, and refractory ceramics.",
+    "badge_text": "Morbi Ceramic Cluster"
+  },
+  "logistics-handling": {
+    "name": "Logistics & Material Handling",
+    "hero_image_url": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600",
+    "subtitle": "Hydraulic pallet trucks, electric stackers, industrial dock levelers, heavy warehouse racking, and conveyors.",
+    "badge_text": "Material Handling Line"
+  },
+  "marine-ship": {
+    "name": "Marine & Ship Equipment",
+    "hero_image_url": "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=1600",
+    "subtitle": "Marine diesel engine propulsion spares, anchor chains, navigational radars, life rafts, and deck winches.",
+    "badge_text": "IMO & SOLAS Certified"
+  },
+  "waste-recycling": {
+    "name": "Waste Management & Recycling",
+    "hero_image_url": "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=1600",
+    "subtitle": "High-speed scrap metal balers, PET bottle recycling shredders, municipal composters, and incinerators.",
+    "badge_text": "CPCB Compliant Recycling"
+  },
+  "cosmetics-personal": {
+    "name": "Cosmetics & Personal Care",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110670/b2b-bharat/banners/1789110667309_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Private label cosmetic formulation bases, organic carrier oils, cosmetic containers, and personal care active ingredients.",
+    "badge_text": "GMP Certified Personal Care",
+    "updated_at": "2026-09-11T07:11:15.144Z"
+  },
+  "education-training": {
+    "name": "Education & Training Supplies",
+    "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110773/b2b-bharat/banners/1789110769769_ChatGPT_Image_Sep_11__2026__12.jpg",
+    "subtitle": "Interactive smart boards, institutional classroom furniture, STEM vocational laboratory trainers, and school kits.",
+    "badge_text": "Institutional Education Line",
+    "updated_at": "2026-09-11T07:12:56.747Z"
+  }
+}

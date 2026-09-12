@@ -1,0 +1,662 @@
+[
+  {
+    "id": "log-1789214835670-gqbo",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-09-12T12:07:15.670Z"
+  },
+  {
+    "id": "log-1789211595623-x7pr",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-09-12T11:13:15.623Z"
+  },
+  {
+    "id": "log-1789211398661-u6q3",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-09-12T11:09:58.661Z"
+  },
+  {
+    "id": "log-1789111126513-r2n4",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for plastic-products",
+    "metadata": {
+      "slug": "plastic-products",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789111111/b2b-bharat/banners/1789111109252_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:18:46.513Z"
+  },
+  {
+    "id": "log-1789111002302-9ep2",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for oil-gas",
+    "metadata": {
+      "slug": "oil-gas",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110999/b2b-bharat/banners/1789110997138_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:16:42.302Z"
+  },
+  {
+    "id": "log-1789110991274-lsq3",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for oil-gas",
+    "metadata": {
+      "slug": "oil-gas",
+      "hero_image_url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1600"
+    },
+    "created_at": "2026-09-11T07:16:31.274Z"
+  },
+  {
+    "id": "log-1789110870874-qls3",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for water-treatment",
+    "metadata": {
+      "slug": "water-treatment",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110866/b2b-bharat/banners/1789110861226_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:14:30.874Z"
+  },
+  {
+    "id": "log-1789110777018-fcxl",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for education-training",
+    "metadata": {
+      "slug": "education-training",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110773/b2b-bharat/banners/1789110769769_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:12:57.018Z"
+  },
+  {
+    "id": "log-1789110675850-42ge",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for cosmetics-personal",
+    "metadata": {
+      "slug": "cosmetics-personal",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110670/b2b-bharat/banners/1789110667309_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:11:15.850Z"
+  },
+  {
+    "id": "log-1789110540463-zs7q",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for metals-steel",
+    "metadata": {
+      "slug": "metals-steel",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110529/b2b-bharat/banners/1789110522815_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:09:00.463Z"
+  },
+  {
+    "id": "log-1789110346951-0jmw",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for hvac-refrigeration",
+    "metadata": {
+      "slug": "hvac-refrigeration",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110341/b2b-bharat/banners/1789110338335_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:05:46.951Z"
+  },
+  {
+    "id": "log-1789110235953-p399",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for mining-minerals",
+    "metadata": {
+      "slug": "mining-minerals",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110230/b2b-bharat/banners/1789110225059_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:03:55.953Z"
+  },
+  {
+    "id": "log-1789110112911-0ia4",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for textiles-fabrics",
+    "metadata": {
+      "slug": "textiles-fabrics",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789110109/b2b-bharat/banners/1789110095103_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T07:01:52.911Z"
+  },
+  {
+    "id": "log-1789109948313-aonq",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for solar-renewable",
+    "metadata": {
+      "slug": "solar-renewable",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109944/b2b-bharat/banners/1789109938439_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T06:59:08.313Z"
+  },
+  {
+    "id": "log-1789109841807-rprb",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for medical-healthcare",
+    "metadata": {
+      "slug": "medical-healthcare",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109837/b2b-bharat/banners/1789109834088_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T06:57:21.807Z"
+  },
+  {
+    "id": "log-1789109610999-krj1",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for chemicals-dyes",
+    "metadata": {
+      "slug": "chemicals-dyes",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109601/b2b-bharat/banners/1789109597734_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T06:53:30.999Z"
+  },
+  {
+    "id": "log-1789109496864-n8bx",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for food-agriculture",
+    "metadata": {
+      "slug": "food-agriculture",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109491/b2b-bharat/banners/1789109486433_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T06:51:36.864Z"
+  },
+  {
+    "id": "log-1789109474395-quhg",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for apparel-garments",
+    "metadata": {
+      "slug": "apparel-garments",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109470/b2b-bharat/banners/1789109467333_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T06:51:14.395Z"
+  },
+  {
+    "id": "log-1789109375850-dmkz",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for industrial-machinery",
+    "metadata": {
+      "slug": "industrial-machinery",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109371/b2b-bharat/banners/1789109364252_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T06:49:35.850Z"
+  },
+  {
+    "id": "log-1789109281867-ee8v",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for electronics-electrical",
+    "metadata": {
+      "slug": "electronics-electrical",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109266/b2b-bharat/banners/1789109262454_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T06:48:01.867Z"
+  },
+  {
+    "id": "log-1789109208112-5b47",
+    "level": "INFO",
+    "service": "cms_sector_banners",
+    "message": "Updated category banner for building-construction",
+    "metadata": {
+      "slug": "building-construction",
+      "hero_image_url": "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789109205/b2b-bharat/banners/1789109201221_ChatGPT_Image_Sep_11__2026__12.jpg"
+    },
+    "created_at": "2026-09-11T06:46:48.112Z"
+  },
+  {
+    "id": "log-1789108720453-ta29",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: Heavy Industrial & Raw Materials Exchange",
+    "metadata": {
+      "bannerId": "banner-3"
+    },
+    "created_at": "2026-09-11T06:38:40.453Z"
+  },
+  {
+    "id": "log-1789108591554-k52l",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: APMC Mandi Direct Agro & Spice Sourcing",
+    "metadata": {
+      "bannerId": "banner-2"
+    },
+    "created_at": "2026-09-11T06:36:31.554Z"
+  },
+  {
+    "id": "log-1789108430536-0dei",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: Heavy Industrial & Raw Materials Exchange",
+    "metadata": {
+      "bannerId": "banner-3"
+    },
+    "created_at": "2026-09-11T06:33:50.536Z"
+  },
+  {
+    "id": "log-1789108424690-id9i",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: India’s Verified B2B Wholesale Marketplace",
+    "metadata": {
+      "bannerId": "banner-1"
+    },
+    "created_at": "2026-09-11T06:33:44.690Z"
+  },
+  {
+    "id": "log-1789108250634-ffcu",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: India’s Verified B2B Wholesale Marketplace",
+    "metadata": {
+      "bannerId": "banner-1"
+    },
+    "created_at": "2026-09-11T06:30:50.634Z"
+  },
+  {
+    "id": "log-1789108131816-rwot",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: Heavy Industrial & Raw Materials Exchange",
+    "metadata": {
+      "bannerId": "banner-3"
+    },
+    "created_at": "2026-09-11T06:28:51.816Z"
+  },
+  {
+    "id": "log-1789107945502-9b8q",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: APMC Mandi Direct Agro & Spice Sourcing",
+    "metadata": {
+      "bannerId": "banner-2"
+    },
+    "created_at": "2026-09-11T06:25:45.502Z"
+  },
+  {
+    "id": "log-1789062806590-kuuj",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: APMC Mandi Direct Agro & Spice Sourcing",
+    "metadata": {
+      "bannerId": "banner-2"
+    },
+    "created_at": "2026-09-10T17:53:26.590Z"
+  },
+  {
+    "id": "log-1788246352267-p0u4",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: Heavy Industrial & Raw Materials Exchange",
+    "metadata": {
+      "bannerId": "banner-3"
+    },
+    "created_at": "2026-09-01T07:05:52.267Z"
+  },
+  {
+    "id": "log-1788169656898-n7vo",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-31T09:47:36.898Z"
+  },
+  {
+    "id": "log-1788106064418-xcob",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-30T16:07:44.419Z"
+  },
+  {
+    "id": "log-1788104270998-wo7v",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: APMC Mandi Direct Agro & Spice Sourcing",
+    "metadata": {
+      "bannerId": "banner-2"
+    },
+    "created_at": "2026-08-30T15:37:50.998Z"
+  },
+  {
+    "id": "log-1788104268557-gwvn",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: APMC Mandi Direct Agro & Spice Sourcing",
+    "metadata": {
+      "bannerId": "banner-2"
+    },
+    "created_at": "2026-08-30T15:37:48.557Z"
+  },
+  {
+    "id": "log-1788103888837-ht1x",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-30T15:31:28.837Z"
+  },
+  {
+    "id": "log-1788103871727-a2g2",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-30T15:31:11.727Z"
+  },
+  {
+    "id": "log-1788103799707-ldtm",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-30T15:29:59.707Z"
+  },
+  {
+    "id": "log-1788033396284-6qrw",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-29T19:56:36.284Z"
+  },
+  {
+    "id": "log-1788032413453-kgti",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: Heavy Industrial & Raw Materials Exchange",
+    "metadata": {
+      "bannerId": "banner-3"
+    },
+    "created_at": "2026-08-29T19:40:13.454Z"
+  },
+  {
+    "id": "log-1788032347527-8vwe",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: APMC Mandi Direct Agro & Spice Sourcing",
+    "metadata": {
+      "bannerId": "banner-2"
+    },
+    "created_at": "2026-08-29T19:39:07.527Z"
+  },
+  {
+    "id": "log-1787941826542-tafl",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: Heavy Industrial & Raw Materials Exchange",
+    "metadata": {
+      "bannerId": "banner-3"
+    },
+    "created_at": "2026-08-28T18:30:26.542Z"
+  },
+  {
+    "id": "log-1787941776021-15vk",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-28T18:29:36.021Z"
+  },
+  {
+    "id": "log-1787941755288-zh79",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-28T18:29:15.288Z"
+  },
+  {
+    "id": "log-1787941723101-01ho",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-28T18:28:43.101Z"
+  },
+  {
+    "id": "log-1787941703747-sc8a",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-28T18:28:23.747Z"
+  },
+  {
+    "id": "log-1787941665218-dhp2",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-08-28T18:27:45.219Z"
+  }
+]

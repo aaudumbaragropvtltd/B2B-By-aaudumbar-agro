@@ -1,108 +1,230 @@
+// ============================================================================
+// RAZORPAY WEBHOOK HANDLER
+// ============================================================================
+// Handles Razorpay webhook events as a server-side fallback.
+// Verifies webhook signature and processes payment events.
+//
+// Configure in Razorpay Dashboard:
+//   URL: https://your-domain.com/api/webhook/payment
+//   Secret: RAZORPAY_WEBHOOK_SECRET env var
+//   Events: payment.captured, payment.failed, order.paid
+// ============================================================================
+
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'mock-key';
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+import { verifyWebhookSignature } from '@/services/razorpay';
+import { notifyPayment } from '@/services/notificationService';
 
 export async function POST(request) {
   try {
-    const { orderId, transactionSignature, amountPaid, paymentStage, physicalArrivalDate } = await request.json();
+    // 1. Read raw body for signature verification
+    const rawBody = await request.text();
+    const signature = request.headers.get('x-razorpay-signature');
 
-    // 1. Structural Payload Validation
-    if (!orderId || !transactionSignature || !amountPaid || !paymentStage) {
-      return NextResponse.json({ error: "Malformed payment clearance telemetry payload." }, { status: 400 });
+    // 2. Verify webhook signature
+    if (signature && !verifyWebhookSignature(rawBody, signature)) {
+      console.error('Webhook signature verification failed');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // 2. Fetch target contract state with associated product metrics
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from('trade_orders')
-      .select('*, products(name, base_price_per_kg)')
-      .eq('id', orderId)
-      .single();
+    const event = JSON.parse(rawBody);
+    const eventType = event.event;
 
-    if (orderError || !order) {
-      return NextResponse.json({ error: "Target contract trace not found in database records." }, { status: 404 });
-    }
+    console.log(`[Webhook] Received event: ${eventType}`);
 
-    // 3. Stage 1: Processing the 10% Price Lock Advance Payment
-    if (paymentStage === 'ADVANCE_10') {
-      const expectedAdvance = Number(order.total_cost) * 0.10;
-      
-      // Allow a tiny margin for float point variations
-      if (Math.abs(amountPaid - expectedAdvance) > 1.0) {
-        return NextResponse.json({ error: "Advance value mismatch. Escrow verification denied." }, { status: 422 });
+    // 3. Initialize Supabase admin client
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || 'mock-key'
+    );
+
+    // 4. Handle payment.captured — payment was successful
+    if (eventType === 'payment.captured') {
+      const payment = event.payload?.payment?.entity;
+      if (!payment) return NextResponse.json({ status: 'ignored', reason: 'no payment entity' });
+
+      const orderId = payment.notes?.order_id;
+      const paymentType = payment.notes?.payment_type;
+
+      if (!orderId) {
+        console.log('[Webhook] No order_id in payment notes. Ignoring.');
+        return NextResponse.json({ status: 'ignored', reason: 'no order_id' });
       }
 
-      const { error: updateError } = await supabaseAdmin
+      // Fetch the order
+      const { data: order } = await supabaseAdmin
         .from('trade_orders')
-        .update({ stage: 'price_locked', metadata: { advance_tx: transactionSignature } })
-        .eq('id', orderId);
+        .select('*')
+        .eq('id', orderId)
+        .single();
 
-      if (updateError) throw updateError;
+      if (!order) {
+        console.log(`[Webhook] Order ${orderId} not found`);
+        return NextResponse.json({ status: 'ignored', reason: 'order not found' });
+      }
 
-      return NextResponse.json({ success: true, nextRequiredStage: "LOADING_90" });
+      // Handle 10% advance payment
+      if (paymentType === 'advance_10_percent' && order.current_state === 'quotation_issued') {
+        await supabaseAdmin
+          .from('trade_orders')
+          .update({
+            current_state: 'price_locked_10',
+            razorpay_payment_id_advance: payment.id,
+            qr_payment_reference: `RZP-${payment.id}`,
+          })
+          .eq('id', orderId);
+
+        // Record ledger entry
+        await supabaseAdmin.from('platform_ledger').insert({
+          order_id: orderId,
+          entry_type: 'advance_10_percent',
+          amount: payment.amount / 100, // Razorpay sends amount in paise
+          from_entity_id: order.buyer_id,
+          to_entity_id: null,
+          payment_reference: payment.id,
+          description: `10% advance (webhook). Razorpay: ${payment.id}`,
+        });
+
+        // Timeline entry
+        await supabaseAdmin.from('order_timeline').insert({
+          order_id: orderId,
+          from_state: 'quotation_issued',
+          to_state: 'price_locked_10',
+          action: 'pay_advance_webhook',
+          notes: `Advance payment confirmed via webhook. Amount: ₹${payment.amount / 100}`,
+          metadata: { razorpay_payment_id: payment.id },
+        });
+
+        // Notify
+        await notifyPayment(supabaseAdmin, {
+          userId: order.buyer_id,
+          type: 'advance_10',
+          orderId,
+          amount: payment.amount / 100,
+          success: true,
+        });
+
+        // Record in payments table
+        await supabaseAdmin.from('payments').insert({
+          user_id: order.buyer_id,
+          order_id: orderId,
+          amount: payment.amount / 100,
+          currency: payment.currency || 'INR',
+          payment_method: payment.method || 'Razorpay',
+          status: 'successful',
+          transaction_reference: payment.id,
+          payment_type: paymentType || 'advance_10_percent',
+          notes: `Confirmed via Webhook (Payment ID: ${payment.id})`
+        });
+
+        console.log(`[Webhook] Order ${orderId} advanced to price_locked_10`);
+      }
+
+      return NextResponse.json({ status: 'processed', orderId, paymentType });
     }
 
-    // 4. Stage 2: Final Warehouse QR Loading Code Verification (Remaining 90%)
-    if (paymentStage === 'FINAL_90') {
-      if (order.stage !== 'price_locked') {
-        return NextResponse.json({ error: "Order must be in locked stage for warehouse settlement." }, { status: 400 });
-      }
+    // 5. Handle payment.failed
+    if (eventType === 'payment.failed') {
+      const payment = event.payload?.payment?.entity;
+      const orderId = payment?.notes?.order_id;
+      const failureReason = payment?.error_description || payment?.error_reason || 'Transaction declined by bank/gateway';
+      const errorCode = payment?.error_code || 'GATEWAY_ERROR';
 
-      // Check for Early Arrival Hospitality Perk (Exactly 1 day before loading window)
-      let accommodationVoucherIssued = false;
-      if (physicalArrivalDate && order.scheduled_loading_date) {
-        const arrival = new Date(physicalArrivalDate);
-        const scheduled = new Date(order.scheduled_loading_date);
-        
-        const timeDifference = scheduled.getTime() - arrival.getTime();
-        const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+      if (orderId) {
+        // Fetch order
+        const { data: order } = await supabaseAdmin
+          .from('trade_orders')
+          .select('buyer_id, current_state')
+          .eq('id', orderId)
+          .single();
 
-        if (daysDifference === 1) {
-          accommodationVoucherIssued = true;
+        const buyerId = order?.buyer_id || null;
+
+        // 1. Mark order as cancelled in trade_orders
+        await supabaseAdmin
+          .from('trade_orders')
+          .update({
+            current_state: 'cancelled',
+            notes: `Payment Failed: ${failureReason} (Code: ${errorCode})`,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId);
+
+        // 2. Timeline entry
+        try {
+          await supabaseAdmin.from('order_timeline').insert({
+            order_id: orderId,
+            from_state: order?.current_state || 'quotation_issued',
+            to_state: 'cancelled',
+            action: 'payment_failed_webhook',
+            notes: `Payment failed on gateway: ${failureReason}`,
+            metadata: { razorpay_payment_id: payment?.id, error_code: errorCode },
+          });
+        } catch (tErr) {}
+
+        // 3. Update local store
+        try {
+          const { updateOrder } = require('@/services/ordersStore');
+          updateOrder(orderId, {
+            order_status: 'cancelled',
+            payment_status: 'payment_failed',
+            delivery_status: 'cancelled',
+            notes: `Payment Failed: ${failureReason}`,
+            updated_at: new Date().toISOString(),
+          });
+        } catch (sErr) {}
+
+        if (buyerId) {
+          await notifyPayment(supabaseAdmin, {
+            userId: buyerId,
+            type: payment?.notes?.payment_type || 'unknown',
+            orderId,
+            amount: (payment?.amount || 0) / 100,
+            success: false,
+          });
         }
+
+        // Record failed payment in payments table
+        await supabaseAdmin.from('payments').insert({
+          user_id: buyerId,
+          order_id: orderId,
+          amount: (payment?.amount || 0) / 100,
+          currency: payment?.currency || 'INR',
+          payment_method: payment?.method || 'Razorpay',
+          status: 'failed',
+          transaction_reference: payment?.id || `FAIL-${Date.now()}`,
+          payment_type: payment?.notes?.payment_type || 'advance_10_percent',
+          failure_reason: failureReason,
+          notes: `Failed via Webhook: ${errorCode} - ${failureReason}`
+        });
+
+        // Activity log
+        await supabaseAdmin.from('activity_logs').insert({
+          action: 'payment_failed_webhook',
+          details: {
+            order_id: orderId,
+            razorpay_payment_id: payment?.id,
+            error: failureReason,
+            code: errorCode,
+          },
+        });
+
+        console.log(`[Webhook] Order ${orderId} marked as cancelled due to payment failure`);
       }
 
-      // Compute Platform Fee Split Rules (Fixed ₹2 per kilogram structural platform fee)
-      const platformFee = Number(order.quantity_kg) * 2.00;
-      const supplierPayout = Number(amountPaid) - platformFee;
-
-      // Ensure ledger math is balanced before committing
-      if (supplierPayout <= 0) {
-        return NextResponse.json({ error: "Invalid financial allocation breakdown." }, { status: 400 });
-      }
-
-      // 5. Atomic Update Execution via Supabase Relational Client
-      const { error: ledgerError } = await supabaseAdmin.rpc('execute_order_settlement', {
-        p_order_id: orderId,
-        p_gross: amountPaid,
-        p_fee: platformFee,
-        p_payout: supplierPayout,
-        p_accommodation: accommodationVoucherIssued,
-        p_signature: transactionSignature
-      });
-
-      if (ledgerError) throw ledgerError;
-
-      return NextResponse.json({
-        success: true,
-        finalStage: "settled",
-        accommodationVoucherIssued,
-        invoiceManifest: {
-          grossCollected: amountPaid,
-          platformCut: platformFee,
-          supplierNet: supplierPayout,
-          hospitalityCovered: accommodationVoucherIssued
-        }
-      });
+      return NextResponse.json({ status: 'processed', event: 'payment.failed', orderId });
     }
 
-    return NextResponse.json({ error: "Unrecognized settlement phase target." }, { status: 400 });
+    // 6. Unhandled event type
+    console.log(`[Webhook] Unhandled event type: ${eventType}`);
+    return NextResponse.json({ status: 'ignored', event: eventType });
 
   } catch (error) {
-    console.error("Critical Escrow System Execution Exception:", error);
-    return NextResponse.json({ error: "Internal processing loop timeout failure.", details: error.message }, { status: 500 });
+    console.error('Webhook processing error:', error);
+    return NextResponse.json(
+      { error: 'Webhook processing failed', details: error.message },
+      { status: 500 }
+    );
   }
 }
+

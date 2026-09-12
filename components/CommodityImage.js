@@ -37,7 +37,7 @@ export default function CommodityImage({ src, category, className = "aspect-vide
     return (
       <div className={`${className} bg-gradient-to-br ${currentTheme} flex flex-col items-center justify-center relative overflow-hidden border border-white/5 shadow-inner p-4 text-center`}>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:16px_16px]" />
-        <span className="text-xs font-mono tracking-widest uppercase opacity-60 mb-2 relative z-10">B2B Bharat Verified</span>
+        <span className="text-xs font-mono tracking-widest uppercase opacity-60 mb-2 relative z-10">B2B India Verified</span>
         <span className="text-sm font-bold tracking-wide truncate max-w-full relative z-10">{category || "Bulk Commodity"}</span>
       </div>
     );

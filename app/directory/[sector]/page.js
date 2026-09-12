@@ -1,8 +1,8 @@
 // ============================================================================
-// SECTOR-SPECIFIC DIRECTORY PAGE
+// SECTOR-SPECIFIC DIRECTORY PAGE — PROGRAMMATIC B2B SEO
 // ============================================================================
-// Dynamic route showing products for a specific industry sector.
-// Features sector hero image, supplier cards, and product listings.
+// Dynamic route for all 38 industry sectors in India.
+// Injects Schema.org CollectionPage, ItemList, Breadcrumbs & Sector FAQs.
 // ============================================================================
 
 import React from 'react';
@@ -10,186 +10,274 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CommodityImage from '@/components/CommodityImage';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import FavoriteButton from '@/components/FavoriteButton';
+import { STATIC_SECTORS } from '@/constants/sectors';
+import { getAllProducts, getProductUrl } from '@/utils/catalogResolver';
+import { getSectorBanner } from '@/utils/platformBanners';
+import {
+  generateSectorMetadata,
+  generateSectorJsonLd,
+  generateBreadcrumbJsonLd,
+  generateFaqJsonLd,
+  formatInrPrice,
+  SITE_URL,
+} from '@/utils/seoUtils';
 
-// ── Static product data (used when Supabase not configured) ──
-const STATIC_PRODUCTS = {
-  'agriculture': [
-    { id: 'p1', title: 'Drip Irrigation System Kit (1 Hectare)', base_price_per_unit: 45000, unit_label: 'kit', quality_grade: 'Premium', supplier: 'Jain Irrigation Systems Ltd', city: 'Jalgaon, MH', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1592982537447-6f2a6a0c8b39?w=600' },
-    { id: 'p2', title: 'Agricultural Submersible Pumping Kit (5HP)', base_price_per_unit: 38500, unit_label: 'unit', quality_grade: 'Industrial', supplier: 'Jain Irrigation Systems Ltd', city: 'Jalgaon, MH', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600' },
-    { id: 'p3', title: 'High-Yield Hybrid Tomato Seeds (Arka Rakshak)', base_price_per_unit: 1200, unit_label: 'packet', quality_grade: 'Premium', supplier: 'Jain Irrigation Systems Ltd', city: 'Jalgaon, MH', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1592921870789-04563d55041c?w=600' },
-  ],
-  'apparel-fashion': [
-    { id: 'p4', title: 'Premium Selvedge Denim Fabric (12oz Indigo)', base_price_per_unit: 850, unit_label: 'meter', quality_grade: 'Premium', supplier: 'Arvind Mills Ltd', city: 'Ahmedabad, GJ', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1565084888279-aca607ecce0c?w=600' },
-    { id: 'p5', title: 'Combed Cotton Yarn (40s Count, Ring Spun)', base_price_per_unit: 285, unit_label: 'kg', quality_grade: 'A', supplier: 'Arvind Mills Ltd', city: 'Ahmedabad, GJ', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=600' },
-    { id: 'p6', title: 'Handloom Khadi Fabric (Muslin Grade)', base_price_per_unit: 420, unit_label: 'meter', quality_grade: 'Premium', supplier: 'Arvind Mills Ltd', city: 'Ahmedabad, GJ', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600' },
-  ],
-  'automobile-ev': [
-    { id: 'p7', title: 'High-Tensile Hex Bolt Set (Grade 10.9, M10)', base_price_per_unit: 145, unit_label: 'kg', quality_grade: 'Automotive OEM', supplier: 'Sundram Fasteners Ltd', city: 'Chennai, TN', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600' },
-    { id: 'p8', title: 'BLDC Motor Controller Kit (48V/72V, 3KW)', base_price_per_unit: 8500, unit_label: 'unit', quality_grade: 'Premium', supplier: 'Sundram Fasteners Ltd', city: 'Chennai, TN', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=600' },
-    { id: 'p9', title: 'Disc Brake Assembly (Ventilated, 280mm)', base_price_per_unit: 3200, unit_label: 'set', quality_grade: 'OEM Replacement', supplier: 'Sundram Fasteners Ltd', city: 'Chennai, TN', is_stale: false, hero_image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600' },
-  ],
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-const SECTOR_META = {
-  'agriculture': { name: 'Agricultural Products, Equipment & Machines', hero: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1600' },
-  'apparel-fashion': { name: 'Apparel & Fashion Accessories', hero: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600' },
-  'automobile-ev': { name: 'Automobile Parts, Accessories & EV Kits', hero: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1600' },
-  'ayurvedic-herbal': { name: 'Ayurvedic, Herbal Products & Natural Extracts', hero: 'https://images.unsplash.com/photo-1611241893603-3c359704e0ee?w=1600' },
-  'chemicals-polymers': { name: 'Chemical, Dyes, Pigments & Plastic Raw Material', hero: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=1600' },
-  'it-hardware': { name: 'Computer Hardware, Peripherals & IT Solutions', hero: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600' },
-  'electronics-electrical': { name: 'Electronics & Electrical Equipment', hero: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=1600' },
-  'food-beverage': { name: 'Food & Beverage Products', hero: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=1600' },
-  'medical-surgical': { name: 'Hospital, Medical Imaging & Surgical Supplies', hero: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1600' },
-  'industrial-cnc': { name: 'Industrial Machinery, Plant Equipment & CNC Systems', hero: 'https://images.unsplash.com/photo-1565043666747-69f6646db940?w=1600' },
-};
+async function getSectorInfo(slug) {
+  const dynamicBanner = await getSectorBanner(slug);
+  const found = STATIC_SECTORS.find((s) => s.slug === slug || s.slug.replace(/-/g, '_') === slug);
+  const cleanName = found?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+  return {
+    name: dynamicBanner?.name || cleanName,
+    slug: slug,
+    hero_image_url: dynamicBanner?.hero_image_url || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1600',
+    subtitle: dynamicBanner?.subtitle || 'Source verified bulk supplies directly from Indian manufacturers with escrow protection, factory pricing, and pan-India logistics.',
+    badge_text: dynamicBanner?.badge_text || 'Verified Wholesale Sourcing',
+  };
+}
 
 export async function generateMetadata({ params }) {
   const { sector } = await params;
-  const meta = SECTOR_META[sector];
-  return {
-    title: `${meta?.name || 'Sector'} — B2B Bharat Trade Directory`,
-    description: `Browse verified suppliers and products in ${meta?.name || 'this sector'}. GST-verified, escrow-protected B2B sourcing.`,
-  };
+  const sectorInfo = await getSectorInfo(sector);
+  return generateSectorMetadata(sectorInfo);
 }
 
 export default async function SectorPage({ params }) {
   const { sector } = await params;
-  const meta = SECTOR_META[sector] || { name: sector, hero: null };
-  let products = STATIC_PRODUCTS[sector] || [];
+  const sectorInfo = await getSectorInfo(sector);
 
-  // Attempt Supabase fetch
-  try {
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      const { createAdminClient } = await import('@/services/supabaseServer');
-      const supabase = createAdminClient();
+  // Fetch all products matching this sector
+  const allProducts = await getAllProducts();
+  const products = allProducts.filter((p) => {
+    const slug = p.sector_id?.slug || p.category || '';
+    return (
+      slug === sector ||
+      slug.includes(sector) ||
+      sector.includes(slug) ||
+      (sector === 'agriculture' && slug === 'food-agriculture') ||
+      (sector === 'food-agriculture' && slug === 'agriculture') ||
+      (sector === 'automobile-ev' && slug === 'automobile-parts') ||
+      (sector === 'automobile-parts' && slug === 'automobile-ev') ||
+      (sector === 'apparel-fashion' && slug === 'apparel-garments') ||
+      (sector === 'apparel-garments' && slug === 'apparel-fashion')
+    );
+  });
 
-      const { data: sectorData } = await supabase
-        .from('industry_sectors')
-        .select('id, name')
-        .eq('slug', sector)
-        .single();
+  // Schema.org Structured Data
+  const sectorJsonLd = generateSectorJsonLd(sectorInfo, products);
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: 'Directory', url: '/directory' },
+    { name: sectorInfo.name, url: `/directory/${sectorInfo.slug}` },
+  ]);
 
-      if (sectorData) {
-        const { data: productData } = await supabase
-          .from('products')
-          .select('id, title, base_price_per_unit, unit_label, quality_grade, hero_image_url, is_stale, supplier_id(company_name, city)')
-          .eq('sector_id', sectorData.id)
-          .eq('is_active', true)
-          .order('last_price_update', { ascending: false });
-
-        if (productData && productData.length > 0) {
-          products = productData.map((p) => ({
-            ...p,
-            supplier: p.supplier_id?.company_name || 'Unknown',
-            city: p.supplier_id?.city || '',
-          }));
-        }
-      }
-    }
-  } catch (e) {
-    // Use static data
-  }
+  const sectorFaqs = [
+    {
+      question: `How to buy wholesale ${sectorInfo.name} in bulk on B2B India?`,
+      answer: `You can browse verified Indian manufacturers and distributors in ${sectorInfo.name}, compare real-time wholesale price quotes, check Minimum Order Quantities (MOQ), and initiate direct RFQs or escrow-secured orders with full GST invoices.`,
+    },
+    {
+      question: `Are suppliers in ${sectorInfo.name} GST verified and certified?`,
+      answer: `Yes, all suppliers on B2B India undergo strict business credential verification including active GSTIN registration, manufacturing unit verification, and relevant industry certifications (ISO, BIS, CE, FSSAI).`,
+    },
+    {
+      question: `What payment protection is provided for bulk orders in ${sectorInfo.name}?`,
+      answer: `B2B India provides an automated Escrow Clearing mechanism. Funds are held safely in escrow and only released to the supplier once you receive and verify the goods at your warehouse.`,
+    },
+  ];
+  const faqJsonLd = generateFaqJsonLd(sectorFaqs);
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(sectorJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+
       <Navbar />
-      <main className="flex-1">
-        {/* Hero Banner */}
+
+      <main className="flex-1 bg-gray-50 min-h-screen">
+        {/* Sector Hero Banner */}
         <div className="relative h-64 sm:h-80 overflow-hidden">
           <CommodityImage
-            src={meta.hero}
-            category={meta.name}
-            className="w-full h-full"
+            src={sectorInfo.hero_image_url}
+            category={sectorInfo.name}
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
           <div className="absolute bottom-8 left-0 right-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-2 mb-3">
-              <Link href="/directory" className="text-white/60 text-sm hover:text-white transition-colors">
-                Directory
-              </Link>
-              <span className="text-white/30">/</span>
-              <span className="text-white text-sm font-medium">{meta.name}</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white drop-shadow-lg">
-              {meta.name}
+            <Breadcrumbs
+              variant="transparent"
+              items={[
+                { label: 'Home', href: '/' },
+                { label: 'Directory', href: '/directory' },
+                { label: sectorInfo.name }
+              ]}
+              className="mb-3"
+            />
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-md">
+              {sectorInfo.name}
             </h1>
-            <p className="text-white/60 mt-2">
-              {products.length} products from verified suppliers
+            <p className="text-white/85 mt-2 text-sm sm:text-base max-w-3xl leading-relaxed">
+              {sectorInfo.subtitle}
             </p>
           </div>
         </div>
 
-        {/* Products Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Product Catalog Grid */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Verified Products & Suppliers ({products.length})
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Real-time wholesale base prices with instant quotation & RFQ support
+              </p>
+            </div>
+            <Link
+              href="/directory"
+              className="text-sm font-semibold text-brand-600 hover:text-brand-700 self-start sm:self-auto flex items-center gap-1"
+            >
+              ← Explore All 38 Sectors
+            </Link>
+          </div>
+
           {products.length === 0 ? (
-            <div className="text-center py-20">
+            <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
               <span className="text-5xl mb-4 block">📦</span>
-              <h3 className="text-xl font-bold text-foreground mb-2">No products listed yet</h3>
-              <p className="text-gray-500">Suppliers in this sector will be onboarded soon.</p>
-              <Link href="/directory" className="inline-block mt-6 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 transition-colors">
-                ← Back to Directory
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Products currently being onboarded for {sectorInfo.name}
+              </h3>
+              <p className="text-gray-500 max-w-md mx-auto mb-6 text-sm">
+                Verified suppliers in this category are being verified. Submit an RFQ to get immediate quotes from our supplier network.
+              </p>
+              <Link
+                href="/directory"
+                className="inline-block px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 transition-colors shadow"
+              >
+                Browse Full Catalog
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <Link
-                  key={product.id}
-                  href={`/directory/product/${product.id}`}
-                  className="group block"
-                >
-                  <div className="rounded-2xl bg-white border border-border-subtle overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
-                    {/* Image */}
-                    <div className="relative h-48 overflow-hidden">
-                      <CommodityImage
-                        src={product.hero_image_url}
-                        category={meta.name || 'Industrial Product'}
-                        className="w-full h-full"
-                      />
-                      {/* Stale badge */}
-                      {product.is_stale && (
-                        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-warning-500 text-white text-[10px] font-bold stale-badge">
-                          Price Updating
-                        </div>
-                      )}
-                      {/* Quality badge */}
-                      {product.quality_grade && (
-                        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur text-foreground text-[10px] font-bold">
-                          {product.quality_grade}
-                        </div>
-                      )}
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product) => {
+                const supplierName =
+                  product.supplier_id?.company_name ||
+                  product.supplier ||
+                  product.supplierName ||
+                  'Aaudumbar Agro';
+                const city =
+                  product.supplier_id?.city ||
+                  product.city ||
+                  'Chhatrapati Sambhajinagar';
 
-                    {/* Content */}
-                    <div className="p-5 flex-1 flex flex-col">
-                      <h3 className="font-bold text-foreground text-sm leading-tight group-hover:text-brand-700 transition-colors line-clamp-2">
-                        {product.title}
-                      </h3>
-                      <p className="mt-1.5 text-xs text-gray-400">
-                        {product.supplier} · {product.city}
-                      </p>
+                return (
+                  <Link
+                    key={product.id}
+                    href={getProductUrl(product)}
+                    className="group block"
+                  >
+                    <div className="rounded-2xl bg-white border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                      <div className="relative h-48 overflow-hidden bg-gray-100">
+                        <CommodityImage
+                          src={product.hero_image_url || product.image}
+                          category={sectorInfo.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute bottom-3 right-3 z-10">
+                          <FavoriteButton 
+                            product={{
+                              id: product.id,
+                              title: product.title || product.name,
+                              price: product.base_price_per_unit || product.price,
+                              unit: product.unit_label || product.unit,
+                              image: product.hero_image_url || product.image,
+                              slug: product.slug || product.id,
+                              url: getProductUrl(product),
+                              sector: sectorInfo.name
+                            }} 
+                            size="small" 
+                          />
+                        </div>
+                        {product.quality_grade && (
+                          <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur text-gray-900 text-[10px] font-bold shadow-sm">
+                            {product.quality_grade}
+                          </div>
+                        )}
+                        {product.bulk_minimum_order && (
+                          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-gray-900/80 backdrop-blur text-white text-[10px] font-semibold">
+                            MOQ: {product.bulk_minimum_order} {product.unit_label || 'units'}
+                          </div>
+                        )}
+                      </div>
 
-                      <div className="mt-auto pt-4 flex items-end justify-between">
-                        <div>
-                          <span className="text-xl font-extrabold text-foreground">
-                            ₹{Number(product.base_price_per_unit).toLocaleString('en-IN')}
-                          </span>
-                          <span className="text-xs text-gray-400 ml-1">
-                            /{product.unit_label}
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h3 className="font-bold text-gray-900 text-base leading-snug group-hover:text-brand-600 transition-colors line-clamp-2">
+                          {product.title || product.name}
+                        </h3>
+                        <p className="mt-2 text-xs text-gray-500 truncate">
+                          <span className="font-semibold text-gray-700">{supplierName}</span> • {city}
+                        </p>
+
+                        <div className="mt-auto pt-4 flex items-end justify-between border-t border-gray-100">
+                          <div>
+                            <span className="text-xl font-extrabold text-gray-900">
+                              ₹{formatInrPrice(product.base_price_per_unit || product.price)}
+                            </span>
+                            <span className="text-xs text-gray-500 ml-1">
+                              /{product.unit_label || product.unit || 'unit'}
+                            </span>
+                          </div>
+                          <span className="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold group-hover:bg-brand-700 transition-colors shadow-sm">
+                            Get Quote
                           </span>
                         </div>
-                        <span className="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold group-hover:bg-brand-700 transition-colors">
-                          Get Quote
-                        </span>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           )}
+
+          {/* Industry SEO Guide & Procurement FAQs */}
+          <div className="mt-16 bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 shadow-sm">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              B2B Sourcing Guide for {sectorInfo.name} in India
+            </h2>
+            <p className="text-gray-600 leading-relaxed text-sm sm:text-base mb-8">
+              B2B India provides an end-to-end digital procurement highway for {sectorInfo.name}. Directly connect with verified domestic manufacturers, tier-1 suppliers, and exporters across India. Eliminate middlemen margins, receive 100% compliant GST input tax credit invoices, and protect capital with milestone-based escrow clearing.
+            </p>
+
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Frequently Asked Questions (FAQs)
+            </h3>
+            <div className="space-y-4">
+              {sectorFaqs.map((faq, idx) => (
+                <div key={idx} className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <h4 className="font-bold text-gray-900 text-base mb-1.5">{faq.question}</h4>
+                  <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </main>
+
       <Footer />
     </>
   );

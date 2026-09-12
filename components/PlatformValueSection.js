@@ -1,7 +1,7 @@
 // ============================================================================
 // PLATFORM VALUE PROPOSITION SECTION
 // ============================================================================
-// Showcases the core differentiators of B2B Bharat with animated cards.
+// Showcases the core differentiators of B2B India with animated cards.
 // ============================================================================
 
 "use client";
@@ -58,6 +58,18 @@ const VALUE_PROPS = [
     statLabel: 'Re-route Time',
     gradient: 'from-purple-500 to-pink-600',
   },
+  {
+    icon: (
+      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+    title: 'Zero-Hassle Ground Support',
+    description: "B2B India handles all the legwork. We provide managed hotel accommodation for buyers at the supplier's location. Complimentary local transportation directly from your hotel to the supplier’s facility is fully provided and managed by the B2B India on-ground team.",
+    stat: '100%',
+    statLabel: 'Managed Logistics',
+    gradient: 'from-cyan-500 to-blue-600',
+  },
 ];
 
 const cardVariants = {
@@ -71,7 +83,7 @@ const cardVariants = {
 
 export default function PlatformValueSection() {
   return (
-    <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-white">
+    <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-white gradient-mesh">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
@@ -81,7 +93,7 @@ export default function PlatformValueSection() {
             viewport={{ once: true }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent-500/10 text-accent-600 text-sm font-semibold mb-4"
           >
-            Why B2B Bharat
+            Why B2B India
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -105,7 +117,7 @@ export default function PlatformValueSection() {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {VALUE_PROPS.map((prop, i) => (
             <motion.div
               key={prop.title}
@@ -115,12 +127,12 @@ export default function PlatformValueSection() {
               whileInView="show"
               viewport={{ once: true }}
               whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}
-              className="relative overflow-hidden rounded-2xl bg-white border border-border-subtle p-8 group"
+              className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-white border border-border-subtle p-4 sm:p-6 lg:p-8 group card-glow hover-lift"
             >
               {/* Background gradient on hover */}
               <div className={`absolute inset-0 bg-gradient-to-br ${prop.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
 
-              <div className="relative z-10 flex flex-col sm:flex-row gap-6">
+              <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6">
                 {/* Icon */}
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${prop.gradient} text-white flex items-center justify-center flex-shrink-0 shadow-lg`}>
                   {prop.icon}
@@ -128,13 +140,13 @@ export default function PlatformValueSection() {
 
                 {/* Content */}
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-foreground mb-2">{prop.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">{prop.title}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed">{prop.description}</p>
                 </div>
 
                 {/* Stat Badge */}
-                <div className="flex-shrink-0 text-right">
-                  <div className={`text-2xl font-extrabold bg-gradient-to-r ${prop.gradient} bg-clip-text text-transparent`}>
+                <div className="flex-shrink-0 sm:text-right flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0">
+                  <div className={`text-xl sm:text-2xl font-extrabold bg-gradient-to-r ${prop.gradient} bg-clip-text text-transparent`}>
                     {prop.stat}
                   </div>
                   <div className="text-xs text-gray-400 font-medium">{prop.statLabel}</div>

@@ -15,12 +15,13 @@
 // ============================================================================
 
 import { NextResponse } from 'next/server';
+import { sendWhatsAppMessage, WhatsAppTemplates } from '@/services/whatsapp';
 
 export async function GET(request) {
   try {
     // ── Authorization Check ──
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET_TOKEN}`) {
       return new NextResponse('Unauthorized: Invalid cron secret', { status: 401 });
     }
 
@@ -101,8 +102,23 @@ export async function GET(request) {
           message: `Price updated from ₹${product.base_price_per_unit}/${product.unit_label} to ₹${fallbackProduct.base_price_per_unit}/${product.unit_label} via fallback supplier`,
         });
 
-        // TODO: Send WhatsApp notification to original supplier requesting price update
-        // TODO: Send WhatsApp notification to fallback supplier confirming rate usage
+        // Send WhatsApp notification to original supplier requesting price update
+        const { data: origSupplier } = await supabase.from('users').select('company_name, whatsapp_number').eq('id', product.supplier_id).single();
+        if (origSupplier?.whatsapp_number) {
+          await sendWhatsAppMessage(
+            origSupplier.whatsapp_number,
+            WhatsAppTemplates.SUPPLIER_PRICE_ALERT(origSupplier.company_name, product.title, product.base_price_per_unit, fallbackProduct.base_price_per_unit)
+          );
+        }
+        
+        // Send WhatsApp notification to fallback supplier confirming rate usage
+        const { data: fallSupplier } = await supabase.from('users').select('company_name, whatsapp_number').eq('id', fallbackProduct.supplier_id).single();
+        if (fallSupplier?.whatsapp_number) {
+          await sendWhatsAppMessage(
+            fallSupplier.whatsapp_number,
+            WhatsAppTemplates.FALLBACK_SUPPLIER_ALERT(fallSupplier.company_name, product.title, 1000, fallbackProduct.base_price_per_unit)
+          );
+        }
 
       } else {
         // No fallback available — product stays stale
@@ -113,7 +129,11 @@ export async function GET(request) {
           message: 'No alternative active supplier found matching product constraints. Product remains stale.',
         });
 
-        // TODO: Send WhatsApp alert to admin for manual intervention
+        // Send WhatsApp alert to admin for manual intervention
+        await sendWhatsAppMessage(
+          process.env.ADMIN_WHATSAPP_NUMBER || '+91-9999999999',
+          WhatsAppTemplates.ADMIN_MANUAL_INTERVENTION(`PROD-${product.id}`, 'Stale product with no fallback supplier')
+        );
       }
     }
 

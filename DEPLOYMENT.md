@@ -25,4 +25,4 @@ Push your code to your remote repository or run `vercel --prod` to trigger the b
 ---
 
 🏁 **Construction Phase Complete**
-The complete technical infrastructure for B2B Bharat is now established. The application is ready to handle cross-industry bulk orders with automated fallback pricing rules and real-time ledger accounting. Simply configure your production keys in your environment variables to launch your automated B2B commodity marketplace.
+The complete technical infrastructure for B2B India is now established. The application is ready to handle cross-industry bulk orders with automated fallback pricing rules and real-time ledger accounting. Simply configure your production keys in your environment variables to launch your automated B2B commodity marketplace.

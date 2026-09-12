@@ -1,5 +1,5 @@
 /**
- * Google Cloud OAuth Setup Script for B2B Bharat
+ * Google Cloud OAuth Setup Script for B2B India
  * ================================================
  * This script creates Google Cloud OAuth 2.0 credentials
  * and configures them in Supabase for Google Sign-In.
@@ -53,7 +53,7 @@ function httpsRequest(url, options = {}, body = null) {
 
 async function main() {
   console.log('\n╔══════════════════════════════════════════════════════╗');
-  console.log('║  B2B Bharat — Google OAuth Setup                    ║');
+  console.log('║  B2B India — Google OAuth Setup                    ║');
   console.log('╚══════════════════════════════════════════════════════╝\n');
   
   console.log('This script will help you set up Google Sign-In.\n');
@@ -71,7 +71,7 @@ async function main() {
   console.log('1. Click "OAuth consent screen" in the left sidebar');
   console.log('2. Select "External" user type → Click "Create"');
   console.log('3. Fill in:');
-  console.log('   • App name: B2B Bharat');
+  console.log('   • App name: B2B India');
   console.log('   • User support email: AAUDUMBARAGROPVTLTD@GMAIL.COM');
   console.log('   • Developer contact email: AAUDUMBARAGROPVTLTD@GMAIL.COM');
   console.log('4. Click "Save and Continue" through all remaining steps');
@@ -83,7 +83,7 @@ async function main() {
   console.log('1. Go to: https://console.cloud.google.com/apis/credentials');
   console.log('2. Click "+ CREATE CREDENTIALS" → "OAuth client ID"');
   console.log('3. Application type: "Web application"');
-  console.log('4. Name: "B2B Bharat Supabase"');
+  console.log('4. Name: "B2B India Supabase"');
   console.log('5. Under "Authorized redirect URIs", click "ADD URI" and enter:');
   console.log(`   ${SUPABASE_REDIRECT_URI}`);
   console.log('6. Click "Create"\n');
