@@ -133,6 +133,51 @@ We noticed your wholesale product prices haven't been updated yet for this month
     return `https://api.whatsapp.com/send?phone=${finalPhone}&text=${encodeURIComponent(text)}`;
   };
 
+  const getWhatsAppWindowsAppUrl = (phone, text) => {
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const finalPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    return `whatsapp://send?phone=${finalPhone}&text=${encodeURIComponent(text)}`;
+  };
+
+  // Open WhatsApp Web in a dedicated Desktop Popout Window (forces width >= 1120px to prevent /mobile/ redirect)
+  const openDesktopWhatsAppWeb = (phone, text) => {
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const finalPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    const webUrl = `https://web.whatsapp.com/send?phone=${finalPhone}&text=${encodeURIComponent(text)}`;
+    const width = 1120;
+    const height = 850;
+    const left = Math.max(0, (window.screen.availWidth - width) / 2);
+    const top = Math.max(0, (window.screen.availHeight - height) / 2);
+    window.open(webUrl, 'WhatsAppWebDesktop', `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+  };
+
+  // Dispatch via Server API (Twilio / Mock)
+  const [serverDispatching, setServerDispatching] = useState(false);
+  const [serverDispatchResult, setServerDispatchResult] = useState(null);
+
+  const handleServerDispatch = async (phone, message, companyName) => {
+    setServerDispatching(true);
+    setServerDispatchResult(null);
+    try {
+      const res = await fetch('/api/admin/whatsapp/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send_single',
+          toPhone: phone,
+          messageBody: message,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Server dispatch failed');
+      setServerDispatchResult(data);
+    } catch (err) {
+      alert(`Server Dispatch Notice: ${err.message}`);
+    } finally {
+      setServerDispatching(false);
+    }
+  };
+
   // Copy message to clipboard
   const handleCopyMessage = (text, label = 'Message') => {
     navigator.clipboard.writeText(text);
@@ -291,17 +336,21 @@ We noticed your wholesale product prices haven't been updated yet for this month
         {/* Quick Launch Next Supplier in Queue */}
         {nextUnsentSupplier && (
           <div className="flex items-center gap-2">
-            <a
-              href={getWhatsAppWebUrl(nextUnsentSupplier.phone, getCompiledMessage(selectedTemplate, nextUnsentSupplier))}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => markAsSent(nextUnsentSupplier.id)}
-              className="flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform active:scale-95"
+            <button
+              type="button"
+              onClick={() => {
+                openDesktopWhatsAppWeb(
+                  nextUnsentSupplier.phone,
+                  getCompiledMessage(selectedTemplate, nextUnsentSupplier)
+                );
+                markAsSent(nextUnsentSupplier.id);
+              }}
+              className="flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform active:scale-95 cursor-pointer"
             >
               <WhatsAppLogoIcon className="w-4 h-4 fill-current" />
               <span>Send Next: {nextUnsentSupplier.company_name.slice(0, 16)}...</span>
-              <span className="text-xs bg-black/25 px-1.5 py-0.5 rounded">🚀 WhatsApp Web</span>
-            </a>
+              <span className="text-xs bg-black/25 px-1.5 py-0.5 rounded">🚀 Desktop Popout</span>
+            </button>
           </div>
         )}
       </div>
@@ -316,7 +365,26 @@ We noticed your wholesale product prices haven't been updated yet for this month
             </h2>
           </div>
           <div className="text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-            ✓ Opens in WhatsApp Web or Mobile without popup blocking
+            ✓ Desktop Popout (1120px) forces Desktop mode &amp; bypasses /mobile/ screen restriction
+          </div>
+        </div>
+
+        {/* Split screen guidance banner */}
+        <div className="mt-3 p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-[11px] text-amber-200 leading-relaxed">
+          <div className="font-bold text-amber-300 flex items-center gap-1.5 mb-0.5">
+            <span>ℹ️ Why did WhatsApp Web redirect to &quot;/mobile/&quot;?</span>
+          </div>
+          WhatsApp Web has a hardcoded screen requirement: if the window width is less than <strong>768px</strong> (such as when your browser is in split-screen mode on the right half of your monitor), WhatsApp Web redirects to <code>web.whatsapp.com/mobile/</code>.
+          <div className="mt-1 font-medium text-white flex flex-wrap gap-2 items-center">
+            <span>👉 <strong>Instant Solution:</strong> Click</span>
+            <button
+              type="button"
+              onClick={() => openDesktopWhatsAppWeb(testPhone, testMessageText)}
+              className="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] shadow"
+            >
+              Desktop Popout (1120px) ↗
+            </button>
+            <span>below to force a full-width desktop window, or <strong>maximize your Chrome browser window</strong>!</span>
           </div>
         </div>
 
@@ -380,27 +448,36 @@ We noticed your wholesale product prices haven't been updated yet for this month
 
           {/* Action Dispatch Buttons */}
           <div className="md:col-span-5 flex flex-wrap items-center gap-2 pt-2 md:pt-4">
-            {/* Direct WhatsApp Web Button */}
-            <a
-              href={getWhatsAppWebUrl(testPhone, testMessageText)}
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* Primary Desktop Popout (Recommended) */}
+            <button
+              type="button"
+              onClick={() => openDesktopWhatsAppWeb(testPhone, testMessageText)}
               className="flex-1 min-w-[170px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all transform active:scale-95 text-center"
+              title="Opens in an 1120px desktop popout window to bypass /mobile/ redirect"
             >
               <WhatsAppLogoIcon className="w-4 h-4 fill-current" />
-              <span>Open in WhatsApp Web</span>
+              <span>🌐 Desktop Popout (1120px)</span>
+            </button>
+
+            {/* Windows Desktop App Protocol Link */}
+            <a
+              href={getWhatsAppWindowsAppUrl(testPhone, testMessageText)}
+              className="flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition-all text-center"
+              title="Opens WhatsApp for Windows Desktop app directly"
+            >
+              <span>💻 PC App</span>
             </a>
 
-            {/* Direct WhatsApp Universal / Mobile Link */}
-            <a
-              href={getWhatsAppAppUrl(testPhone, testMessageText)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition-all text-center"
-              title="Opens via WhatsApp Mobile App or Desktop Application"
+            {/* Direct Server API Dispatch */}
+            <button
+              type="button"
+              onClick={() => handleServerDispatch(testPhone, testMessageText, testCompanyName)}
+              disabled={serverDispatching}
+              className="flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition-all disabled:opacity-50"
+              title="Dispatches directly via server (Twilio / API)"
             >
-              <span>📱 App Link</span>
-            </a>
+              <span>{serverDispatching ? 'Sending...' : '⚡ Server API'}</span>
+            </button>
 
             {/* Copy button */}
             <button
@@ -412,6 +489,23 @@ We noticed your wholesale product prices haven't been updated yet for this month
             </button>
           </div>
         </div>
+
+        {serverDispatchResult && (
+          <div className="mt-3 p-2.5 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-xs text-indigo-200 flex items-center justify-between">
+            <span>
+              {serverDispatchResult.twilioUsed
+                ? `✓ Dispatched via Twilio WhatsApp API (Message SID: ${serverDispatchResult.messageId})`
+                : `✓ Dispatched to server console logger for ${serverDispatchResult.recipient} (Configure Twilio in Platform Settings for automated delivery)`}
+            </span>
+            <button
+              type="button"
+              onClick={() => setServerDispatchResult(null)}
+              className="text-slate-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </div>
 
       {/* KPI Stats Bar */}
@@ -795,36 +889,47 @@ We noticed your wholesale product prices haven't been updated yet for this month
                               Preview
                             </button>
 
-                            {/* Direct WhatsApp Web Anchor (Primary) */}
+                            {/* 1-Click WhatsApp Dispatch Buttons */}
                             {supplier.has_valid_whatsapp ? (
                               <>
-                                <a
-                                  href={webUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={() => markAsSent(supplier.id)}
+                                {/* Primary Desktop Popout Button (Forces 1120px to bypass /mobile/) */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    openDesktopWhatsAppWeb(supplier.phone, compiledText);
+                                    markAsSent(supplier.id);
+                                  }}
                                   className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ${
                                     isSent
                                       ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-slate-700'
                                       : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20 active:scale-95'
                                   }`}
-                                  title="Open directly in WhatsApp Web"
+                                  title="Opens in 1120px desktop popout window to bypass /mobile/ redirect"
                                 >
                                   <WhatsAppLogoIcon className="w-3.5 h-3.5 fill-current" />
-                                  <span>{isSent ? 'Resend' : 'Web'}</span>
+                                  <span>{isSent ? 'Resend' : 'Web ↗'}</span>
                                   {isSent && <span className="text-emerald-400 font-bold">✓</span>}
-                                </a>
+                                </button>
 
+                                {/* Windows PC App Link */}
                                 <a
-                                  href={appUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
+                                  href={getWhatsAppWindowsAppUrl(supplier.phone, compiledText)}
                                   onClick={() => markAsSent(supplier.id)}
                                   className="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-medium border border-slate-700"
-                                  title="Open in WhatsApp Mobile / Desktop App"
+                                  title="Open in WhatsApp for Windows PC Desktop app"
                                 >
-                                  App
+                                  PC App
                                 </a>
+
+                                {/* Copy message icon */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyMessage(compiledText)}
+                                  className="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-medium border border-slate-700"
+                                  title="Copy message to clipboard"
+                                >
+                                  📋
+                                </button>
                               </>
                             ) : (
                               <button
