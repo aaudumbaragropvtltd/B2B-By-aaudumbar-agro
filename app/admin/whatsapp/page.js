@@ -1157,6 +1157,8 @@ We noticed your wholesale product prices haven't been updated yet for this month
             </div>
           </div>
         </div>
+      )}
+
       {/* 🚀 BULK BROADCAST CONFIRMATION & EXECUTION MODAL */}
       {isBulkModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
