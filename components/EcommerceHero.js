@@ -4,40 +4,59 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchAutocomplete from '@/components/SearchAutocomplete';
 
+// Official Admin Panel CMS Banners (Strictly synchronized with data/platform_banners.json)
 const FALLBACK_BANNERS = [
   {
-    id: '1',
-    title: "India's Premier Cross-Industry B2B Network",
-    subtitle: 'Source directly from 10,000+ verified manufacturers',
-    badge_text: 'Verified Wholesale Network',
-    hero_image_url: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1600&q=80',
-    cta_text: 'Explore 38+ Wholesale Sectors',
-    cta_link: '/directory',
+    id: "banner-1",
+    title: "India’s Verified B2B Wholesale Marketplace",
+    subtitle: "Direct ex-factory bulk procurement with 100% Escrow Price Protection, dock inspections, and automated GST billing.",
+    badge_text: "100% Escrow Protected",
+    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg",
+    cta_text: "Explore 38+ Wholesale Sectors",
+    cta_link: "/directory",
+    sector_slug: "all",
+    display_order: 1,
+    is_active: true,
   },
   {
-    id: '2',
-    title: 'Scale Your Business with Trade Assurance',
-    subtitle: 'Secure payments, escrow protection, and guaranteed delivery',
-    badge_text: '100% Escrow Protection',
-    hero_image_url: 'https://images.unsplash.com/photo-1586528116311-ad8ed7c663be?w=1600&q=80',
-    cta_text: 'View Live Mandi Rates',
-    cta_link: '/market-rates',
+    id: "banner-2",
+    title: "APMC Mandi Direct Agro & Spice Sourcing",
+    subtitle: "Connect directly with certified agricultural aggregators in Nashik, Erode, Unjha, and Guntur with daily live mandi rates.",
+    badge_text: "Live Mandi Intelligence",
+    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108587/b2b-bharat/banners/1789108583730_ChatGPT_Image_Sep_11__2026__12.jpg",
+    cta_text: "View Live Mandi Rates",
+    cta_link: "/market-rates",
+    sector_slug: "food-agriculture",
+    display_order: 2,
+    is_active: true,
   },
   {
-    id: '3',
-    title: 'Wholesale Sourcing Made Seamless',
-    subtitle: 'From industrial machinery to premium agriculture',
-    badge_text: 'Direct Factory Pricing',
-    hero_image_url: 'https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=1600&q=80',
-    cta_text: 'Post Requirement RFQ',
-    cta_link: '/#rfq-form',
+    id: "banner-3",
+    title: "Heavy Industrial & Raw Materials Exchange",
+    subtitle: "Bulk TMT steel, polymers, textile fabrics, and chemicals with verified factory lab certificates and dock logistics.",
+    badge_text: "Verified Industrial Hub",
+    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108718/b2b-bharat/banners/1789108715249_ChatGPT_Image_Sep_11__2026__12.jpg",
+    cta_text: "Post Enterprise RFQ",
+    cta_link: "/#rfq-form",
+    sector_slug: "metals-mining",
+    display_order: 3,
+    is_active: true,
   },
 ];
 
-export default function EcommerceHero() {
-  const [banners, setBanners] = useState(FALLBACK_BANNERS);
+export default function EcommerceHero({ initialBanners = [] }) {
+  const [banners, setBanners] = useState(
+    initialBanners && initialBanners.length > 0 ? initialBanners : FALLBACK_BANNERS
+  );
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroQuery, setHeroQuery] = useState('');
+
+  // Sync with initialBanners if provided
+  useEffect(() => {
+    if (initialBanners && initialBanners.length > 0) {
+      setBanners(initialBanners);
+    }
+  }, [initialBanners]);
 
   const handleHeroSearch = (e, customQuery) => {
     if (e?.preventDefault) e.preventDefault();
@@ -49,8 +68,8 @@ export default function EcommerceHero() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query }),
-      }).catch(() => {});
-    } catch (err) {}
+      }).catch(() => { });
+    } catch (err) { }
 
     window.location.href = `/directory?q=${encodeURIComponent(query)}`;
   };
@@ -138,7 +157,7 @@ export default function EcommerceHero() {
   const bgImage = activeBanner.hero_image_url || activeBanner.image || FALLBACK_BANNERS[0].hero_image_url;
 
   return (
-    <section 
+    <section
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -267,9 +286,8 @@ export default function EcommerceHero() {
             key={idx}
             onClick={() => setCurrentSlide(idx)}
             suppressHydrationWarning
-            className={`h-2 rounded-full transition-all cursor-pointer ${
-              currentSlide === idx ? 'w-8 bg-brand-500' : 'w-2 bg-white/40 hover:bg-white/70'
-            }`}
+            className={`h-2 rounded-full transition-all cursor-pointer ${currentSlide === idx ? 'w-8 bg-brand-500' : 'w-2 bg-white/40 hover:bg-white/70'
+              }`}
             aria-label={`Go to slide ${idx + 1}`}
           />
         ))}

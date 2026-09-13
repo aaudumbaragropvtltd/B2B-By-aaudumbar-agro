@@ -20,6 +20,7 @@ import TopSuppliersSection from '@/components/TopSuppliersSection';
 import CategoryShowcase from '@/components/CategoryShowcase';
 import AnimatedCategoryGrid from '@/components/AnimatedCategoryGrid';
 import Footer from '@/components/Footer';
+import { getActiveBanners } from '@/utils/platformBanners';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -73,12 +74,19 @@ export default async function HomePage() {
   let topSuppliers = [];
   let liveRfqs = [];
   let categoryCounts = {};
+  let heroBanners = [];
+
+  try {
+    heroBanners = await getActiveBanners();
+  } catch (err) {
+    console.warn('Failed to load hero banners from CMS:', err.message);
+  }
 
   try {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       const { createAdminClient } = await import('@/services/supabaseServer');
       const supabase = createAdminClient();
-      
+
       // Fetch featured/trending
       const { data, error } = await supabase
         .from('products')
@@ -88,7 +96,7 @@ export default async function HomePage() {
           supplier_id (company_name)
         `)
         .limit(20);
-        
+
       if (!error && data) {
         const mapped = data.map(p => ({
           id: p.id,
@@ -97,13 +105,13 @@ export default async function HomePage() {
           unit: p.unit_label,
           moq: p.bulk_minimum_order,
           badge: p.quality_grade === 'Premium' ? 'Trade Assurance' : (p.quality_grade ? 'Verified' : null),
-          image: (p.hero_image_url && p.hero_image_url.trim() !== '') 
-            ? p.hero_image_url 
+          image: (p.hero_image_url && p.hero_image_url.trim() !== '')
+            ? p.hero_image_url
             : 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80',
           category: p.sector_id?.slug || 'general',
           supplierName: p.technical_specifications?.['Supplier Name'] || p.supplier_id?.company_name || 'Verified Supplier'
         }));
-        
+
         featuredProducts = mapped.slice(0, 8);
         trendingProducts = mapped.slice(8, 20);
       }
@@ -127,7 +135,7 @@ export default async function HomePage() {
       const { data: countData, error: countError } = await supabase
         .from('products')
         .select('sector_id(slug)');
-      
+
       if (!countError && countData) {
         countData.forEach(p => {
           const slug = p.sector_id?.slug;
@@ -144,7 +152,7 @@ export default async function HomePage() {
         .eq('role', 'supplier')
         .eq('onboarding_complete', true)
         .limit(6);
-        
+
       if (!supplierError && supplierData) {
         topSuppliers = supplierData.map(s => ({
           id: s.id,
@@ -172,7 +180,7 @@ export default async function HomePage() {
       />
       <Navbar />
       <main className="flex-1">
-        <EcommerceHero />
+        <EcommerceHero initialBanners={heroBanners} />
         <FeaturedProducts initialProducts={featuredProducts} />
         <LiveRFQsSection initialRfqs={liveRfqs} />
         <TrendingProductsSection initialProducts={trendingProducts} />
