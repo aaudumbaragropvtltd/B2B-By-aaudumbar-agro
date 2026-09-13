@@ -26,7 +26,7 @@ export default function DashboardSupportPage() {
         </div>
 
         {/* Support Chat Panel */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 sm:p-6 backdrop-blur-xl">
+        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl sm:rounded-3xl p-2 sm:p-5 md:p-6 backdrop-blur-xl">
           <SupportChatPanel isDashboard={true} />
         </div>
 

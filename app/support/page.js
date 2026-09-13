@@ -10,7 +10,7 @@ export default function PublicSupportPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
       <Navbar />
 
-      <main className="flex-1 pt-24 sm:pt-28 pb-20 px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 pt-20 sm:pt-28 pb-16 sm:pb-20 px-3 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto space-y-6">
 
           {/* Page Header */}
