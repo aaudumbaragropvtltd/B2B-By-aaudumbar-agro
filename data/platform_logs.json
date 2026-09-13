@@ -1,5 +1,28 @@
 [
   {
+    "id": "log-1789238232010-x0ed",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency"
+      ]
+    },
+    "created_at": "2026-09-12T18:37:12.010Z"
+  },
+  {
     "id": "log-1789214835670-gqbo",
     "level": "INFO",
     "service": "admin_settings",

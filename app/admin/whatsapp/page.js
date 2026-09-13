@@ -8,11 +8,32 @@ export default function AdminWhatsAppBroadcastPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'outdated' | 'updated' | 'real_only'
-  const [selectedTemplate, setSelectedTemplate] = useState('1st_of_month');
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'outdated' | 'updated' | 'real_only' | 'in_broadcast' | 'new_pending'
+  const [selectedTemplate, setSelectedTemplate] = useState('universal_broadcast');
   const [customMessage, setCustomMessage] = useState('');
   const [sentMap, setSentMap] = useState({}); // { [supplierId]: timestamp }
   const [previewSupplierId, setPreviewSupplierId] = useState(null);
+
+  // WhatsApp Broadcast List state
+  const [broadcastMembers, setBroadcastMembers] = useState([]); // Array of supplier IDs in the broadcast list
+  const [isNewMembersModalOpen, setIsNewMembersModalOpen] = useState(false);
+  const [isBroadcastInfoModalOpen, setIsBroadcastInfoModalOpen] = useState(false);
+  const [isAutoPilotModalOpen, setIsAutoPilotModalOpen] = useState(false);
+  const [copiedAutoPilotScript, setCopiedAutoPilotScript] = useState(false);
+  const [copiedBroadcastMsg, setCopiedBroadcastMsg] = useState(false);
+  const [copiedNumbersFeedback, setCopiedNumbersFeedback] = useState(false);
+  const [selectedNewMemberIds, setSelectedNewMemberIds] = useState([]);
+
+  // Gemini AI Studio state
+  const [aiGoal, setAiGoal] = useState('price_reminder');
+  const [aiLanguage, setAiLanguage] = useState('english');
+  const [aiTone, setAiTone] = useState('professional');
+  const [aiCustomPrompt, setAiCustomPrompt] = useState('');
+  const [aiApiKey, setAiApiKey] = useState('');
+  const [showAiKeyModal, setShowAiKeyModal] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiGeneratedResult, setAiGeneratedResult] = useState(null);
+  const [aiError, setAiError] = useState(null);
 
   // Quick Test Sandbox state
   const [testPhone, setTestPhone] = useState('9226497450');
@@ -30,6 +51,33 @@ export default function AdminWhatsAppBroadcastPage() {
 
   // Pre-configured templates
   const TEMPLATES = {
+    'universal_broadcast': {
+      title: '📢 Universal Broadcast (Same for All Suppliers)',
+      description: 'One standard message for all suppliers. Perfect for WhatsApp Broadcast Lists & Groups (no placeholders required).',
+      badge: 'Unified Broadcast',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      isUniversal: true,
+      text: `🌾 *Namaste Valued Suppliers & Wholesale Partners!* 🌾
+
+Greetings from *B2B India Marketplace (Aaudumbar Agro Pvt. Ltd.)*!
+
+This is our monthly reminder for all registered wholesale suppliers to review and update your wholesale commodity and product prices on the portal.
+
+📌 *Why keeping your rates updated is essential:*
+• Verified bulk buyers across India receive real-time accurate rates.
+• Updated catalogs rank at the top of buyer inquiries & RFQs.
+• Immediate purchase order confirmations without price renegotiation delays.
+
+👉 *Click here to update your prices now:*
+https://b2bindia.site/dashboard/products
+
+*(If you have already updated your prices this week, thank you so much!)*
+
+Need assistance or wish to list new bulk wholesale lots? Reply directly to this WhatsApp message or contact our trade desk.
+
+Thank you for your valued partnership!
+— *Team B2B India (Aaudumbar Agro Pvt. Ltd.)*`,
+    },
     '1st_of_month': {
       title: '1st of Month: Price Update Reminder',
       description: 'Monthly reminder sent on the 1st to request updated wholesale commodity rates.',
@@ -63,20 +111,30 @@ We noticed your wholesale product prices haven't been updated yet for this month
 — Team B2B India (Aaudumbar Agro Pvt. Ltd.)`,
     },
     custom: {
-      title: 'Custom Announcement',
-      description: 'Compose your own custom broadcast message for all or filtered suppliers.',
-      badge: 'Custom',
-      badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
-      text: customMessage || `Namaste {{company_name}}! 🌾\n\nImportant update from B2B India:\n\n[Write your message here]\n\nAccess your dashboard: https://b2bindia.site/dashboard\n— Team B2B India`,
+      title: '✨ Gemini AI & Custom Broadcast',
+      description: 'Compose manually or generate dynamically with Google Gemini AI for customized wholesale campaigns.',
+      badge: '✨ Gemini AI',
+      badgeColor: 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-300 border-purple-500/30',
+      text: customMessage || `🌾 *Namaste Wholesale Partners & Suppliers!* 🌾\n\nImportant trade announcement from B2B India:\n\n[Write your custom message or click 'Generate with Gemini AI']\n\nAccess your supplier dashboard: https://b2bindia.site/dashboard/products\n— Team B2B India (Aaudumbar Agro Pvt. Ltd.)`,
     },
   };
 
-  // Fetch suppliers list
+  // Fetch suppliers list and saved states
   useEffect(() => {
     fetchSuppliers();
     try {
       const savedSent = sessionStorage.getItem('b2b_whatsapp_sent_session');
       if (savedSent) setSentMap(JSON.parse(savedSent));
+    } catch {}
+    try {
+      const savedBroadcast = localStorage.getItem('b2b_whatsapp_broadcast_members');
+      if (savedBroadcast) {
+        setBroadcastMembers(JSON.parse(savedBroadcast));
+      }
+    } catch {}
+    try {
+      const savedKey = localStorage.getItem('b2b_gemini_api_key');
+      if (savedKey) setAiApiKey(savedKey);
     } catch {}
   }, []);
 
@@ -99,10 +157,241 @@ We noticed your wholesale product prices haven't been updated yet for this month
     }
   };
 
-  // Compile personalized message
+  // Save broadcast members to localStorage
+  const saveBroadcastMembers = (newMembersList) => {
+    setBroadcastMembers(newMembersList);
+    try {
+      localStorage.setItem('b2b_whatsapp_broadcast_members', JSON.stringify(newMembersList));
+    } catch {}
+  };
+
+  const markAsAddedToBroadcast = (supplierIds) => {
+    const idsToAdd = Array.isArray(supplierIds) ? supplierIds : [supplierIds];
+    const currentSet = new Set(broadcastMembers);
+    idsToAdd.forEach((id) => currentSet.add(id));
+    const updated = Array.from(currentSet);
+    saveBroadcastMembers(updated);
+  };
+
+  const removeFromBroadcast = (supplierId) => {
+    const updated = broadcastMembers.filter((id) => id !== supplierId);
+    saveBroadcastMembers(updated);
+  };
+
+  // Generate and download .vcf contact card for immediate phone sync
+  const generateAndDownloadVCF = (targetSuppliers, filename = 'B2B_Suppliers_Contacts.vcf') => {
+    if (!targetSuppliers || targetSuppliers.length === 0) {
+      alert('No suppliers with valid phone numbers to export.');
+      return;
+    }
+    let vcfContent = '';
+    targetSuppliers.forEach((s) => {
+      const name = (s.company_name || s.contact_name || 'B2B Supplier').replace(/[;,\n]/g, ' ');
+      const cleanDigits = String(s.phone || '').replace(/\D/g, '');
+      const finalPhone = cleanDigits.length === 10 ? `+91${cleanDigits}` : `+${cleanDigits}`;
+      vcfContent += `BEGIN:VCARD\r\nVERSION:3.0\r\nFN:B2B - ${name}\r\nORG:${name}\r\nTEL;TYPE=CELL:${finalPhone}\r\nEND:VCARD\r\n`;
+    });
+
+    const blob = new Blob([vcfContent], { type: 'text/vcard;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Copy candidate phone numbers
+  const handleCopyNewNumbers = (candidates) => {
+    if (!candidates || candidates.length === 0) return;
+    const numbers = candidates.map((c) => (c.phone?.startsWith('91') ? `+${c.phone}` : `+91${c.phone}`)).join(', ');
+    navigator.clipboard.writeText(numbers);
+    setCopiedNumbersFeedback(true);
+    setTimeout(() => setCopiedNumbersFeedback(false), 2500);
+  };
+
+  // Open WhatsApp Web and Add Members
+  const handleOpenWhatsAppAndAddMembers = (membersToAdd) => {
+    const list = membersToAdd && membersToAdd.length > 0 ? membersToAdd : newBroadcastCandidates;
+    if (list.length === 0) {
+      alert('No new members to add.');
+      return;
+    }
+    // Copy universal broadcast text
+    const universalText = TEMPLATES.universal_broadcast.text;
+    navigator.clipboard.writeText(universalText);
+    setCopiedBroadcastMsg(true);
+    setTimeout(() => setCopiedBroadcastMsg(false), 3000);
+
+    // Mark as added
+    const ids = list.map((s) => s.id);
+    markAsAddedToBroadcast(ids);
+
+    // Open WhatsApp Web in desktop view
+    openWhatsAppWebHome();
+  };
+
+  const openNewMembersModal = () => {
+    setSelectedNewMemberIds(newBroadcastCandidates.map((s) => s.id));
+    setIsNewMembersModalOpen(true);
+  };
+
+  // Save or clear Gemini API key
+  const handleSaveGeminiKey = (key) => {
+    const cleanKey = (key || '').trim();
+    setAiApiKey(cleanKey);
+    try {
+      if (cleanKey) {
+        localStorage.setItem('b2b_gemini_api_key', cleanKey);
+      } else {
+        localStorage.removeItem('b2b_gemini_api_key');
+      }
+    } catch {}
+    setShowAiKeyModal(false);
+  };
+
+  // Generate broadcast via Gemini AI API
+  const handleGenerateAiBroadcast = async () => {
+    setAiGenerating(true);
+    setAiError(null);
+    setAiGeneratedResult(null);
+    try {
+      const res = await fetch('/api/admin/whatsapp/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal: aiGoal,
+          language: aiLanguage,
+          tone: aiTone,
+          customPrompt: aiCustomPrompt,
+          apiKey: aiApiKey,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate broadcast message');
+      
+      setAiGeneratedResult(data);
+      if (data.message) {
+        setCustomMessage(data.message);
+        setSelectedTemplate('custom');
+      }
+    } catch (err) {
+      console.error('Gemini AI generation error:', err);
+      setAiError(err.message);
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  // Generate self-contained WhatsApp Web Auto-Pilot script for automated broadcasting
+  const generateWhatsAppAutoPilotScript = () => {
+    const list = suppliers.filter((s) => s.has_valid_whatsapp && !s.is_dummy);
+    const text = selectedTemplate === 'custom' ? customMessage || TEMPLATES.custom.text : TEMPLATES[selectedTemplate].text;
+    
+    return `// == B2B INDIA WHATSAPP WEB AUTO-BROADCASTER ==
+// 1. Open https://web.whatsapp.com in Chrome
+// 2. Press F12 -> Click "Console" tab
+// 3. Paste this code and press Enter
+(function runB2BBroadcast() {
+  const contacts = ${JSON.stringify(list.map(s => ({ id: s.id, name: s.company_name || s.contact_name, phone: s.phone })))};
+  const rawMessage = ${JSON.stringify(text)};
+  
+  if (!contacts.length) {
+    alert("No verified suppliers found to broadcast to!");
+    return;
+  }
+  
+  let currentIndex = 0;
+  let isPaused = false;
+  
+  const existing = document.getElementById("b2b-whatsapp-autopilot");
+  if (existing) existing.remove();
+  
+  const bar = document.createElement("div");
+  bar.id = "b2b-whatsapp-autopilot";
+  bar.style = "position:fixed;top:24px;right:24px;z-index:9999999;background:#090d16;color:#f8fafc;padding:18px 22px;border-radius:20px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.85);border:2px solid #10b981;font-family:sans-serif;min-width:340px;backdrop-filter:blur(12px);";
+  bar.innerHTML = \`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">🤖</span>
+        <strong style="color:#34d399;font-size:14px;">B2B India Auto-Pilot</strong>
+      </div>
+      <button id="b2b-close-btn" style="background:transparent;border:none;color:#94a3b8;font-size:16px;cursor:pointer;font-weight:bold;">✕</button>
+    </div>
+    <div id="b2b-status" style="font-size:12px;color:#cbd5e1;margin-bottom:10px;line-height:1.4;">Ready to broadcast to \${contacts.length} verified suppliers...</div>
+    <div style="background:#1e293b;border-radius:10px;height:8px;overflow:hidden;margin-bottom:14px;">
+      <div id="b2b-progress" style="background:linear-gradient(90deg,#10b981,#059669);height:100%;width:0%;transition:width 0.3s;"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button id="b2b-start-btn" style="flex:1;background:#10b981;color:#022c22;font-weight:800;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-size:12px;box-shadow:0 4px 12px rgba(16,185,129,0.3);">▶ Start Auto-Pilot</button>
+      <button id="b2b-pause-btn" style="background:#334155;color:#fff;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-size:12px;display:none;">⏸ Pause</button>
+    </div>
+  \`;
+  document.body.appendChild(bar);
+  
+  const statusEl = document.getElementById("b2b-status");
+  const progEl = document.getElementById("b2b-progress");
+  const startBtn = document.getElementById("b2b-start-btn");
+  const pauseBtn = document.getElementById("b2b-pause-btn");
+  
+  document.getElementById("b2b-close-btn").onclick = () => bar.remove();
+  
+  function sendNext() {
+    if (isPaused || currentIndex >= contacts.length) {
+      if (currentIndex >= contacts.length) {
+        statusEl.innerHTML = "🎉 <b style='color:#34d399'>Broadcast Complete!</b> Dispatched to all " + contacts.length + " suppliers.";
+        progEl.style.width = "100%";
+        startBtn.style.display = "none";
+        pauseBtn.style.display = "none";
+      }
+      return;
+    }
+    
+    const target = contacts[currentIndex];
+    const pct = Math.round(((currentIndex + 1) / contacts.length) * 100);
+    progEl.style.width = pct + "%";
+    statusEl.innerHTML = \`Broadcasting (\${currentIndex + 1}/\${contacts.length}): <b>\${target.name}</b> (+91 \${target.phone.slice(-10)})...\`;
+    
+    const personalized = rawMessage.replace(/{{company_name}}/g, target.name);
+    const cleanPhone = target.phone.replace(/\\D/g, "");
+    
+    window.location.href = "https://web.whatsapp.com/send?phone=" + cleanPhone + "&text=" + encodeURIComponent(personalized);
+    
+    setTimeout(() => {
+      const sendBtn = document.querySelector('button[aria-label="Send"], span[data-icon="send"]');
+      if (sendBtn) {
+        sendBtn.closest("button")?.click();
+      }
+      currentIndex++;
+      setTimeout(sendNext, 4500);
+    }, 4000);
+  }
+  
+  startBtn.onclick = () => {
+    startBtn.style.display = "none";
+    pauseBtn.style.display = "inline-block";
+    isPaused = false;
+    sendNext();
+  };
+  
+  pauseBtn.onclick = () => {
+    isPaused = !isPaused;
+    pauseBtn.innerText = isPaused ? "▶ Resume" : "⏸ Pause";
+    if (!isPaused) sendNext();
+  };
+})();
+`;
+  };
+
+  // Compile message
   const getCompiledMessage = (templateKey, supplier) => {
-    if (!supplier) return '';
-    const baseText = templateKey === 'custom' ? customMessage || TEMPLATES.custom.text : TEMPLATES[templateKey].text;
+    const tpl = TEMPLATES[templateKey] || TEMPLATES['universal_broadcast'];
+    const baseText = templateKey === 'custom' ? customMessage || TEMPLATES.custom.text : tpl.text;
+    if (tpl.isUniversal || !supplier) {
+      return baseText;
+    }
     return baseText
       .replace(/{{company_name}}/g, supplier.company_name || 'Partner')
       .replace(/{{contact_name}}/g, supplier.contact_name || 'Partner')
@@ -149,6 +438,15 @@ We noticed your wholesale product prices haven't been updated yet for this month
     const left = Math.max(0, (window.screen.availWidth - width) / 2);
     const top = Math.max(0, (window.screen.availHeight - height) / 2);
     window.open(webUrl, 'WhatsAppWebDesktop', `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+  };
+
+  // Open WhatsApp Web Home (1120px desktop view)
+  const openWhatsAppWebHome = () => {
+    const width = 1120;
+    const height = 850;
+    const left = Math.max(0, (window.screen.availWidth - width) / 2);
+    const top = Math.max(0, (window.screen.availHeight - height) / 2);
+    window.open('https://web.whatsapp.com', 'WhatsAppWebMain', `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
   };
 
   // Dispatch via Server API (Twilio / Mock)
@@ -302,12 +600,26 @@ We noticed your wholesale product prices haven't been updated yet for this month
     }
   };
 
+  // New members not yet added to WhatsApp broadcast
+  const newBroadcastCandidates = useMemo(() => {
+    const broadcastSet = new Set(broadcastMembers);
+    return suppliers.filter((s) => !broadcastSet.has(s.id) && s.has_valid_whatsapp);
+  }, [suppliers, broadcastMembers]);
+
+  const existingBroadcastMembers = useMemo(() => {
+    const broadcastSet = new Set(broadcastMembers);
+    return suppliers.filter((s) => broadcastSet.has(s.id));
+  }, [suppliers, broadcastMembers]);
+
   // Filter & Search Suppliers
   const filteredSuppliers = useMemo(() => {
+    const broadcastSet = new Set(broadcastMembers);
     return suppliers.filter((s) => {
       if (activeFilter === 'outdated' && s.has_updated_this_month) return false;
       if (activeFilter === 'updated' && !s.has_updated_this_month) return false;
       if (activeFilter === 'real_only' && (s.is_dummy || !s.has_valid_whatsapp)) return false;
+      if (activeFilter === 'in_broadcast' && !broadcastSet.has(s.id)) return false;
+      if (activeFilter === 'new_pending' && (broadcastSet.has(s.id) || !s.has_valid_whatsapp)) return false;
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -319,7 +631,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
       }
       return true;
     });
-  }, [suppliers, activeFilter, searchQuery]);
+  }, [suppliers, activeFilter, searchQuery, broadcastMembers]);
 
   // Next unsent supplier in queue
   const nextUnsentSupplier = useMemo(() => {
@@ -343,8 +655,10 @@ We noticed your wholesale product prices haven't been updated yet for this month
     const outdated = suppliers.filter((s) => !s.has_updated_this_month).length;
     const updated = suppliers.filter((s) => s.has_updated_this_month).length;
     const sentCount = Object.keys(sentMap).length;
-    return { total, realPhones, dummyPhones, outdated, updated, sentCount };
-  }, [suppliers, sentMap]);
+    const inBroadcast = existingBroadcastMembers.length;
+    const pendingBroadcast = newBroadcastCandidates.length;
+    return { total, realPhones, dummyPhones, outdated, updated, sentCount, inBroadcast, pendingBroadcast };
+  }, [suppliers, sentMap, existingBroadcastMembers, newBroadcastCandidates]);
 
   // Compiled text for the Test Sandbox
   const testMessageText = useMemo(() => {
@@ -358,7 +672,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
   }, [selectedTemplate, customMessage, testCompanyName, testPhone]);
 
   return (
-    <div className="h-full flex flex-col bg-slate-950 text-slate-100 overflow-y-auto font-sans p-4 md:p-8">
+    <div className="min-h-full w-full bg-slate-950 text-slate-100 font-sans p-4 md:p-8 space-y-6">
       {/* Top Breadcrumb & Return to Admin */}
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80">
         <div className="flex items-center gap-2 text-xs text-slate-400">
@@ -367,6 +681,13 @@ We noticed your wholesale product prices haven't been updated yet for this month
           <span className="text-white font-medium">WhatsApp Broadcast Hub</span>
         </div>
         <div className="flex items-center gap-3">
+          <Link
+            href="/admin/emails"
+            className="text-xs px-3 py-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-500/40 text-indigo-300 flex items-center gap-1.5 font-semibold"
+          >
+            <span>📧</span>
+            <span>Email Broadcast Hub (1st &amp; 5th)</span>
+          </Link>
           <Link
             href="/admin/users"
             className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 flex items-center gap-1.5"
@@ -397,8 +718,28 @@ We noticed your wholesale product prices haven't been updated yet for this month
           </div>
         </div>
 
-        {/* Action Header Buttons: Send to All & Send Next */}
+        {/* Action Header Buttons: Add New Members, Send to All & Send Next */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Primary User Action: Add New Members to Broadcast */}
+          <button
+            type="button"
+            onClick={openNewMembersModal}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer ${
+              stats.pendingBroadcast > 0
+                ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-700 text-slate-950 shadow-amber-500/30 ring-2 ring-amber-400/60'
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+            }`}
+            title="View new registered suppliers and add them to your WhatsApp Broadcast List"
+          >
+            <span className="text-sm">➕</span>
+            <span>Add New Members</span>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+              stats.pendingBroadcast > 0 ? 'bg-black/40 text-white animate-pulse' : 'bg-slate-700 text-slate-300'
+            }`}>
+              {stats.pendingBroadcast}
+            </span>
+          </button>
+
           {/* Send to All Button */}
           <button
             type="button"
@@ -413,6 +754,20 @@ We noticed your wholesale product prices haven't been updated yet for this month
             <span>Send to All Suppliers</span>
             <span className="bg-black/30 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">
               {stats.outdated} Pending
+            </span>
+          </button>
+
+          {/* 🤖 WhatsApp Web Auto-Pilot Button */}
+          <button
+            type="button"
+            onClick={() => setIsAutoPilotModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-xl shadow-purple-600/25 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+            title="Auto-run broadcast directly inside WhatsApp Web without manual clicking"
+          >
+            <span className="text-sm">🤖</span>
+            <span>WhatsApp Web Auto-Pilot</span>
+            <span className="bg-black/30 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold text-purple-200">
+              Auto-Bot
             </span>
           </button>
 
@@ -437,8 +792,134 @@ We noticed your wholesale product prices haven't been updated yet for this month
         </div>
       </div>
 
+      {/* 📢 OFFICIAL WHATSAPP BROADCAST COMMAND CENTER */}
+      <div className="w-full p-6 rounded-3xl bg-gradient-to-br from-emerald-950/70 via-slate-900 to-slate-950 border-2 border-emerald-500/50 shadow-2xl relative overflow-visible">
+        {/* Glowing background aura */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800 relative z-10">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20 shrink-0">
+              📢
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-lg font-black tracking-tight text-white">
+                  WhatsApp Broadcast List &amp; Community Hub
+                </h2>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Single Standard Message • 100% Free
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-1">
+                Send <strong>one identical reminder</strong> to all suppliers at once via WhatsApp Broadcast. When a new supplier registers, simply click <strong>&quot;Add New Members&quot;</strong> to open WhatsApp and include them.
+              </p>
+            </div>
+          </div>
+
+          {/* Broadcast Quick Metrics */}
+          <div className="flex items-center gap-3">
+            <div className="px-4 py-2 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400">In Broadcast List</div>
+              <div className="text-xl font-black text-emerald-400">{stats.inBroadcast}</div>
+            </div>
+            <div className={`px-4 py-2 rounded-2xl border text-center transition-all ${
+              stats.pendingBroadcast > 0
+                ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 ring-2 ring-amber-500/30 animate-pulse'
+                : 'bg-slate-950/80 border-slate-800 text-slate-400'
+            }`}>
+              <div className="text-[10px] uppercase font-bold">New Pending Members</div>
+              <div className={`text-xl font-black ${stats.pendingBroadcast > 0 ? 'text-amber-300' : 'text-slate-400'}`}>
+                {stats.pendingBroadcast}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Button Bar */}
+        <div className="pt-4 flex flex-wrap items-center justify-between gap-3 relative z-10">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* 1. Add New Members Button */}
+            <button
+              type="button"
+              onClick={openNewMembersModal}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition-all transform active:scale-95 cursor-pointer shadow-xl ${
+                stats.pendingBroadcast > 0
+                  ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-slate-950 shadow-amber-500/25 ring-2 ring-amber-400/50'
+                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25'
+              }`}
+            >
+              <span className="text-sm">➕</span>
+              <span>Add New Members ({stats.pendingBroadcast} Waiting)</span>
+              {stats.pendingBroadcast > 0 && (
+                <span className="bg-black/30 text-white px-1.5 py-0.5 rounded text-[10px] font-mono">
+                  Action Required
+                </span>
+              )}
+            </button>
+
+            {/* 2. Open WhatsApp Web */}
+            <button
+              type="button"
+              onClick={openWhatsAppWebHome}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all transform active:scale-95 cursor-pointer shadow"
+              title="Open WhatsApp Web in full 1120px desktop view to manage your Broadcast List"
+            >
+              <WhatsAppLogoIcon className="w-4 h-4 fill-emerald-400" />
+              <span>🌐 Open WhatsApp Web</span>
+            </button>
+
+            {/* 3. Copy Universal Message */}
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(TEMPLATES.universal_broadcast.text);
+                setCopiedBroadcastMsg(true);
+                setTimeout(() => setCopiedBroadcastMsg(false), 2500);
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all"
+            >
+              <span>{copiedBroadcastMsg ? '✓ Copied Message!' : '📋 Copy Universal Broadcast Message'}</span>
+            </button>
+
+            {/* 4. Export Contacts (.vcf) */}
+            <button
+              type="button"
+              onClick={() => generateAndDownloadVCF(suppliers.filter((s) => s.has_valid_whatsapp), 'B2B_All_Suppliers_Contacts.vcf')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-semibold transition-all"
+              title="Download all supplier contacts as a .vcf file to import into your phone contacts in 1 tap"
+            >
+              <span>📥 Export All Contacts (.vcf)</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsBroadcastInfoModalOpen(true)}
+              className="text-xs text-emerald-400 hover:text-emerald-300 underline font-medium flex items-center gap-1"
+            >
+              <span>ℹ️ How WhatsApp Broadcast works</span>
+            </button>
+            {stats.inBroadcast > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm('Reset Broadcast List tracking? This will mark all suppliers as new pending members again.')) {
+                    saveBroadcastMembers([]);
+                  }
+                }}
+                className="text-[11px] text-slate-500 hover:text-slate-300 ml-2"
+              >
+                Reset Tracking
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* 🧪 INSTANT TEST DISPATCH SANDBOX CARD */}
-      <div className="my-6 p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border-2 border-emerald-500/30 shadow-2xl relative overflow-hidden">
+      <div className="w-full p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border-2 border-emerald-500/30 shadow-2xl relative overflow-visible">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
@@ -591,37 +1072,48 @@ We noticed your wholesale product prices haven't been updated yet for this month
       </div>
 
       {/* KPI Stats Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
           <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Suppliers</div>
           <div className="text-2xl font-black text-white mt-1">{stats.total}</div>
           <div className="text-[11px] text-emerald-400 mt-0.5 font-medium">
-            {stats.realPhones} real WhatsApp numbers
+            {stats.realPhones} real numbers
           </div>
-        </div>
-
-        <div className="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4">
-          <div className="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-            Outdated Prices
-          </div>
-          <div className="text-2xl font-black text-amber-300 mt-1">{stats.outdated}</div>
-          <div className="text-[11px] text-amber-400/80 mt-0.5">Need 5th follow-up reminder</div>
         </div>
 
         <div className="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-4">
           <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            Updated This Month
+            In Broadcast
           </div>
-          <div className="text-2xl font-black text-emerald-300 mt-1">{stats.updated}</div>
-          <div className="text-[11px] text-emerald-400/80 mt-0.5">Active fresh pricing</div>
+          <div className="text-2xl font-black text-emerald-300 mt-1">{stats.inBroadcast}</div>
+          <div className="text-[11px] text-emerald-400/80 mt-0.5">Active in WhatsApp list</div>
+        </div>
+
+        <div className={`bg-slate-900/90 rounded-2xl p-4 border transition-all ${
+          stats.pendingBroadcast > 0 ? 'border-amber-500/50 bg-amber-950/20' : 'border-slate-800'
+        }`}>
+          <div className="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full bg-amber-400 ${stats.pendingBroadcast > 0 ? 'animate-ping' : ''}`} />
+            New to Add
+          </div>
+          <div className="text-2xl font-black text-amber-300 mt-1">{stats.pendingBroadcast}</div>
+          <div className="text-[11px] text-amber-400/80 mt-0.5">Pending WhatsApp sync</div>
+        </div>
+
+        <div className="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4">
+          <div className="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            Outdated Rates
+          </div>
+          <div className="text-2xl font-black text-amber-300 mt-1">{stats.outdated}</div>
+          <div className="text-[11px] text-amber-400/80 mt-0.5">Pending 1st/5th update</div>
         </div>
 
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
-          <div className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">Sent This Session</div>
+          <div className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">Sent Today</div>
           <div className="text-2xl font-black text-indigo-300 mt-1">{stats.sentCount}</div>
-          <div className="text-[11px] text-indigo-400/80 mt-0.5">Completed chats</div>
+          <div className="text-[11px] text-indigo-400/80 mt-0.5">Session dispatches</div>
         </div>
 
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-col justify-center">
@@ -640,7 +1132,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
             onClick={fetchSuppliers}
             className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold mt-1 text-left"
           >
-            ↻ Refresh Supplier List
+            ↻ Refresh Suppliers
           </button>
         </div>
       </div>
@@ -674,6 +1166,196 @@ We noticed your wholesale product prices haven't been updated yet for this month
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Template Selection & Live Preview (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
+          {/* ✨ GEMINI AI BROADCAST STUDIO CARD */}
+          <div className="bg-gradient-to-br from-purple-950/40 via-slate-900 to-indigo-950/40 border-2 border-purple-500/40 rounded-2xl p-5 shadow-2xl relative overflow-visible">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-purple-500/20">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-base shadow-lg shadow-purple-500/25">
+                  ✨
+                </div>
+                <div>
+                  <h2 className="text-sm font-black text-white flex items-center gap-2">
+                    Gemini AI Broadcast Studio
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      Google AI
+                    </span>
+                  </h2>
+                  <p className="text-[11px] text-purple-200/70">
+                    Generate high-converting wholesale broadcasts tailored to your trading objectives.
+                  </p>
+                </div>
+              </div>
+
+              {/* API Key settings trigger */}
+              <button
+                type="button"
+                onClick={() => setShowAiKeyModal(true)}
+                className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold flex items-center gap-1.5 transition-all ${
+                  aiApiKey
+                    ? 'bg-purple-950/60 border-purple-400/50 text-purple-300 hover:bg-purple-900/60'
+                    : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'
+                }`}
+                title="Configure Google Gemini API Key"
+              >
+                <span>⚙️</span>
+                <span>{aiApiKey ? 'Gemini Key Active' : 'API Key'}</span>
+              </button>
+            </div>
+
+            {/* Campaign Objective Presets */}
+            <div className="mt-4">
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">
+                1. Select Campaign Objective:
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'price_reminder', icon: '🌾', label: 'Monthly Price Update', desc: '1st of Month catalog refresh' },
+                  { id: 'urgent_price_check', icon: '🚨', label: 'Urgent 5th Check', desc: 'Prevent quote suspension' },
+                  { id: 'demand_inquiry', icon: '📦', label: 'Bulk Buyer Demand', desc: 'New institutional RFQs waiting' },
+                  { id: 'festive_offer', icon: '🎉', label: 'Festive Bulk Offer', desc: 'Seasonal discounts & volume' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setAiGoal(item.id);
+                      if (item.id === 'price_reminder') setAiCustomPrompt('Monthly reminder to update wholesale prices so bulk buyers receive accurate quotes.');
+                      else if (item.id === 'urgent_price_check') setAiCustomPrompt('Urgent follow-up for suppliers who have not updated rates this month.');
+                      else if (item.id === 'demand_inquiry') setAiCustomPrompt('Institutional buyers are looking for fresh wholesale lots with guaranteed 10% advance escrow.');
+                      else if (item.id === 'festive_offer') setAiCustomPrompt('Festive season bulk buying surge. Update rates with special discounts.');
+                    }}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      aiGoal === item.id
+                        ? 'bg-purple-900/40 border-purple-400 ring-1 ring-purple-400/40 text-white shadow-md'
+                        : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-0.5 truncate">{item.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Language & Tone Controls */}
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Language:
+                </label>
+                <select
+                  value={aiLanguage}
+                  onChange={(e) => setAiLanguage(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white outline-none focus:border-purple-400"
+                >
+                  <option value="english">🌐 English (Indian Trade)</option>
+                  <option value="hindi">🇮🇳 हिंदी (Devanagari Hindi)</option>
+                  <option value="hinglish">💬 Hinglish (Conversational)</option>
+                  <option value="marathi">🚩 मराठी (Devanagari Marathi)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Communication Tone:
+                </label>
+                <select
+                  value={aiTone}
+                  onChange={(e) => setAiTone(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white outline-none focus:border-purple-400"
+                >
+                  <option value="professional">💼 Professional & Respectful</option>
+                  <option value="urgent">⚡ Urgent & Action-Oriented</option>
+                  <option value="friendly">🤝 Friendly & Supportive</option>
+                  <option value="promotional">🏷️ Promotional & Volume</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Custom Prompt / Context Input */}
+            <div className="mt-3">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                Custom Instructions or Specific Commodities (Optional):
+              </label>
+              <textarea
+                value={aiCustomPrompt}
+                onChange={(e) => setAiCustomPrompt(e.target.value)}
+                placeholder="e.g., Mention that onion & basmati rice buyers from Mumbai & Delhi are actively placing bulk orders today..."
+                rows={2}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400"
+              />
+            </div>
+
+            {/* Action Bar */}
+            <div className="mt-4 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleGenerateAiBroadcast}
+                disabled={aiGenerating}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow-lg shadow-purple-600/30 transition-all transform active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                {aiGenerating ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Synthesizing Broadcast with Gemini AI...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>✨ Generate with Gemini AI</span>
+                    <span className="text-[10px] bg-black/30 px-1.5 py-0.5 rounded font-mono font-normal">1-Click</span>
+                  </>
+                )}
+              </button>
+
+              {aiGeneratedResult && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (aiGeneratedResult.message) {
+                      setCustomMessage(aiGeneratedResult.message);
+                      setSelectedTemplate('custom');
+                      handleCopyMessage(aiGeneratedResult.message);
+                    }
+                  }}
+                  className="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs border border-purple-500/30 transition-all"
+                  title="Copy and apply to custom template"
+                >
+                  📋 Copy
+                </button>
+              )}
+            </div>
+
+            {/* Status & Results Notice */}
+            {aiGeneratedResult && (
+              <div className="mt-3 p-2.5 rounded-xl bg-purple-950/60 border border-purple-500/30 text-[11px] text-purple-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓ Applied to Live Preview!</span>
+                  <span className="text-slate-400">({aiGeneratedResult.source})</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTemplate('custom');
+                  }}
+                  className="text-purple-300 hover:underline font-semibold"
+                >
+                  View Preview ↓
+                </button>
+              </div>
+            )}
+
+            {aiError && (
+              <div className="mt-3 p-2.5 rounded-xl bg-rose-950/60 border border-rose-500/30 text-[11px] text-rose-300 flex items-center justify-between">
+                <span>⚠️ {aiError}</span>
+                <button type="button" onClick={() => setAiError(null)} className="text-slate-400 hover:text-white">✕</button>
+              </div>
+            )}
+          </div>
+
           {/* Template Selector Card */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
@@ -777,7 +1459,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
           {/* Filter Tabs & Search Bar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4">
             {/* Filter Pills */}
-            <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+            <div className="flex flex-wrap items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs gap-1">
               <button
                 type="button"
                 onClick={() => setActiveFilter('all')}
@@ -791,10 +1473,32 @@ We noticed your wholesale product prices haven't been updated yet for this month
               </button>
               <button
                 type="button"
+                onClick={() => setActiveFilter('in_broadcast')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                  activeFilter === 'in_broadcast'
+                    ? 'bg-emerald-600 text-white font-bold shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                In Broadcast ({stats.inBroadcast})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveFilter('new_pending')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                  activeFilter === 'new_pending'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow'
+                    : 'text-amber-400/80 hover:text-amber-300'
+                }`}
+              >
+                🆕 New Pending ({stats.pendingBroadcast})
+              </button>
+              <button
+                type="button"
                 onClick={() => setActiveFilter('real_only')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                   activeFilter === 'real_only'
-                    ? 'bg-emerald-600 text-white font-bold shadow'
+                    ? 'bg-slate-800 text-white font-bold shadow'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -805,7 +1509,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
                 onClick={() => setActiveFilter('outdated')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                   activeFilter === 'outdated'
-                    ? 'bg-amber-500 text-slate-950 font-bold shadow'
+                    ? 'bg-amber-500/80 text-slate-950 font-bold shadow'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -905,6 +1609,7 @@ We noticed your wholesale product prices haven't been updated yet for this month
                     <th className="py-3 px-3">Supplier / Company</th>
                     <th className="py-3 px-3">WhatsApp Number</th>
                     <th className="py-3 px-3">Price Status</th>
+                    <th className="py-3 px-3">Broadcast List</th>
                     <th className="py-3 px-3 text-right">Dispatch Options</th>
                   </tr>
                 </thead>
@@ -986,6 +1691,37 @@ We noticed your wholesale product prices haven't been updated yet for this month
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                               Pending Update
                             </span>
+                          )}
+                        </td>
+
+                        {/* Broadcast List Status & Quick Action */}
+                        <td className="py-3 px-3">
+                          {broadcastMembers.includes(supplier.id) ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                In Broadcast
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => removeFromBroadcast(supplier.id)}
+                                className="text-[10px] text-slate-500 hover:text-red-400 px-1"
+                                title="Remove from broadcast tracking"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : supplier.has_valid_whatsapp ? (
+                            <button
+                              type="button"
+                              onClick={() => markAsAddedToBroadcast(supplier.id)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-all cursor-pointer"
+                              title="Click to mark as added to your WhatsApp broadcast list"
+                            >
+                              <span>+ Add to List</span>
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-slate-500 font-mono">Needs Phone</span>
                           )}
                         </td>
 
@@ -1365,6 +2101,544 @@ We noticed your wholesale product prices haven't been updated yet for this month
                   Done
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ➕ ADD NEW MEMBERS TO WHATSAPP BROADCAST MODAL */}
+      {isNewMembersModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 text-xl">
+                  ➕
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    Add New Members to WhatsApp Broadcast
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                      {newBroadcastCandidates.length} New Suppliers
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Open WhatsApp to add new supplier contacts to your Broadcast List or dispatch the universal reminder.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsNewMembersModalOpen(false)}
+                className="text-slate-400 hover:text-white text-xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="my-4 space-y-4 overflow-y-auto flex-1 pr-1">
+              {/* Step instructions banner */}
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-2">
+                <div className="font-bold text-white flex items-center gap-1.5">
+                  <span>⚡ Quick 2-Step Workflow:</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800/80">
+                    <div className="font-bold text-emerald-400 mb-1">Step 1: Save Contacts</div>
+                    Download the <strong>.vcf contact card</strong> below so these new suppliers are in your phone address book.
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800/80">
+                    <div className="font-bold text-emerald-400 mb-1">Step 2: Add in WhatsApp</div>
+                    Open WhatsApp Web/App, add them into your Broadcast List or message them directly.
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Toolbar */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedNewMemberIds.length === newBroadcastCandidates.length) {
+                        setSelectedNewMemberIds([]);
+                      } else {
+                        setSelectedNewMemberIds(newBroadcastCandidates.map((s) => s.id));
+                      }
+                    }}
+                    className="text-xs text-slate-300 hover:text-white px-2.5 py-1 rounded bg-slate-800 border border-slate-700 font-semibold"
+                  >
+                    {selectedNewMemberIds.length === newBroadcastCandidates.length ? 'Deselect All' : 'Select All'}
+                  </button>
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    {selectedNewMemberIds.length} of {newBroadcastCandidates.length} selected
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => generateAndDownloadVCF(
+                      newBroadcastCandidates.filter((s) => selectedNewMemberIds.includes(s.id)),
+                      'B2B_New_Members_Contacts.vcf'
+                    )}
+                    className="text-xs px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 font-semibold border border-slate-700"
+                    title="Download .vcf card for selected new suppliers"
+                  >
+                    📥 Download Contacts (.vcf)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyNewNumbers(
+                      newBroadcastCandidates.filter((s) => selectedNewMemberIds.includes(s.id))
+                    )}
+                    className="text-xs px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold border border-slate-700"
+                  >
+                    {copiedNumbersFeedback ? '✓ Copied!' : '📋 Copy Numbers'}
+                  </button>
+                </div>
+              </div>
+
+              {/* List of New Suppliers */}
+              {newBroadcastCandidates.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs bg-slate-950/60 rounded-2xl border border-slate-800">
+                  🎉 All verified suppliers are already added to your WhatsApp Broadcast List!
+                </div>
+              ) : (
+                <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/70 max-h-72 overflow-y-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-900/90 text-slate-400 border-b border-slate-800 text-[10px] uppercase sticky top-0">
+                      <tr>
+                        <th className="py-2.5 px-3 w-8"></th>
+                        <th className="py-2.5 px-3">Company / Name</th>
+                        <th className="py-2.5 px-3">WhatsApp Number</th>
+                        <th className="py-2.5 px-3 text-right">Direct Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {newBroadcastCandidates.map((supplier) => {
+                        const isChecked = selectedNewMemberIds.includes(supplier.id);
+                        return (
+                          <tr key={supplier.id} className="hover:bg-slate-900/50">
+                            <td className="py-2.5 px-3">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedNewMemberIds([...selectedNewMemberIds, supplier.id]);
+                                  } else {
+                                    setSelectedNewMemberIds(selectedNewMemberIds.filter((id) => id !== supplier.id));
+                                  }
+                                }}
+                                className="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500"
+                              />
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <div className="font-bold text-white">{supplier.company_name}</div>
+                              <div className="text-[10px] text-slate-400">{supplier.contact_name} • {supplier.location}</div>
+                            </td>
+                            <td className="py-2.5 px-3 font-mono text-emerald-400 font-bold">
+                              +{supplier.phone}
+                            </td>
+                            <td className="py-2.5 px-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    openDesktopWhatsAppWeb(supplier.phone, TEMPLATES.universal_broadcast.text);
+                                    markAsAddedToBroadcast(supplier.id);
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold shadow"
+                                  title="Open chat in WhatsApp with universal message and mark added"
+                                >
+                                  Chat &amp; Add ↗
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => markAsAddedToBroadcast(supplier.id)}
+                                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
+                                  title="Mark added to broadcast without opening chat"
+                                >
+                                  ✓ Added
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setIsNewMembersModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+              >
+                Close
+              </button>
+
+              <div className="flex items-center gap-2">
+                {/* Open WhatsApp & Add Selected */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const toAdd = newBroadcastCandidates.filter((s) => selectedNewMemberIds.includes(s.id));
+                    handleOpenWhatsAppAndAddMembers(toAdd.length > 0 ? toAdd : newBroadcastCandidates);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 cursor-pointer"
+                >
+                  <WhatsAppLogoIcon className="w-3.5 h-3.5 fill-current" />
+                  <span>Open WhatsApp &amp; Add Members</span>
+                </button>
+
+                {/* Mark Selected as Added */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    markAsAddedToBroadcast(selectedNewMemberIds);
+                  }}
+                  disabled={selectedNewMemberIds.length === 0}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold disabled:opacity-40"
+                >
+                  ✓ Mark ({selectedNewMemberIds.length}) Added
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ℹ️ HOW BROADCAST WORKS INFO MODAL */}
+      {isBroadcastInfoModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="text-base font-black text-white flex items-center gap-2">
+                <span>ℹ️ How WhatsApp Broadcast Works</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsBroadcastInfoModalOpen(false)}
+                className="text-slate-400 hover:text-white text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="my-4 space-y-3.5 text-xs text-slate-300 leading-relaxed">
+              <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 font-semibold">
+                WhatsApp Broadcast allows you to send 1 single message to up to 256 contacts at the same time for ₹0 cost!
+              </div>
+
+              <div className="space-y-2.5">
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-slate-800 text-emerald-400 font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">1</span>
+                  <div>
+                    <strong className="text-white">Save Supplier Contacts:</strong>
+                    <p className="text-slate-400 mt-0.5">Click <em>Export All Contacts (.vcf)</em> to save all verified supplier numbers into your phone contacts in 1 click.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-slate-800 text-emerald-400 font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">2</span>
+                  <div>
+                    <strong className="text-white">Create Broadcast List in WhatsApp:</strong>
+                    <p className="text-slate-400 mt-0.5">In WhatsApp Mobile or Web, click the menu (3 dots) → <strong>New Broadcast</strong>, and select your suppliers.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-slate-800 text-emerald-400 font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">3</span>
+                  <div>
+                    <strong className="text-white">Send the Universal Message:</strong>
+                    <p className="text-slate-400 mt-0.5">Copy our pre-formatted Universal Broadcast message and paste it. Every supplier receives it as an individual private chat.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-slate-800 text-amber-400 font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">4</span>
+                  <div>
+                    <strong className="text-white">Adding New Members:</strong>
+                    <p className="text-slate-400 mt-0.5">When a new supplier registers on B2B India, the dashboard automatically highlights them. Click <strong>&quot;Add New Members&quot;</strong> to open WhatsApp and add them to your Broadcast List!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-800 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsBroadcastInfoModalOpen(false)}
+                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ⚙️ GEMINI API KEY CONFIGURATION MODAL */}
+      {showAiKeyModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-purple-500/40 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-sm shadow">
+                  ✨
+                </div>
+                <h3 className="text-base font-black text-white">
+                  Google Gemini API Configuration
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAiKeyModal(false)}
+                className="text-slate-400 hover:text-white text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="my-4 space-y-3.5 text-xs text-slate-300 leading-relaxed">
+              <p>
+                Provide your Google Gemini API key to unlock dynamic AI synthesis for WhatsApp Broadcast reminders, urgent checks, and high-demand inquiries.
+              </p>
+
+              <div className="p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-purple-200">
+                <div className="font-bold text-white flex items-center gap-1.5 mb-1">
+                  <span>💡 How to get a 100% Free Gemini API Key:</span>
+                </div>
+                <ol className="list-decimal pl-4 space-y-1 text-slate-300">
+                  <li>Visit <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-purple-300 font-bold underline hover:text-purple-200">Google AI Studio (aistudio.google.com)</a></li>
+                  <li>Sign in with any standard Google account.</li>
+                  <li>Click <strong>&quot;Create API key&quot;</strong> (Free tier has no charge).</li>
+                  <li>Copy and paste the key below.</li>
+                </ol>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Your Google Gemini API Key:
+                </label>
+                <input
+                  type="password"
+                  value={aiApiKey}
+                  onChange={(e) => setAiApiKey(e.target.value)}
+                  placeholder="AIzaSy..."
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-purple-400"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Key is securely stored in your local browser storage and never leaked.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => handleSaveGeminiKey('')}
+                className="text-xs text-slate-400 hover:text-rose-400 underline"
+              >
+                Clear / Remove Key
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAiKeyModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSaveGeminiKey(aiApiKey)}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30"
+                >
+                  Save API Key
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🤖 WHATSAPP WEB AUTO-PILOT MODAL */}
+      {isAutoPilotModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-purple-500/50 rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in-95 max-h-[92vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg shadow-purple-500/30">
+                  🤖
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    WhatsApp Web Auto-Pilot &amp; Broadcaster
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold uppercase tracking-wider">
+                      Zero Manual Clicks
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Automate broadcasting to all registered suppliers directly inside WhatsApp Web.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAutoPilotModalOpen(false)}
+                className="text-slate-400 hover:text-white text-xl font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="my-4 space-y-4 overflow-y-auto flex-1 pr-1 text-xs text-slate-300">
+              {/* Status summary */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                  <div className="text-[10px] uppercase text-slate-400 font-bold">Total Targets</div>
+                  <div className="text-lg font-black text-white mt-0.5">{stats.realPhones}</div>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                  <div className="text-[10px] uppercase text-slate-400 font-bold">New Pending</div>
+                  <div className="text-lg font-black text-amber-400 mt-0.5">{stats.pendingBroadcast}</div>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                  <div className="text-[10px] uppercase text-slate-400 font-bold">Template</div>
+                  <div className="text-xs font-bold text-emerald-400 mt-1 truncate">
+                    {TEMPLATES[selectedTemplate]?.badge || 'Gemini Custom'}
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                  <div className="text-[10px] uppercase text-slate-400 font-bold">Cost</div>
+                  <div className="text-lg font-black text-emerald-400 mt-0.5">₹0.00</div>
+                </div>
+              </div>
+
+              {/* Option 1: WhatsApp Web Auto-Pilot Script */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/30 to-slate-950 border border-purple-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-black text-white text-sm flex items-center gap-2">
+                    <span>⚡ Option 1: Direct Message Auto-Pilot (Sends to Each Supplier)</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">
+                    Automated Loop
+                  </span>
+                </div>
+                <p className="text-slate-300 text-[11px] leading-relaxed">
+                  Runs directly inside your logged-in WhatsApp Web tab. It injects a floating control overlay and automatically opens each chat, types the Gemini broadcast message, and dispatches it with human safe intervals.
+                </p>
+
+                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-[11px] space-y-1 text-slate-400">
+                  <div className="text-emerald-400 font-bold font-sans">How to run in 10 seconds:</div>
+                  <div>1. Open <strong className="text-white">web.whatsapp.com</strong> in your Chrome browser and make sure you are logged in.</div>
+                  <div>2. Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-white">F12</kbd> (or right click → Inspect) and click the <strong className="text-white">Console</strong> tab.</div>
+                  <div>3. Click the button below, paste the script into the console, and press <strong className="text-white">Enter</strong>.</div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(generateWhatsAppAutoPilotScript());
+                      setCopiedAutoPilotScript(true);
+                      setTimeout(() => setCopiedAutoPilotScript(false), 3000);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+                  >
+                    <span>{copiedAutoPilotScript ? '✓ Script Copied to Clipboard!' : '📋 Copy WhatsApp Web Auto-Pilot Script'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openWhatsAppWebHome}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition-all flex items-center gap-1.5"
+                  >
+                    <WhatsAppLogoIcon className="w-3.5 h-3.5 fill-current" />
+                    <span>Open Web ↗</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Option 2: WhatsApp Announcement Group (Native to WhatsApp Web) */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/30 to-slate-950 border border-emerald-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-black text-white text-sm flex items-center gap-2">
+                    <span>📢 Option 2: Create WhatsApp Announcement Group (Recommended)</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                    100% Reliable
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
+                  <strong>Why Announcement Group is superior:</strong> Meta only puts &quot;New Broadcast&quot; on mobile phones. On WhatsApp Web, Meta supports <strong>Groups &amp; Communities</strong>. When you set group permissions to &quot;Send Messages: Only Admins&quot;, it works exactly like a Broadcast, and suppliers receive messages even if they haven&apos;t saved your phone number!
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <strong className="text-white">1. Create Group:</strong>
+                    <p className="text-slate-400 mt-0.5">In WhatsApp Web, click <strong>+</strong> → <strong>New Group</strong>. Name: <em>B2B India Suppliers</em>.</p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <strong className="text-white">2. Paste Numbers:</strong>
+                    <p className="text-slate-400 mt-0.5">Click &quot;Copy All Numbers&quot; below and paste into WhatsApp participant search to add all suppliers.</p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                    <strong className="text-white">3. Admin Only:</strong>
+                    <p className="text-slate-400 mt-0.5">In Group Info → Group Permissions → set <em>Send Messages: Only Admins</em>.</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const allNums = suppliers
+                        .filter((s) => s.has_valid_whatsapp && !s.is_dummy)
+                        .map((s) => (s.phone.startsWith('91') ? `+${s.phone}` : `+91${s.phone}`))
+                        .join(', ');
+                      navigator.clipboard.writeText(allNums);
+                      setCopiedNumbersFeedback(true);
+                      setTimeout(() => setCopiedNumbersFeedback(false), 2500);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all"
+                  >
+                    <span>{copiedNumbersFeedback ? '✓ Copied All Supplier Numbers!' : `📋 Copy All (${stats.realPhones}) Numbers for Group`}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => generateAndDownloadVCF(suppliers.filter((s) => s.has_valid_whatsapp && !s.is_dummy))}
+                    className="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700"
+                  >
+                    📥 Export .vcf
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">
+                Connected to Gemini AI Broadcast Engine
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsAutoPilotModalOpen(false)}
+                className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

@@ -34,7 +34,7 @@ export default function DynamicInvoicePDF({ invoiceData }) {
           <h2 className="text-xl font-black text-white tracking-wider">B2B INDIA</h2>
           <p className="text-[10px] font-bold tracking-widest uppercase mt-0.5" style={{ color: '#E8792B' }}>by Aaudumbar Agro Pvt. Ltd.</p>
           <p className="text-[11px] text-white/50 mt-2">Plot No. 5, Prerna Nagar, Garkheda Parisar</p>
-          <p className="text-[11px] text-white/50">Chhatrapati Sambhajinagar 431009</p>
+          <p className="text-[11px] text-white/50">Chhatrapati Sambhajinagar 431009, Maharashtra</p>
         </div>
         <div className="text-right">
           <div className="inline-block px-4 py-1.5 rounded-md text-[10px] font-extrabold tracking-widest uppercase text-white" style={{ background: '#E8792B' }}>

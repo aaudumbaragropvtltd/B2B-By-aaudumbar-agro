@@ -18,9 +18,9 @@ Platform Knowledge Base:
    - Platform: B2B India (India's Premier Cross-Industry Automated B2B Wholesale Marketplace).
    - Parent Corporate Entity: Aaudumbar Agro Pvt. Ltd.
    - GSTIN: 27ABACA6256A1Z2
-   - Central Head Office: Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar, Maharashtra - 431009.
+   - Central Head Office: Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar 431009, Maharashtra.
    - Support Phone / WhatsApp: +91 84088 41998
-   - Official Email: b2bbharat.in@gmail.com
+   - Official Email: support@b2bindia.site
 
 2. 10% Escrow Advance Protection:
    - Buyers only pay a 10% advance deposit to lock contracts and initiate warehouse fulfillment.

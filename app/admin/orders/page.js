@@ -20,6 +20,14 @@ export default function AdminOrders() {
   const [viewingOrder, setViewingOrder] = useState(null);
   const [editingOrder, setEditingOrder] = useState(null);
   const [invoiceModalOrder, setInvoiceModalOrder] = useState(null);
+  const [bankDetailsModalOrder, setBankDetailsModalOrder] = useState(null);
+  const [bankCustomEmail, setBankCustomEmail] = useState('');
+  const [bankCustomCompanyName, setBankCustomCompanyName] = useState('');
+  const [bankCustomGstin, setBankCustomGstin] = useState('');
+  const [bankCustomPhone, setBankCustomPhone] = useState('');
+  const [bankCustomHsnCode, setBankCustomHsnCode] = useState('1006.30');
+  const [sendingBankDetails, setSendingBankDetails] = useState(false);
+  const [copiedBankField, setCopiedBankField] = useState(null);
   const [customBuyerEmail, setCustomBuyerEmail] = useState('');
   const [customBuyerCompanyName, setCustomBuyerCompanyName] = useState('');
   const [customBuyerGstin, setCustomBuyerGstin] = useState('');
@@ -117,6 +125,63 @@ export default function AdminOrders() {
     }
   };
 
+  const openBankDetailsModal = (order) => {
+    setBankDetailsModalOrder(order);
+    const resolvedEmail = order.buyer_email || order.buyerEmail || order.registered_email || order.email || '';
+    const resolvedCompany = order.buyer_company_name || order.company_name || order.buyer_name || '';
+    const resolvedGstin = order.buyer_gstin || order.gstin || '27AAACR1234F1Z5';
+    const resolvedPhone = order.buyer_phone || order.receiver_phone || order.phone_number || '';
+    const resolvedHsn = order.hsn_code || order.hsn || '1006.30';
+
+    setBankCustomEmail(resolvedEmail);
+    setBankCustomCompanyName(resolvedCompany);
+    setBankCustomGstin(resolvedGstin);
+    setBankCustomPhone(resolvedPhone);
+    setBankCustomHsnCode(resolvedHsn);
+  };
+
+  const handleSendBankDetails = async (e) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
+    if (!bankDetailsModalOrder) return;
+
+    const emailTarget = (bankCustomEmail || bankDetailsModalOrder.buyer_email || bankDetailsModalOrder.buyerEmail || '').trim();
+    if (!emailTarget || !emailTarget.includes('@')) {
+      alert('Please enter a valid buyer email address (e.g. buyer@company.com).');
+      return;
+    }
+
+    try {
+      setSendingBankDetails(true);
+      const res = await fetch('/api/admin/orders/send-bank-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: bankDetailsModalOrder.id || bankDetailsModalOrder.transaction_id,
+          customEmail: emailTarget,
+          buyerCompanyName: bankCustomCompanyName,
+          buyerGstin: bankCustomGstin,
+          buyerPhone: bankCustomPhone,
+          hsnCode: bankCustomHsnCode,
+          order: bankDetailsModalOrder
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setEmailNotice(data.message || `✓ 90% Balance Banking Details successfully emailed to ${emailTarget}!`);
+        setBankDetailsModalOrder(null);
+        setTimeout(() => setEmailNotice(null), 8000);
+      } else {
+        alert(data.error || 'Failed to dispatch 90% bank details email');
+      }
+    } catch (err) {
+      alert('Error sending bank details email: ' + err.message);
+    } finally {
+      setSendingBankDetails(false);
+    }
+  };
+
   const handleSendReceipt = async (order) => {
     try {
       const emailTarget = (order.buyer_email || order.buyerEmail || order.registered_email || order.email || '').trim();
@@ -163,6 +228,8 @@ export default function AdminOrders() {
     // Close any open modals immediately
     setViewingOrder(null);
     setEditingOrder(null);
+    setInvoiceModalOrder(null);
+    setBankDetailsModalOrder(null);
 
     // Optimistically remove from state
     setOrders(prev => prev.filter(o => 
@@ -760,6 +827,14 @@ export default function AdminOrders() {
                           </button>
                         )}
                         <button
+                          onClick={() => openBankDetailsModal(order)}
+                          className="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1 border border-sky-200"
+                          title="Send 90% Balance Payment & Banking Details (SBI A/C: 20521984403, IFSC: SBIN0011514) on Buyer Email"
+                        >
+                          <span>🏦</span>
+                          <span>90% Bank Details</span>
+                        </button>
+                        <button
                           onClick={() => handleSendReceipt(order)}
                           disabled={sendingReceiptId === order.id}
                           className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
@@ -1100,6 +1175,19 @@ export default function AdminOrders() {
                 >
                   <span>🧾</span>
                   <span>Send Total GST Tax Invoice</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const o = viewingOrder;
+                    setViewingOrder(null);
+                    openBankDetailsModal(o);
+                  }}
+                  className="px-3.5 py-2.5 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-sky-600/20 flex items-center gap-1.5 cursor-pointer"
+                  title="Send 90% Banking Details via Email"
+                >
+                  <span>🏦</span>
+                  <span>Send 90% Bank Details</span>
                 </button>
                 <button
                   type="button"
@@ -1618,7 +1706,7 @@ export default function AdminOrders() {
                     <div><strong>GSTIN:</strong> <span className="font-mono font-bold text-brand-900 bg-white px-1.5 py-0.5 rounded border border-slate-200">27ABACA6256A1Z2</span></div>
                     <div><strong>Phone:</strong> <span className="font-mono font-bold text-emerald-800">📞 +91 84088 41998</span></div>
                     <div><strong>Email:</strong> b2bbharat.in@gmail.com</div>
-                    <div className="text-[10px] text-slate-400">Plot 5, Prerna Nagar, Sambhajinagar</div>
+                    <div className="text-[10px] text-slate-400">Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar 431009, Maharashtra</div>
                   </div>
                 </div>
 
@@ -1751,6 +1839,284 @@ export default function AdminOrders() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        );
+      })()}
+
+      {/* ========================================================= */}
+      {/* MODAL 4: SEND 90% BALANCE PAYMENT & BANK DETAILS (QUOTATION UI) */}
+      {/* ========================================================= */}
+      {bankDetailsModalOrder && (() => {
+        const totalVal = Number(bankDetailsModalOrder.total_amount || 0);
+        const isHighVal = totalVal >= 1000000;
+        const advanceVal = Number(bankDetailsModalOrder.advance_amount || (isHighVal ? 100000 : totalVal * 0.1));
+        const pendingVal = Number(bankDetailsModalOrder.balance_amount || Math.max(0, totalVal - advanceVal));
+        const quoteRef = `AAPL/PAY90/2026/${(bankDetailsModalOrder.transaction_id || bankDetailsModalOrder.id || '').replace(/[^0-9a-zA-Z]/g, '').slice(-6).toUpperCase() || '772910'}`;
+        const todayStr = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        return (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-3xl shadow-2xl p-0 w-full max-w-2xl max-h-[92vh] overflow-y-auto border border-slate-200"
+            >
+              {/* Top Quotation Navy Header Bar */}
+              <div className="bg-gradient-to-r from-[#1B3A5C] via-[#20446c] to-[#234b73] p-6 sm:p-7 text-white rounded-t-3xl relative">
+                <button
+                  onClick={() => setBankDetailsModalOrder(null)}
+                  className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-xl text-sm cursor-pointer transition-colors"
+                  title="Close"
+                >
+                  ✕
+                </button>
+                <div className="flex flex-wrap items-center justify-between gap-3 pr-8">
+                  <div>
+                    <div className="text-xl sm:text-2xl font-black tracking-wide text-white">B2B INDIA</div>
+                    <div className="text-[11px] font-bold text-[#E8792B] uppercase tracking-widest mt-0.5">by Aaudumbar Agro Pvt. Ltd.</div>
+                  </div>
+                  <div className="bg-[#E8792B] text-white text-[11px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-lg shadow-sm">
+                    90% BALANCE PAYMENT DETAILS
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 sm:p-7 space-y-5">
+                {/* Quotation Metadata Matrix */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-slate-200 text-xs">
+                  <div className="space-y-1">
+                    <div><span className="text-slate-500 font-medium">Reference No:</span> <strong className="font-mono text-[#1B3A5C]">{quoteRef}</strong></div>
+                    <div><span className="text-slate-500 font-medium">Order ID:</span> <span className="font-mono font-bold text-slate-800">{bankDetailsModalOrder.id || 'ORD-IND'}</span></div>
+                    <div><span className="text-slate-500 font-medium">Date:</span> <strong className="text-slate-800">{todayStr}</strong></div>
+                    <div><span className="text-slate-500 font-medium">Validity:</span> <strong className="text-[#E8792B]">Prior to Warehouse Dispatch</strong></div>
+                  </div>
+                  <div className="sm:text-right space-y-1">
+                    <div className="font-bold text-[#1B3A5C]">Supplier Origin (Billed By):</div>
+                    <div className="font-extrabold text-slate-900">Aaudumbar Agro Pvt. Ltd.</div>
+                    <div className="text-slate-500 text-[11px]">Garkheda Parisar, Sambhajinagar</div>
+                    <div><span className="text-slate-500 font-medium">GSTIN:</span> <strong className="font-mono text-slate-800">27ABACA6256A1Z2</strong></div>
+                  </div>
+                </div>
+
+                {/* Buyer Information Card with Inline Edit fields */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="text-xs font-bold text-[#1B3A5C] uppercase tracking-wider flex items-center gap-1.5">
+                      <span>👤</span> Recipient & Buyer Information:
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">Editable for email dispatch</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        Buyer Email (Receives Banking Details): *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={bankCustomEmail}
+                        onChange={(e) => setBankCustomEmail(e.target.value)}
+                        placeholder="buyer@company.com"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        Buyer Company / Enterprise Name:
+                      </label>
+                      <input
+                        type="text"
+                        value={bankCustomCompanyName}
+                        onChange={(e) => setBankCustomCompanyName(e.target.value)}
+                        placeholder="Enterprise Buyer Ltd."
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        Buyer Phone Number:
+                      </label>
+                      <input
+                        type="text"
+                        value={bankCustomPhone}
+                        onChange={(e) => setBankCustomPhone(e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-mono text-slate-900 outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        Buyer GSTIN:
+                      </label>
+                      <input
+                        type="text"
+                        value={bankCustomGstin}
+                        onChange={(e) => setBankCustomGstin(e.target.value)}
+                        placeholder="27AAACR1234F1Z5"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-mono uppercase text-slate-900 outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product / Commodity Breakdown Table */}
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead className="bg-[#1B3A5C] text-white">
+                      <tr>
+                        <th className="py-2.5 px-3 font-bold uppercase tracking-wider text-[10px]">#</th>
+                        <th className="py-2.5 px-3 font-bold uppercase tracking-wider text-[10px]">Product Description</th>
+                        <th className="py-2.5 px-3 font-bold uppercase tracking-wider text-[10px] text-center">HSN</th>
+                        <th className="py-2.5 px-3 font-bold uppercase tracking-wider text-[10px] text-center">Qty</th>
+                        <th className="py-2.5 px-3 font-bold uppercase tracking-wider text-[10px] text-right">Rate (₹)</th>
+                        <th className="py-2.5 px-3 font-bold uppercase tracking-wider text-[10px] text-right">Total Amount (₹)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      <tr>
+                        <td className="py-2.5 px-3 font-medium text-slate-500">1</td>
+                        <td className="py-2.5 px-3 font-bold text-slate-900">{bankDetailsModalOrder.product_name}</td>
+                        <td className="py-2.5 px-3 font-mono text-slate-500 text-center">{bankCustomHsnCode || '1006.30'}</td>
+                        <td className="py-2.5 px-3 font-bold text-slate-800 text-center">{Number(bankDetailsModalOrder.quantity || 1).toLocaleString('en-IN')} {bankDetailsModalOrder.unit || 'Kg'}</td>
+                        <td className="py-2.5 px-3 font-mono text-slate-700 text-right">₹{Number(bankDetailsModalOrder.price_per_unit || (totalVal / (bankDetailsModalOrder.quantity || 1))).toLocaleString('en-IN')}</td>
+                        <td className="py-2.5 px-3 font-mono font-bold text-[#1B3A5C] text-right">₹{totalVal.toLocaleString('en-IN')}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Financial Summary Breakdown */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="space-y-1">
+                      <div className="text-slate-500">Total Contract Value: <strong className="text-slate-900 font-mono">₹{totalVal.toLocaleString('en-IN')}</strong></div>
+                      <div className="text-emerald-700 font-medium flex items-center gap-1">
+                        <span>✓ 10% Advance Received (Escrow Verified):</span>
+                        <strong className="font-mono font-bold text-emerald-800">₹{advanceVal.toLocaleString('en-IN')}</strong>
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-r from-[#1B3A5C] to-[#234b73] text-white px-4 py-3 rounded-xl shadow-md text-right">
+                      <div className="text-[10px] uppercase font-bold tracking-wider text-slate-200">90% Remaining Balance Payable</div>
+                      <div className="text-lg font-black font-mono text-[#E8792B]">₹{pendingVal.toLocaleString('en-IN')}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* THE OFFICIAL BANKING DETAILS (PROMINENT QUOTATION BOX) */}
+                <div className="bg-gradient-to-b from-[#f8fafc] to-[#edf2f7] border-2 border-[#1B3A5C] rounded-2xl p-4 sm:p-5 shadow-sm relative space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-slate-300 pb-3">
+                    <div>
+                      <div className="text-[10px] font-black text-[#E8792B] uppercase tracking-widest">OFFICIAL BANK TRANSFER DETAILS</div>
+                      <div className="text-sm sm:text-base font-black text-[#1B3A5C]">Bank Transfer / RTGS / NEFT / IMPS</div>
+                    </div>
+                    <span className="text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-300 px-2.5 py-1 rounded-full flex items-center gap-1">
+                      <span>🔒</span> VERIFIED ESCROW ACCOUNT
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+                    <div className="bg-white p-3 rounded-xl border border-slate-200">
+                      <span className="text-slate-500 text-[11px] block">Beneficiary / Account Name:</span>
+                      <strong className="text-slate-900 font-bold text-sm block mt-0.5">Aaudumbar Agro Pvt. Ltd.</strong>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-xl border border-slate-200">
+                      <span className="text-slate-500 text-[11px] block">Bank Name & Branch:</span>
+                      <strong className="text-slate-900 font-bold text-sm block mt-0.5">State Bank of India (SBI)</strong>
+                      <span className="text-[10px] text-slate-500">Garkheda Parisar, Chhatrapati Sambhajinagar</span>
+                    </div>
+
+                    <div className="bg-sky-50/70 p-3 rounded-xl border border-sky-200 flex items-center justify-between">
+                      <div>
+                        <span className="text-sky-800 text-[11px] font-bold block">Account Number:</span>
+                        <span className="font-mono font-black text-[#1B3A5C] text-base tracking-wider block">
+                          20521984403
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText('20521984403');
+                          setCopiedBankField('acc');
+                          setTimeout(() => setCopiedBankField(null), 2000);
+                        }}
+                        className="px-2.5 py-1 bg-white hover:bg-sky-100 text-sky-700 text-[11px] font-bold rounded-lg border border-sky-300 cursor-pointer transition-colors"
+                      >
+                        {copiedBankField === 'acc' ? '✓ Copied' : '📋 Copy'}
+                      </button>
+                    </div>
+
+                    <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200 flex items-center justify-between">
+                      <div>
+                        <span className="text-amber-800 text-[11px] font-bold block">IFSC Code:</span>
+                        <span className="font-mono font-black text-[#E8792B] text-base tracking-wider block">
+                          SBIN0011514
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText('SBIN0011514');
+                          setCopiedBankField('ifsc');
+                          setTimeout(() => setCopiedBankField(null), 2000);
+                        }}
+                        className="px-2.5 py-1 bg-white hover:bg-amber-100 text-amber-800 text-[11px] font-bold rounded-lg border border-amber-300 cursor-pointer transition-colors"
+                      >
+                        {copiedBankField === 'ifsc' ? '✓ Copied' : '📋 Copy'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-slate-600 bg-slate-100/80 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                    <div><strong>Account Type:</strong> Current Account</div>
+                    <div><strong>Payment Remarks:</strong> <span className="font-mono text-[#1B3A5C] font-bold">{quoteRef}</span></div>
+                  </div>
+                </div>
+
+                {/* Guidelines / Terms Alert */}
+                <div className="bg-[#f8faf9] border border-[#4A8C3F]/40 border-l-4 border-l-[#4A8C3F] p-3.5 rounded-xl text-xs space-y-1">
+                  <div className="text-[#4A8C3F] font-bold uppercase tracking-wider text-[11px]">
+                    Guidelines for 90% Payment & Dispatch:
+                  </div>
+                  <ul className="text-slate-600 text-[11px] space-y-0.5 list-disc list-inside">
+                    <li>10% advance is confirmed and held in B2B India Escrow.</li>
+                    <li>90% remaining amount (₹{pendingVal.toLocaleString('en-IN')}) is payable to above SBI account before warehouse dispatch.</li>
+                    <li>Share UTR number or transfer receipt on WhatsApp <strong>+91 84088 41998</strong> or email for instantaneous dispatch clearance.</li>
+                  </ul>
+                </div>
+
+                {/* Modal Actions */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setBankDetailsModalOrder(null)}
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => handleSendBankDetails(e)}
+                    disabled={sendingBankDetails}
+                    className="px-6 py-2.5 bg-gradient-to-r from-sky-600 via-blue-700 to-indigo-800 hover:from-sky-700 hover:to-indigo-900 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-sky-600/20 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {sendingBankDetails ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Sending 90% Bank Details Email...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>✉️</span>
+                        <span>Send 90% Bank Details to Buyer Email</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </motion.div>
           </div>
         );

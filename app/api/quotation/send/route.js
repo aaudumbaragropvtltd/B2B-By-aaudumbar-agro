@@ -52,7 +52,7 @@ export async function POST(request) {
 Date: ${dateStr} | Valid Until: ${validUntilStr}
 
 From: Aaudumbar Agro Pvt. Ltd.
-Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar - 431009
+Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar 431009, Maharashtra
 Phone: +91 84088 41998 | GSTIN: 27ABACA6256A1Z2
 
 To (Buyer): ${buyerCompany || buyerName || 'Valued Buyer'}
@@ -238,7 +238,7 @@ Aaudumbar Agro Pvt. Ltd.
               <tr>
                 <td style="font-size:12px;color:#fff;opacity:0.8;">
                   <strong>Aaudumbar Agro Pvt. Ltd.</strong><br>
-                  <span style="font-size:11px;opacity:0.7;">Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar 431009</span>
+                  <span style="font-size:11px;opacity:0.7;">Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar 431009, Maharashtra</span>
                 </td>
                 <td style="text-align:right;font-size:11px;color:#fff;opacity:0.7;">
                   📞 +91 84088 41998<br>

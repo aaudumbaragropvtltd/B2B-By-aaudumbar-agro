@@ -32,7 +32,7 @@ export async function sendTotalInvoiceEmail(orderData, options = {}) {
       pan: 'ABACA6256A',
       phone: '+91 84088 41998',
       email: 'b2bbharat.in@gmail.com',
-      address: 'Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar - 431009, Maharashtra',
+      address: 'Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar 431009, Maharashtra',
       state: 'Maharashtra (State Code: 27)'
     };
 
@@ -355,7 +355,7 @@ This is an electronically verified GST Tax Invoice issued by Aaudumbar Agro Pvt.
                     <strong>B2B India Central Operations</strong><br>
                     Aaudumbar Agro Pvt. Ltd.<br>
                     Plot No. 5, Prerna Nagar, Garkheda Parisar,<br>
-                    Chhatrapati Sambhajinagar - 431009, Maharashtra<br>
+                    Chhatrapati Sambhajinagar 431009, Maharashtra<br>
                     GSTIN: 27ABACA6256A1Z2 | PAN: ABACA6256A
                   </td>
                   <td width="45%" style="text-align:right;vertical-align:bottom;">

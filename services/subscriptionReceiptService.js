@@ -209,7 +209,7 @@ export async function sendSubscriptionReceiptEmail(subscriptionData, options = {
                 Aaudumbar Agro Private Limited (B2B India)
               </div>
               <div style="font-size:11px;color:#94a3b8;margin-top:4px;">
-                GSTIN: 27ABACA6256A1Z2 • Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar - 431009
+                GSTIN: 27ABACA6256A1Z2 • Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar 431009, Maharashtra
               </div>
               <div style="font-size:10px;color:#64748b;margin-top:6px;">
                 This is an official automated computer-generated payment receipt &amp; tax invoice. No physical signature required.

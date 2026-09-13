@@ -466,7 +466,7 @@ export default function SupportChatPanel({ isDashboard = false }) {
               <span>Aaudumbar Agro Pvt. Ltd.</span>
             </div>
             <div><strong>GSTIN:</strong> 27ABACA6256A1Z2</div>
-            <div><strong>Central Hub:</strong> Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar - 431009, Maharashtra</div>
+            <div><strong>Registered Office:</strong> Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar 431009, Maharashtra</div>
           </div>
 
         </div>
