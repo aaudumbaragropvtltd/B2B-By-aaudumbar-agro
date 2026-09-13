@@ -48,6 +48,22 @@ const DEMO_FAVORITES = [];
 
 const DEMO_HISTORY = [];
 
+// Helper to format large currency amounts into compact Indian denomination (Crores / Lakhs)
+const getCompactIndianCurrency = (val) => {
+  if (!val || typeof val !== 'string' || !val.includes('₹')) return null;
+  const num = Number(val.replace(/[^0-9.]/g, ''));
+  if (!num || isNaN(num) || num < 100000) return null;
+  if (num >= 10000000) {
+    const cr = (num / 10000000).toFixed(2).replace(/\.00$/, '');
+    return `₹${cr} Cr`;
+  }
+  if (num >= 100000) {
+    const l = (num / 100000).toFixed(2).replace(/\.00$/, '');
+    return `₹${l} Lakh`;
+  }
+  return null;
+};
+
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -525,24 +541,54 @@ function DashboardContent() {
 
                   {/* ═══ MAIN CONTENT ═══ */}
                   <div className="lg:col-span-3 order-1 lg:order-2 space-y-8">
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                      {stats.map((stat, i) => (
-                        <motion.div
-                          key={stat.label}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: i * 0.05 }}
-                          className="rounded-2xl bg-white border border-border-subtle p-5 shadow-sm hover:shadow-md transition-all"
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-2xl">{stat.icon}</span>
-                            <span className="text-[10px] text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded-full">{stat.change}</span>
-                          </div>
-                          <div className="text-2xl font-extrabold text-foreground">{stat.value}</div>
-                          <div className="text-xs text-gray-500 mt-1 font-medium">{stat.label}</div>
-                        </motion.div>
-                      ))}
+                    {/* Stats Grid - 100% Mobile Responsive */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                      {stats.map((stat, i) => {
+                        const compactEquivalent = getCompactIndianCurrency(stat.value);
+                        const valLength = String(stat.value || '').length;
+
+                        return (
+                          <motion.div
+                            key={stat.label}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: i * 0.05 }}
+                            className="rounded-2xl bg-white border border-border-subtle p-3.5 sm:p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between min-w-0 overflow-hidden"
+                          >
+                            <div className="flex items-center justify-between gap-1 mb-2 sm:mb-3 min-w-0">
+                              <span className="text-xl sm:text-2xl flex-shrink-0">{stat.icon}</span>
+                              <span className="text-[9px] sm:text-[10px] text-gray-500 font-bold bg-gray-50 border border-gray-100 px-1.5 sm:px-2 py-0.5 rounded-full truncate max-w-[80px] sm:max-w-none flex-shrink-0">
+                                {stat.change}
+                              </span>
+                            </div>
+
+                            <div className="min-w-0">
+                              <div 
+                                className={`font-black text-foreground tracking-tight leading-tight truncate ${
+                                  valLength > 11 
+                                    ? 'text-[15px] sm:text-lg lg:text-2xl' 
+                                    : valLength > 7 
+                                    ? 'text-base sm:text-xl lg:text-2xl' 
+                                    : 'text-xl sm:text-2xl'
+                                }`}
+                                title={stat.value}
+                              >
+                                {stat.value}
+                              </div>
+
+                              {compactEquivalent && (
+                                <div className="text-[10px] sm:text-xs font-bold text-emerald-600 truncate mt-0.5" title={`Approx. ${compactEquivalent}`}>
+                                  ≈ {compactEquivalent}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="text-[11px] sm:text-xs text-gray-500 mt-1 font-semibold truncate" title={stat.label}>
+                              {stat.label}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </div>
 
                     {/* Quick Actions (Unified Buying & Selling) */}
@@ -651,14 +697,14 @@ function DashboardContent() {
                           orders.filter(o => orderFilter === 'all' || o.status === orderFilter).slice(0, 5).map((order) => {
                             const statusInfo = STATUS_MAP[order.status] || STATUS_MAP.quotation_issued;
                             return (
-                              <div key={order.id} className="px-4 sm:px-6 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors">
+                              <div key={order.id} className="px-3 sm:px-6 py-3 flex items-center gap-2 sm:gap-3 hover:bg-gray-50 transition-colors">
                                 <div className={`w-2.5 h-2.5 rounded-full ${statusInfo.dot} flex-shrink-0`} />
                                 <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-bold text-gray-900 truncate">{order.productName}</div>
-                                  <div className="text-xs text-gray-400">{order.supplierName}</div>
+                                  <div className="text-xs sm:text-sm font-bold text-gray-900 truncate">{order.productName}</div>
+                                  <div className="text-[10px] sm:text-xs text-gray-400 truncate">{order.supplierName}</div>
                                 </div>
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${statusInfo.color} uppercase tracking-wider`}>{statusInfo.label}</span>
-                                <div className="text-sm font-bold text-gray-900">{order.value}</div>
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold ${statusInfo.color} uppercase tracking-wider flex-shrink-0`}>{statusInfo.label}</span>
+                                <div className="text-xs sm:text-sm font-bold text-gray-900 flex-shrink-0 text-right">{order.value}</div>
                               </div>
                             );
                           })

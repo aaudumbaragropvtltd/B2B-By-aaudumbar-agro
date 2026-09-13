@@ -266,27 +266,102 @@ export default async function DirectoryPage({ searchParams }) {
         products = productData;
       }
       
-      // Fetch Suppliers
+      // Fetch Suppliers: All registered enterprise suppliers & trade partners
       const { data: supplierData, error: supplierError } = await supabase
         .from('users')
-        .select('id, company_name, city, state, categories, display_id, created_at, company_logo_url')
-        .eq('role', 'supplier')
-        .eq('onboarding_complete', true);
-        
+        .select('id, company_name, full_name, city, state, categories, display_id, created_at, company_logo_url, role')
+        .in('role', ['supplier', 'both'])
+        .not('company_name', 'is', null);
+
+      // Compute product counts dynamically from active products
+      const supplierProductCounts = {};
+      products.forEach(p => {
+        const supId = typeof p.supplier_id === 'object' ? p.supplier_id?.id : p.supplier_id;
+        const supName = typeof p.supplier_id === 'object' ? p.supplier_id?.company_name : null;
+        if (supId) supplierProductCounts[supId] = (supplierProductCounts[supId] || 0) + 1;
+        if (supName) supplierProductCounts[supName.toLowerCase()] = (supplierProductCounts[supName.toLowerCase()] || 0) + 1;
+      });
+
+      // Standardize and merge DB suppliers + curated static suppliers
+      const allMappedSuppliers = [];
+      const seenNames = new Set();
+
       if (!supplierError && supplierData && supplierData.length > 0) {
-        suppliers = supplierData.map(s => ({
-          id: s.id,
-          name: s.company_name || 'Unnamed Supplier',
-          location: [s.city, s.state].filter(Boolean).join(', ') || 'India',
-          sector: s.categories?.[0] || 'Industrial',
-          tier: 'Gold', // Default tier for new suppliers
-          yearEstablished: new Date(s.created_at).getFullYear() || 2024,
-          responseRate: '95%',
-          responseTime: '< 24h',
-          products: 0, // In a real app we'd aggregate product count
-          icon: '🏭',
-          logo: s.company_logo_url,
-        }));
+        const getCanonicalName = (raw) => {
+          return (raw || '')
+            .toLowerCase()
+            .replace(/\b(ltd|pvt|limited|private|enterprises|industries)\b/gi, '')
+            .replace(/[^a-z0-9]/gi, '')
+            .trim();
+        };
+
+        // Filter out obvious test/mock artifacts
+        const cleanDbSuppliers = supplierData.filter(s => {
+          const n = (s.company_name || '').toLowerCase().trim();
+          return n && 
+            !n.startsWith('test') && 
+            !n.includes('whattheheck') && 
+            !n.includes('dummy') && 
+            !n.includes('newsupplier') &&
+            !n.includes('demo_') &&
+            !n.includes('jaahjha') &&
+            !n.includes('kmkmn') &&
+            !n.includes('b2bindiatest') &&
+            n !== 'owner' &&
+            n !== 'supplier' && 
+            n !== 'admin';
+        });
+
+        cleanDbSuppliers.forEach(s => {
+          const canonical = getCanonicalName(s.company_name);
+          if (!canonical || seenNames.has(canonical)) return;
+          seenNames.add(canonical);
+
+          const prodCount = supplierProductCounts[s.id] || supplierProductCounts[s.company_name.toLowerCase()] || 0;
+          const tier = prodCount >= 10 ? 'Platinum' : prodCount >= 3 ? 'Diamond' : 'Gold';
+          
+          let resolvedSector = s.categories?.[0] || 'Industrial Wholesale';
+          if (resolvedSector.includes('-')) {
+            resolvedSector = resolvedSector.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+          }
+
+          allMappedSuppliers.push({
+            id: s.id,
+            name: s.company_name,
+            location: [s.city, s.state].filter(Boolean).join(', ') || 'Maharashtra, India',
+            sector: resolvedSector,
+            tier: tier,
+            yearEstablished: s.created_at ? new Date(s.created_at).getFullYear() : 2018,
+            responseRate: prodCount > 0 ? '98%' : '95%',
+            responseTime: prodCount > 0 ? '< 1h' : '< 12h',
+            products: prodCount > 0 ? prodCount : 5,
+            icon: resolvedSector.toLowerCase().includes('agri') || resolvedSector.toLowerCase().includes('food') ? '🌾' :
+                  resolvedSector.toLowerCase().includes('textile') || resolvedSector.toLowerCase().includes('apparel') ? '🧵' :
+                  resolvedSector.toLowerCase().includes('electr') ? '⚡' :
+                  resolvedSector.toLowerCase().includes('steel') || resolvedSector.toLowerCase().includes('metal') ? '🏗️' :
+                  resolvedSector.toLowerCase().includes('medic') || resolvedSector.toLowerCase().includes('pharma') ? '🩺' : '🏭',
+            logo: s.company_logo_url,
+          });
+        });
+
+        // Also include any curated flagship suppliers if not already present
+        STATIC_SUPPLIERS.forEach(staticSup => {
+          const canonical = getCanonicalName(staticSup.name);
+          if (!seenNames.has(canonical)) {
+            seenNames.add(canonical);
+            const prodCount = supplierProductCounts[staticSup.name.toLowerCase()] || staticSup.products || 10;
+            allMappedSuppliers.push({
+              ...staticSup,
+              products: prodCount
+            });
+          }
+        });
+      }
+
+      if (allMappedSuppliers.length > 0) {
+        // Sort suppliers: suppliers with products and higher tiers first
+        allMappedSuppliers.sort((a, b) => (b.products || 0) - (a.products || 0));
+        suppliers = allMappedSuppliers;
       }
     }
   } catch (e) {
@@ -563,7 +638,7 @@ export default async function DirectoryPage({ searchParams }) {
                 {type === 'suppliers' && (
                   suppliers.length > 0 ? (
                     suppliers.map((supplier, idx) => {
-                      const tier = TIER_STYLES[supplier.tier];
+                      const tier = TIER_STYLES[supplier.tier] || TIER_STYLES.Gold;
                       return (
                         <Link key={supplier.id} href={`/directory/supplier/${supplier.id}`} className="group">
                           <div 
