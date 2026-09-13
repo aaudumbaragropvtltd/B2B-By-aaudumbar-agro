@@ -400,42 +400,71 @@ function DashboardContent() {
       <main className="flex-1 pt-24 pb-16 bg-surface-elevated min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Header & Role Badge */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">Trade Dashboard</h1>
-                {profile && (
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-xs flex items-center gap-1.5">
-                      <span>🤝</span> Trade Partner (Buyer & Supplier) {profile.display_id ? `• ${profile.display_id}` : ''}
-                    </span>
-                    
-                    <div className="flex bg-gray-100 p-1 rounded-xl ml-2 border border-gray-200">
-                      <button
-                        onClick={() => setRole('buyer')}
-                        className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${role === 'buyer' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                      >
-                        🛒 Buying Hub
-                      </button>
-                      <button
-                        onClick={() => setRole('supplier')}
-                        className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${role === 'supplier' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                      >
-                        🏭 Selling Hub
-                      </button>
-                    </div>
-                  </div>
+          {/* Header & Role Switcher */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 sm:mb-8">
+            <div className="space-y-3 flex-1 min-w-0">
+              
+              {/* Title & Trade Partner Badge */}
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Trade Dashboard</h1>
+                {(profile || user) && (
+                  <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 shadow-2xs flex items-center gap-1.5 max-w-full truncate">
+                    <span className="flex-shrink-0">🤝</span>
+                    <span className="truncate">Trade Partner (Buyer &amp; Supplier)</span>
+                    {profile?.display_id ? <span className="text-indigo-600 font-mono font-extrabold flex-shrink-0">• {profile.display_id}</span> : ''}
+                  </span>
                 )}
               </div>
-              <p className="text-gray-500 mt-1">Unified All-in-One workspace to buy materials and sell wholesale products.</p>
+
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-2xl">
+                Unified All-in-One workspace to buy raw materials and sell wholesale products across India.
+              </p>
+
+              {/* 100% Mobile Responsive Hub Switcher (Buying Hub vs Selling Hub) */}
+              {(profile || user) && (
+                <div className="pt-1 w-full sm:w-auto">
+                  <div className="grid grid-cols-2 sm:inline-flex w-full sm:w-auto bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/90 shadow-inner gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setRole('buyer')}
+                      className={`flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 sm:py-2 text-xs sm:text-sm font-black rounded-xl transition-all duration-200 cursor-pointer ${
+                        role === 'buyer'
+                          ? 'bg-white text-brand-700 shadow-md shadow-brand-500/10 border border-slate-200 scale-[1.01]'
+                          : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
+                      }`}
+                    >
+                      <span className="text-base sm:text-lg">🛒</span>
+                      <span className="truncate">Buying Hub</span>
+                      {role === 'buyer' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-600 animate-pulse hidden sm:inline-block ml-1" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setRole('supplier')}
+                      className={`flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 sm:py-2 text-xs sm:text-sm font-black rounded-xl transition-all duration-200 cursor-pointer ${
+                        role === 'supplier'
+                          ? 'bg-white text-orange-700 shadow-md shadow-orange-500/10 border border-slate-200 scale-[1.01]'
+                          : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
+                      }`}
+                    >
+                      <span className="text-base sm:text-lg">🏭</span>
+                      <span className="truncate">Selling Hub</span>
+                      {role === 'supplier' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-600 animate-pulse hidden sm:inline-block ml-1" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {isAdminUser && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <Link
                   href="/admin/dashboard"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-700 hover:to-indigo-800 text-white text-sm font-bold shadow-md shadow-purple-600/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-purple-400/30"
+                  className="w-full sm:w-auto justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-700 hover:to-indigo-800 text-white text-xs sm:text-sm font-bold shadow-md shadow-purple-600/25 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-purple-400/30"
                 >
                   <span>🛡️</span>
                   <span>Admin Panel</span>
