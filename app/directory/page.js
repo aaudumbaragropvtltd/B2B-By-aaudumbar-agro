@@ -247,7 +247,7 @@ export default async function DirectoryPage({ searchParams }) {
         .select(`
           id, title, description, base_price_per_unit, unit_label, 
           bulk_minimum_order, quality_grade, is_stale, hero_image_url, technical_specifications,
-          supplier_id (company_name, city, state, warehouse_address, pincode),
+          supplier_id (id, company_name, city, state, warehouse_address, pincode),
           sector_id (name, slug)
         `)
         .eq('is_active', true);
@@ -273,13 +273,18 @@ export default async function DirectoryPage({ searchParams }) {
         .in('role', ['supplier', 'both'])
         .not('company_name', 'is', null);
 
-      // Compute product counts dynamically from active products
-      const supplierProductCounts = {};
-      products.forEach(p => {
+      // LIVE REAL PRODUCT COUNT: Query the active products directly to get exact real-time counts per supplier
+      const { data: allActiveProductRows } = await supabase
+        .from('products')
+        .select('supplier_id')
+        .eq('is_active', true);
+
+      const liveSupplierProductCounts = {};
+      allActiveProductRows?.forEach(p => {
         const supId = typeof p.supplier_id === 'object' ? p.supplier_id?.id : p.supplier_id;
-        const supName = typeof p.supplier_id === 'object' ? p.supplier_id?.company_name : null;
-        if (supId) supplierProductCounts[supId] = (supplierProductCounts[supId] || 0) + 1;
-        if (supName) supplierProductCounts[supName.toLowerCase()] = (supplierProductCounts[supName.toLowerCase()] || 0) + 1;
+        if (supId) {
+          liveSupplierProductCounts[supId] = (liveSupplierProductCounts[supId] || 0) + 1;
+        }
       });
 
       // Standardize and merge DB suppliers + curated static suppliers
@@ -312,12 +317,16 @@ export default async function DirectoryPage({ searchParams }) {
             n !== 'admin';
         });
 
+        // Sort suppliers by actual live product count descending before deduplication
+        // so the active supplier account with real products always takes precedence!
+        cleanDbSuppliers.sort((a, b) => (liveSupplierProductCounts[b.id] || 0) - (liveSupplierProductCounts[a.id] || 0));
+
         cleanDbSuppliers.forEach(s => {
           const canonical = getCanonicalName(s.company_name);
           if (!canonical || seenNames.has(canonical)) return;
           seenNames.add(canonical);
 
-          const prodCount = supplierProductCounts[s.id] || supplierProductCounts[s.company_name.toLowerCase()] || 0;
+          const prodCount = liveSupplierProductCounts[s.id] || 0;
           const tier = prodCount >= 10 ? 'Platinum' : prodCount >= 3 ? 'Diamond' : 'Gold';
           
           let resolvedSector = s.categories?.[0] || 'Industrial Wholesale';
@@ -332,9 +341,9 @@ export default async function DirectoryPage({ searchParams }) {
             sector: resolvedSector,
             tier: tier,
             yearEstablished: s.created_at ? new Date(s.created_at).getFullYear() : 2018,
-            responseRate: prodCount > 0 ? '98%' : '95%',
-            responseTime: prodCount > 0 ? '< 1h' : '< 12h',
-            products: prodCount > 0 ? prodCount : 5,
+            responseRate: prodCount > 10 ? '99%' : prodCount > 0 ? '98%' : '95%',
+            responseTime: prodCount > 10 ? '< 30m' : prodCount > 0 ? '< 1h' : '< 4h',
+            products: prodCount,
             icon: resolvedSector.toLowerCase().includes('agri') || resolvedSector.toLowerCase().includes('food') ? '🌾' :
                   resolvedSector.toLowerCase().includes('textile') || resolvedSector.toLowerCase().includes('apparel') ? '🧵' :
                   resolvedSector.toLowerCase().includes('electr') ? '⚡' :
@@ -349,7 +358,7 @@ export default async function DirectoryPage({ searchParams }) {
           const canonical = getCanonicalName(staticSup.name);
           if (!seenNames.has(canonical)) {
             seenNames.add(canonical);
-            const prodCount = supplierProductCounts[staticSup.name.toLowerCase()] || staticSup.products || 10;
+            const prodCount = liveSupplierProductCounts[staticSup.id] || 0;
             allMappedSuppliers.push({
               ...staticSup,
               products: prodCount
