@@ -497,20 +497,36 @@ export default function AdminDashboardPage() {
         )}
       </AnimatePresence>
 
-      {/* Top Bar */}
-      <div className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <B2BLogo className="w-9 h-9" />
-            <div>
-              <h1 className="text-base font-extrabold text-white leading-tight">B2B INDIA Admin</h1>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest">Control Panel</p>
+      {/* Top Bar - Clean Non-Floating Header */}
+      <div className="bg-slate-900 border-b border-slate-800 relative z-20">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3 flex flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <B2BLogo className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-xs sm:text-base font-black text-white leading-tight">
+                <span className="hidden sm:inline">B2B INDIA </span>Admin
+              </h1>
+              <p className="text-[8px] sm:text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Control Panel</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-xs text-slate-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-800">🌐 View Site</Link>
-            <button onClick={handleLogout} className="text-xs text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10 font-bold">
-              🚪 Logout
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            <Link 
+              href="/" 
+              className="text-[10px] sm:text-xs text-slate-300 hover:text-white transition-colors px-2 sm:px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 flex items-center gap-1 font-semibold"
+              title="View Public Site"
+            >
+              <span>🌐</span>
+              <span className="hidden sm:inline">View Site</span>
+              <span className="sm:hidden">Site</span>
+            </Link>
+            <button 
+              onClick={handleLogout} 
+              className="text-[10px] sm:text-xs text-red-400 hover:text-red-300 transition-colors px-2 sm:px-3 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 font-bold border border-red-500/20 cursor-pointer flex items-center gap-1"
+              title="Logout Admin"
+            >
+              <span>🚪</span>
+              <span className="hidden sm:inline">Logout</span>
+              <span className="sm:hidden">Exit</span>
             </button>
           </div>
         </div>
