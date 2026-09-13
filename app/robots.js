@@ -5,14 +5,28 @@
 // all public products, sectors, and directories with 0 blockage.
 // ============================================================================
 
+import { getSiteUrl } from '../utils/seoUtils.js';
+
 export default function robots() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://b2bindia.site';
+  const baseUrl = getSiteUrl();
 
   return {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: [
+          '/',
+          '/directory/',
+          '/directory/*',
+          '/directory/product/*',
+          '/directory/supplier/*',
+          '/market-rates/',
+          '/terms',
+          '/privacy',
+          '/shipping-policy',
+          '/refund-policy',
+          '/public/*',
+        ],
         disallow: [
           '/api/',
           '/_next/',
@@ -30,6 +44,7 @@ export default function robots() {
           '/directory/*',
           '/directory/product/*',
           '/directory/supplier/*',
+          '/market-rates/',
           '/public/*',
         ],
         disallow: [

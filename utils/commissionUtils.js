@@ -4,8 +4,8 @@
 // Resolves platform fee percentages across all 38 industry categories.
 // ============================================================================
 
-import { DEFAULT_CATEGORY_FEES } from '@/constants/categoryFees';
-import { STATIC_SECTORS } from '@/constants/sectors';
+import { DEFAULT_CATEGORY_FEES } from '../constants/categoryFees.js';
+import { STATIC_SECTORS } from '../constants/sectors.js';
 
 /**
  * Get the platform fee percentage for a given sector slug or name (e.g. 3.0 for 3%, 5.0 for 5%).

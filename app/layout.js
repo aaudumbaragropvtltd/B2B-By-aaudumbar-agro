@@ -1,13 +1,15 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+import { getSiteUrl } from "@/utils/seoUtils";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://b2bindia.site';
+const baseUrl = getSiteUrl();
 
 export const metadata = {
   metadataBase: new URL(baseUrl),
@@ -16,30 +18,24 @@ export const metadata = {
     template: "%s | B2B India",
   },
   description:
-    "Direct B2B procurement pipeline across 38 industrial sectors. Buy wholesale from verified Indian manufacturers with escrow payment clearing, GST invoices, and pan-India logistics.",
+    "Direct B2B wholesale procurement across 38 industrial sectors. Buy wholesale from verified Indian manufacturers with escrow payment clearing, GST tax invoices, and pan-India logistics dispatch.",
   keywords: [
     "B2B wholesale marketplace India",
-    "B2B e-commerce platform India",
-    "find B2B buyers in India",
-    "Bulk order suppliers India",
-    "wholesale distributor for retailers",
+    "buy wholesale online India",
     "verified B2B suppliers India",
-    "industrial suppliers India",
-    "B2B procurement",
-    "manufacturing supplies",
-    "trade directory India",
+    "turmeric wholesale suppliers India",
+    "buy turmeric finger bulk India",
+    "curcumin turmeric exporters India",
     "wholesale spices suppliers India",
     "bulk cardamom black pepper turmeric buyers",
-    "wholesale vegetables online India",
-    "bulk onion and potato suppliers",
-    "fresh agricultural commodities B2B",
-    "wholesale grains and pulses India",
-    "export quality Indian spices bulk",
-    "bulk dry fruits wholesale India",
-    "organic food commodities B2B",
-    "agri-commodities trading platform India",
-    "B2B agricultural produce buyers",
-    "wholesale grocery suppliers India",
+    "wholesale agricultural commodities mandi India",
+    "bulk grain pulses and oilseeds suppliers",
+    "industrial supplies and machinery manufacturers India",
+    "building materials wholesale cement steel",
+    "electrical equipment and solar panels wholesale",
+    "B2B e-commerce platform India",
+    "escrow payment B2B wholesale India",
+    "factory direct wholesale prices",
   ],
   alternates: {
     canonical: '/',
@@ -79,7 +75,7 @@ export const metadata = {
     },
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'google-site-verification-b2bindia',
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
   },
   other: {
     'geo.region': 'IN',

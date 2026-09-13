@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { getCategoryFeePercent } from '@/utils/platformSettings';
+import { triggerProductSeoAutomation } from '@/services/seoAutomationService';
 
 export async function GET(request) {
   try {
@@ -185,6 +186,9 @@ export async function PATCH(request) {
       console.error('Error updating product in admin catalog:', updateErr);
       throw updateErr;
     }
+
+    // Automated Realtime SEO & Google Sitemap Notification
+    triggerProductSeoAutomation(updatedProduct, 'updated').catch(e => console.warn('[SEO] Automation ping error:', e));
     
     return NextResponse.json({ success: true, product: updatedProduct });
   } catch (error) {
@@ -300,6 +304,10 @@ export async function POST(request) {
       .single();
 
     if (insertErr) throw insertErr;
+
+    // Automated Realtime SEO & Google Sitemap Notification
+    triggerProductSeoAutomation(newProduct, 'created').catch(e => console.warn('[SEO] Automation ping error:', e));
+
     return NextResponse.json({ success: true, product: newProduct });
   } catch (error) {
     console.error('Error in POST /api/admin/catalog:', error);

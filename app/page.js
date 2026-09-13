@@ -21,26 +21,29 @@ import CategoryShowcase from '@/components/CategoryShowcase';
 import AnimatedCategoryGrid from '@/components/AnimatedCategoryGrid';
 import Footer from '@/components/Footer';
 import { getActiveBanners } from '@/utils/platformBanners';
+import { getSiteUrl } from '@/utils/seoUtils';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function HomePage() {
+  const siteUrl = getSiteUrl();
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
       {
         '@type': 'WebSite',
-        '@id': 'https://b2bindia.site/#website',
-        url: 'https://b2bindia.site/',
+        '@id': `${siteUrl}/#website`,
+        url: `${siteUrl}/`,
         name: 'B2B India',
-        description: "India's Largest B2B Marketplace — Find Products, Connect with Suppliers",
+        description: "India's Largest B2B Wholesale Marketplace — Direct Manufacturer Sourcing & Automated Escrow",
         potentialAction: [
           {
             '@type': 'SearchAction',
             target: {
               '@type': 'EntryPoint',
-              urlTemplate: 'https://b2bindia.site/directory?q={search_term_string}',
+              urlTemplate: `${siteUrl}/directory?q={search_term_string}`,
             },
             'query-input': 'required name=search_term_string',
           },
@@ -49,21 +52,21 @@ export default async function HomePage() {
       },
       {
         '@type': 'Organization',
-        '@id': 'https://b2bindia.site/#organization',
+        '@id': `${siteUrl}/#organization`,
         name: 'B2B India',
-        url: 'https://b2bindia.site/',
+        url: `${siteUrl}/`,
         logo: {
           '@type': 'ImageObject',
           inLanguage: 'en-IN',
-          '@id': 'https://b2bindia.site/#logo',
-          url: 'https://b2bindia.site/og-image.jpg',
-          contentUrl: 'https://b2bindia.site/og-image.jpg',
+          '@id': `${siteUrl}/#logo`,
+          url: `${siteUrl}/og-image.jpg`,
+          contentUrl: `${siteUrl}/og-image.jpg`,
           width: 1200,
           height: 630,
           caption: 'B2B India',
         },
         image: {
-          '@id': 'https://b2bindia.site/#logo',
+          '@id': `${siteUrl}/#logo`,
         },
       },
     ],

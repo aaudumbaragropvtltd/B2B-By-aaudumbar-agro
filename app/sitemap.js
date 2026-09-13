@@ -5,13 +5,14 @@
 // supplier profiles, and landing pages to Google Search Console for #1 Indexing.
 // ============================================================================
 
-import { getAllProducts, getAllSectors, getProductSlug } from '@/utils/catalogResolver';
+import { getAllProducts, getAllSectors, getProductSlug } from '../utils/catalogResolver.js';
+import { getSiteUrl } from '../utils/seoUtils.js';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate sitemap hourly
 
 export default async function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://b2bindia.site';
+  const baseUrl = getSiteUrl();
   const now = new Date();
 
   // 1. Static Core Platform Pages
@@ -27,6 +28,12 @@ export default async function sitemap() {
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/market-rates`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/orders`,
@@ -48,6 +55,18 @@ export default async function sitemap() {
     },
     {
       url: `${baseUrl}/privacy`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/shipping-policy`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/refund-policy`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.4,

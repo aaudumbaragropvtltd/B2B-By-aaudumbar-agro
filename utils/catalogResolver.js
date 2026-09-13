@@ -7,11 +7,11 @@
 // as well as direct UUID and case-insensitive keyword lookups.
 // ============================================================================
 
-import { PRODUCTS as STATIC_PRODUCTS_LIST, CATEGORIES, SUPPLIER as DEFAULT_SUPPLIER } from '@/data/products';
-import { STATIC_SECTORS } from '@/constants/sectors';
-import { DEFAULT_CATEGORY_FEES } from '@/constants/categoryFees';
-import { getCategoryFeePercentage } from '@/utils/commissionUtils';
-import { slugify, getProductSlug, getProductUrl } from '@/utils/slugUtils';
+import { PRODUCTS as STATIC_PRODUCTS_LIST, CATEGORIES, SUPPLIER as DEFAULT_SUPPLIER } from '../data/products.js';
+import { STATIC_SECTORS } from '../constants/sectors.js';
+import { DEFAULT_CATEGORY_FEES } from '../constants/categoryFees.js';
+import { getCategoryFeePercentage } from './commissionUtils.js';
+import { slugify, getProductSlug, getProductUrl } from './slugUtils.js';
 
 export { slugify, getProductSlug, getProductUrl };
 
@@ -293,6 +293,48 @@ function findProductInList(list, cleanId, targetSlug) {
   // 6. By contains slug match
   match = list.find((p) => slugify(p.title || p.name).includes(targetSlug));
   if (match) return match;
+
+  // 7. By vernacular commodity alias match (e.g. "haldi" -> matches "Turmeric")
+  const COMMODITY_ALIASES = {
+    haldi: 'turmeric',
+    turmeric: 'turmeric',
+    jeera: 'cumin',
+    cumin: 'cumin',
+    mirchi: 'chilli',
+    chilli: 'chilli',
+    chili: 'chilli',
+    elaichi: 'cardamom',
+    cardamom: 'cardamom',
+    chawal: 'rice',
+    basmati: 'rice',
+    kapas: 'cotton',
+    cotton: 'cotton',
+    gehu: 'wheat',
+    wheat: 'wheat',
+    dhania: 'coriander',
+    coriander: 'coriander',
+    sarson: 'mustard',
+    mustard: 'mustard',
+    soya: 'soybean',
+    soyabean: 'soybean',
+    soybean: 'soybean',
+    chini: 'sugar',
+    sugar: 'sugar',
+    saria: 'steel',
+    tmt: 'steel',
+    cement: 'cement',
+    solar: 'solar',
+  };
+
+  const aliasKey = COMMODITY_ALIASES[targetSlug];
+  if (aliasKey) {
+    match = list.find((p) => {
+      const pTitle = (p.title || p.name || '').toLowerCase();
+      const pSlug = slugify(p.title || p.name);
+      return pTitle.includes(aliasKey) || pSlug.includes(aliasKey);
+    });
+    if (match) return match;
+  }
 
   return null;
 }

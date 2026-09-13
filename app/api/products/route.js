@@ -4,6 +4,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { getUserMembership, readMemberships } from '@/services/membershipStore';
 import { getProductSlug } from '@/utils/catalogResolver';
 import { uploadBase64OrUrlToCloudinary, isCloudinaryConfigured } from '@/services/cloudinary';
+import { triggerProductSeoAutomation } from '@/services/seoAutomationService';
 
 // Helper to resolve user profile across firebase_uid, id, and registered_email
 async function resolveUserProfile(supabaseAdmin, user) {
@@ -260,6 +261,9 @@ export async function POST(request) {
       console.error('Error inserting product:', insertError);
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
+
+    // Automated Realtime SEO & Google Sitemap Notification
+    triggerProductSeoAutomation(product, 'created').catch(e => console.warn('[SEO] Automation ping error:', e));
 
     return NextResponse.json({ success: true, product }, { status: 201 });
   } catch (error) {
