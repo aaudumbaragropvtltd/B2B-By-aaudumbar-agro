@@ -14,6 +14,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import Razorpay from 'razorpay';
 
 export function getCredentials() {
   let keyId = null;
@@ -44,8 +45,8 @@ export function getCredentials() {
     }
   } catch (e) {}
 
-  keyId = keyId || process.env.RAZORPAY_KEY_ID?.trim() || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim() || 'rzp_test_TWLTjuvaVcjNFc';
-  keySecret = keySecret || process.env.RAZORPAY_KEY_SECRET?.trim() || 'fq5tI6y0SF9U7qSLa4Af5nOs';
+  keyId = keyId || process.env.RAZORPAY_KEY_ID?.trim() || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim() || 'rzp_live_TbvASSd9EMGeDz';
+  keySecret = keySecret || process.env.RAZORPAY_KEY_SECRET?.trim() || '';
   webhookSecret = webhookSecret || process.env.RAZORPAY_WEBHOOK_SECRET?.trim() || '';
 
   // Synchronize process.env
@@ -193,4 +194,15 @@ export async function fetchPayment(paymentId) {
 export function getPublicKeyId() {
   const { keyId } = getCredentials();
   return keyId;
+}
+
+/**
+ * Get official Razorpay SDK instance initialized with credentials.
+ */
+export function getRazorpayInstance() {
+  const { keyId, keySecret } = getCredentials();
+  return new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret,
+  });
 }

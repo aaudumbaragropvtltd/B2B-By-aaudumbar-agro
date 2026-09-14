@@ -107,7 +107,7 @@ export default function DualPaymentModal({
 
     try {
       let currentOrderId = activeOrderId;
-      let rzpKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_TVAejLVex404MV';
+      let rzpKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_live_TbvASSd9EMGeDz';
       let rzpOrderId = null;
 
       // 1. Initialize order via /api/checkout if needed

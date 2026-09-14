@@ -91,7 +91,7 @@ export default function RazorpayCheckoutButton({
         throw new Error(orderData.error || 'Failed to initiate Razorpay order.');
       }
 
-      const keyId = orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_TWLTjuvaVcjNFc';
+      const keyId = orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_live_TbvASSd9EMGeDz';
 
       // 3. Configure Razorpay checkout options
       const options = {

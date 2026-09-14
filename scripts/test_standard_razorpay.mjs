@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
-const KEY_ID = 'rzp_test_TWLTjuvaVcjNFc';
-const KEY_SECRET = 'fq5tI6y0SF9U7qSLa4Af5nOs';
+const KEY_ID = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_live_TbvASSd9EMGeDz';
+const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 
 async function testRazorpayStandardFlow() {
   console.log('====================================================');
