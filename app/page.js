@@ -72,11 +72,9 @@ export default async function HomePage() {
           contentUrl: `${siteUrl}/logo.png`,
           width: 1024,
           height: 1024,
-          caption: 'B2B India',
+          caption: 'B2B India Official Logo',
         },
-        image: {
-          '@id': `${siteUrl}/#logo`,
-        },
+        image: `${siteUrl}/logo.png`,
       },
     ],
   };

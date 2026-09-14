@@ -42,9 +42,11 @@ export const metadata = {
   ],
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-48.png', sizes: '48x48', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/logo.png', sizes: '1024x1024', type: 'image/png' },
     ],
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
@@ -62,7 +64,13 @@ export const metadata = {
     siteName: "B2B India | b2bindia.site",
     images: [
       {
-        url: '/og-image.jpg',
+        url: `${baseUrl}/logo.png`,
+        width: 1024,
+        height: 1024,
+        alt: 'B2B India Official Logo',
+      },
+      {
+        url: `${baseUrl}/og-image.png`,
         width: 1200,
         height: 630,
         alt: 'B2B India Platform Preview',
@@ -75,7 +83,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: "B2B India — Verified B2B Wholesale Marketplace | b2bindia.site",
     description: "India's premier B2B platform on b2bindia.site connecting verified manufacturers across 38 sectors with automated escrow and AI pricing.",
-    images: ['/og-image.jpg'],
+    images: [`${baseUrl}/logo.png`, `${baseUrl}/og-image.png`],
   },
   robots: {
     index: true,
@@ -125,6 +133,10 @@ export default function RootLayout({ children }) {
           'query-input': 'required name=search_term_string',
         },
         inLanguage: 'en-IN',
+        publisher: {
+          '@id': `${baseUrl}/#organization`,
+        },
+        image: `${baseUrl}/logo.png`,
       },
       {
         '@type': 'Organization',
@@ -133,10 +145,13 @@ export default function RootLayout({ children }) {
         url: `${baseUrl}/`,
         logo: {
           '@type': 'ImageObject',
+          '@id': `${baseUrl}/#logo`,
+          inLanguage: 'en-IN',
           url: `${baseUrl}/logo.png`,
+          contentUrl: `${baseUrl}/logo.png`,
           width: 1024,
           height: 1024,
-          caption: 'B2B India',
+          caption: 'B2B India Official Logo',
         },
         image: `${baseUrl}/logo.png`,
         contactPoint: {
@@ -155,10 +170,16 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
         <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
         <link rel="icon" href="/icon-512.png" type="image/png" sizes="512x512" />
+        <link rel="icon" href="/logo.png" type="image/png" sizes="1024x1024" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <meta name="msapplication-TileImage" content="/icon-512.png" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="preconnect" href="https://5.imimg.com" />
