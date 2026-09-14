@@ -42,16 +42,10 @@ export async function GET(request) {
     const search = (searchParams.get('search') || '').toLowerCase();
     const typeFilter = searchParams.get('type') || 'all'; // 'all', 'deliver', 'pickup'
 
-    // Completed payment states & statuses (Rule: only completed payment orders appear in admin)
-    const COMPLETED_PAYMENT_STATES = [
+    // Completed payment states in PostgreSQL trade_orders enum (strictly: price_locked_10, warehouse_loading, settled)
+    const VALID_SUPABASE_PAYMENT_STATES = [
       'price_locked_10',
       'warehouse_loading',
-      'in_transit',
-      'dispatched',
-      'ready_for_pickup',
-      'collected',
-      'delivered',
-      'completed',
       'settled'
     ];
 
@@ -82,6 +76,24 @@ export async function GET(request) {
         process.env.SUPABASE_SERVICE_ROLE_KEY
       );
 
+      // Fetch transaction references from platform_ledger so transaction_id is 100% unified with payments & receipts
+      const ledgerMap = new Map();
+      try {
+        const { data: ledgerEntries } = await supabaseAdmin
+          .from('platform_ledger')
+          .select('order_id, payment_reference')
+          .not('order_id', 'is', null)
+          .order('created_at', { ascending: false });
+
+        (ledgerEntries || []).forEach(l => {
+          if (l.order_id && l.payment_reference && !ledgerMap.has(l.order_id)) {
+            ledgerMap.set(l.order_id, l.payment_reference);
+          }
+        });
+      } catch (ledgerFetchErr) {
+        console.warn('Ledger fetch notice in admin orders:', ledgerFetchErr.message);
+      }
+
       const { data, error } = await supabaseAdmin
         .from('trade_orders')
         .select(`
@@ -90,12 +102,12 @@ export async function GET(request) {
           supplier:users!trade_orders_supplier_id_fkey ( id, display_id, company_name, full_name, registered_email, corporate_phone, phone_number, whatsapp_number, city, state, warehouse_address ),
           product:products ( id, title, hero_image_url, base_price_per_unit, unit_label )
         `)
-        .in('current_state', COMPLETED_PAYMENT_STATES)
+        .in('current_state', VALID_SUPABASE_PAYMENT_STATES)
         .order('created_at', { ascending: false });
 
       if (!error && data) {
         supabaseOrders = data
-          .filter(so => COMPLETED_PAYMENT_STATES.includes(so.current_state))
+          .filter(so => VALID_SUPABASE_PAYMENT_STATES.includes(so.current_state))
           .map(so => {
             let logisticsMeta = {};
             let cleanNotes = so.buyer_notes || '';
@@ -149,15 +161,7 @@ export async function GET(request) {
               paymentStatusLabel = '10% Paid (Warehouse Loading)';
               effectiveAdvanceAmt = advanceAmt;
               effectiveBalanceAmt = balanceAmt;
-            } else if (so.current_state === 'in_transit' || so.current_state === 'dispatched') {
-              paymentStatusLabel = '10% Paid (In Transit)';
-              effectiveAdvanceAmt = advanceAmt;
-              effectiveBalanceAmt = balanceAmt;
-            } else if (so.current_state === 'ready_for_pickup') {
-              paymentStatusLabel = '10% Paid (Ready for Pickup)';
-              effectiveAdvanceAmt = advanceAmt;
-              effectiveBalanceAmt = balanceAmt;
-            } else if (so.current_state === 'settled' || so.current_state === 'delivered' || so.current_state === 'completed' || logisticsMeta.dispatch_status === 'collected' || logisticsMeta.dispatch_status === 'delivered') {
+            } else if (so.current_state === 'settled' || logisticsMeta.dispatch_status === 'collected' || logisticsMeta.dispatch_status === 'delivered') {
               paymentStatusLabel = '100% Fully Settled';
               effectiveAdvanceAmt = totalAmt;
               effectiveBalanceAmt = 0;
@@ -166,42 +170,49 @@ export async function GET(request) {
             const supplierCompany = so.supplier?.company_name || 'Aaudumbar Agro Pvt. Ltd.';
             const supplierContact = so.supplier?.full_name || 'Aditya Patil';
             const supplierPhoneResolved = supplierPhone || '+91 84088 41998';
-          const supplierEmailResolved = so.supplier?.registered_email || 'aaudumbaragro@gmail.com';
-          const supplierGstResolved = so.supplier?.gst_number || '27ABACA6256A1Z2';
-          const supplierLocResolved = [so.supplier?.city, so.supplier?.state].filter(Boolean).join(', ') || 'Chhatrapati Sambhajinagar, Maharashtra';
-          const supplierGodownResolved = so.supplier?.warehouse_address || 'Central Godown, Plot 14, MIDC Shendra, Chhatrapati Sambhajinagar, Maharashtra 431007';
+            const supplierEmailResolved = so.supplier?.registered_email || 'aaudumbaragro@gmail.com';
+            const supplierGstResolved = so.supplier?.gst_number || '27ABACA6256A1Z2';
+            const supplierLocResolved = [so.supplier?.city, so.supplier?.state].filter(Boolean).join(', ') || 'Chhatrapati Sambhajinagar, Maharashtra';
+            const supplierGodownResolved = so.supplier?.warehouse_address || 'Central Godown, Plot 14, MIDC Shendra, Chhatrapati Sambhajinagar, Maharashtra 431007';
 
-          return {
-            id: so.id,
-            transaction_id: so.qr_payment_reference || `TXN-ESCROW-${so.id.slice(0, 8).toUpperCase()}`,
-            created_at: so.created_at,
-            buyer_id: so.buyer_id,
-            buyer_email: so.buyer?.registered_email || 'buyer@b2bindia.site',
-            buyer_name: so.buyer?.company_name || 'Registered Buyer',
-            buyer_contact_person: so.buyer?.full_name || '',
-            buyer_phone: buyerPhone,
-            buyer_whatsapp: so.buyer?.whatsapp_number || buyerPhone,
-            buyer_location: [so.buyer?.city, so.buyer?.state].filter(Boolean).join(', '),
-            supplier_id: so.supplier_id || 'sup-aaudumbar-1',
-            supplier_name: supplierCompany,
-            supplier_company_name: supplierCompany,
-            supplier_contact_person: supplierContact,
-            supplier_phone: supplierPhoneResolved,
-            supplier_email: supplierEmailResolved,
-            supplier_gstin: supplierGstResolved,
-            supplier_location: supplierLocResolved,
-            supplier_godown: supplierGodownResolved,
-            product_name: resolvedTitle,
-            quantity: so.quantity || 1,
-            unit: so.unit_label || 'Units',
-            agreed_unit_price: so.agreed_unit_price,
-            total_amount: totalAmt,
-            advance_amount: effectiveAdvanceAmt,
-            balance_amount: effectiveBalanceAmt,
-            payment_status: paymentStatusLabel,
-            order_status: logisticsMeta.dispatch_status || logisticsMeta.order_status || so.current_state || 'quotation_issued',
-            delivery_option: deliveryOption,
-            is_paid: true,
+            // Resolve exact transaction ID from platform ledger or qr_payment_reference
+            const liveTxnId = ledgerMap.get(so.id) || 
+              (so.qr_payment_reference && !so.qr_payment_reference.startsWith('RZP-order_') ? so.qr_payment_reference : null) || 
+              so.qr_payment_reference || 
+              `TXN-ESCROW-${so.id.slice(0, 8).toUpperCase()}`;
+
+            return {
+              id: so.id,
+              transaction_id: liveTxnId,
+              created_at: so.created_at,
+              buyer_id: so.buyer_id,
+              buyer_email: so.buyer?.registered_email || 'buyer@b2bindia.site',
+              buyer_name: so.buyer?.company_name || so.buyer?.full_name || 'Registered Buyer',
+              buyer_company_name: so.buyer?.company_name || 'Registered Buyer',
+              buyer_contact_person: so.buyer?.full_name || '',
+              buyer_phone: buyerPhone,
+              buyer_whatsapp: so.buyer?.whatsapp_number || buyerPhone,
+              buyer_location: [so.buyer?.city, so.buyer?.state].filter(Boolean).join(', '),
+              supplier_id: so.supplier_id || 'sup-aaudumbar-1',
+              supplier_name: supplierCompany,
+              supplier_company_name: supplierCompany,
+              supplier_contact_person: supplierContact,
+              supplier_phone: supplierPhoneResolved,
+              supplier_email: supplierEmailResolved,
+              supplier_gstin: supplierGstResolved,
+              supplier_location: supplierLocResolved,
+              supplier_godown: supplierGodownResolved,
+              product_name: resolvedTitle,
+              quantity: so.quantity || 1,
+              unit: so.unit_label || 'Units',
+              agreed_unit_price: so.agreed_unit_price,
+              total_amount: totalAmt,
+              advance_amount: effectiveAdvanceAmt,
+              balance_amount: effectiveBalanceAmt,
+              payment_status: paymentStatusLabel,
+              order_status: logisticsMeta.dispatch_status || logisticsMeta.order_status || so.current_state || 'quotation_issued',
+              delivery_option: deliveryOption,
+              is_paid: true,
             
             // Delivery Specifics
             delivery_address: logisticsMeta.delivery_address || deliveryAddr || [so.buyer?.city, so.buyer?.state].filter(Boolean).join(', ') || 'Delivery Warehouse',

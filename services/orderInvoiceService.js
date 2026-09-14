@@ -15,8 +15,8 @@ export async function sendTotalInvoiceEmail(orderData, options = {}) {
     const dateStr = today.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
     const timeStr = today.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
-    const txnId = orderData.transaction_id || orderData.transactionId || `TXN-IND-${Date.now().toString().slice(-6)}`;
-    const orderId = orderData.id || `ORD-IND-${Date.now().toString().slice(-6)}`;
+    const txnId = orderData.transaction_id || orderData.transactionId || orderData.payment_reference || orderData.razorpay_payment_id || `TXN-IND-${Date.now().toString().slice(-6)}`;
+    const orderId = orderData.order_id || orderData.orderId || orderData.id || `ORD-IND-${Date.now().toString().slice(-6)}`;
     const invoiceNumber = orderData.invoice_number || options.invoiceNumber || `AAPL/INV/2026/${(txnId.replace(/[^0-9a-zA-Z]/g, '')).slice(-6).toUpperCase() || Math.floor(100000 + Math.random() * 900000)}`;
 
     const buyerEmail = (options.buyerEmail || options.customEmail || orderData.buyer_email || orderData.buyerEmail || '').trim();
@@ -37,8 +37,71 @@ export async function sendTotalInvoiceEmail(orderData, options = {}) {
     };
 
     // Party 2: Buyer / Billed To Entity Details
-    const buyerCompanyName = options.buyerCompanyName || orderData.buyer_company_name || orderData.company_name || orderData.buyer_name || 'Enterprise Buyer';
-    const buyerContactPerson = orderData.buyer_contact_person || orderData.receiver_name || orderData.buyer_name || buyerCompanyName;
+    let buyerCompanyName = (
+      options.buyerCompanyName || 
+      orderData.buyer_company_name || 
+      orderData.company_name || 
+      orderData.buyer?.company_name || 
+      ''
+    ).trim();
+
+    // Prevent visitor/driver names from polluting company name
+    const visitorNames = [
+      orderData.p1_name, orderData.p1Name,
+      orderData.p2_name, orderData.p2Name,
+      orderData.receiver_name, orderData.receiverName
+    ].filter(Boolean).map(n => n.trim().toLowerCase());
+
+    if (buyerCompanyName && visitorNames.includes(buyerCompanyName.toLowerCase())) {
+      buyerCompanyName = '';
+    }
+
+    // Lookup company name from Supabase users if not already resolved
+    if (!buyerCompanyName || buyerCompanyName === 'Enterprise Buyer' || buyerCompanyName === 'Verified Buyer') {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ihsgymlxdgmdrtwlnetr.supabase.co';
+        const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imloc2d5bWx4ZGdtZHJ0d2xuZXRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzQ5NDY3OCwiZXhwIjoyMDk5MDcwNjc4fQ.kog1SWIohMiQ76VIOtL5Paa5MSZlV96_nOFjUW0UPII';
+        if (sbUrl && sbKey) {
+          const supabaseAdmin = createClient(sbUrl, sbKey);
+          const buyerId = orderData.buyer_id || orderData.buyerId;
+          if (buyerId) {
+            const { data: uData } = await supabaseAdmin.from('users').select('company_name, full_name').eq('id', buyerId).maybeSingle();
+            if (uData?.company_name) buyerCompanyName = uData.company_name;
+          }
+          if (!buyerCompanyName && buyerEmail) {
+            const { data: uData } = await supabaseAdmin.from('users').select('company_name, full_name').eq('registered_email', buyerEmail).maybeSingle();
+            if (uData?.company_name) buyerCompanyName = uData.company_name;
+          }
+        }
+      } catch (lookupErr) {
+        // Non-fatal
+      }
+    }
+
+    if (!buyerCompanyName) {
+      const candidate = (orderData.buyer_name || orderData.buyerName || '').trim();
+      if (candidate && !visitorNames.includes(candidate.toLowerCase())) {
+        buyerCompanyName = candidate.toLowerCase().includes('enterprise') || candidate.toLowerCase().includes('expo') || candidate.toLowerCase().includes('agro') || candidate.toLowerCase().includes('ltd') || candidate.toLowerCase().includes('co')
+          ? candidate
+          : `${candidate} Enterprises`;
+      } else {
+        buyerCompanyName = 'Enterprise Commercial Buyer';
+      }
+    }
+
+    let buyerContactPerson = (
+      orderData.buyer_contact_person || 
+      options.buyerContactPerson || 
+      orderData.buyer_name || 
+      orderData.buyerName || 
+      buyerCompanyName
+    ).trim();
+
+    if (visitorNames.includes(buyerContactPerson.toLowerCase()) && buyerContactPerson !== buyerCompanyName) {
+      buyerContactPerson = buyerCompanyName;
+    }
+
     const buyerPhone = options.buyerPhone || orderData.buyer_phone || orderData.buyer_whatsapp || orderData.receiver_phone || '+91 98765 43210';
     const buyerGstin = options.buyerGstin || orderData.buyer_gstin || orderData.gstin || '27AAACR1234F1Z5';
     const deliveryAddress = orderData.delivery_address || orderData.buyer_location || 'Registered Commercial Premises';
@@ -77,10 +140,10 @@ export async function sendTotalInvoiceEmail(orderData, options = {}) {
     const isPickup = deliveryOption === 'pickup';
     const deliveryDate = orderData.delivery_date || orderData.arrival_date || dateStr;
     const vehicleNumber = orderData.vehicle_number || orderData.vehicleNumber || null;
-    const p1Name = orderData.p1_name || orderData.p1Name || buyerContactPerson;
-    const p1Phone = orderData.p1_phone || orderData.p1Phone || buyerPhone;
+    const p1Name = orderData.p1_name || orderData.p1Name || 'Authorized Driver / Visitor';
+    const p1Phone = orderData.p1_phone || orderData.p1Phone || 'N/A';
     const p1Aadhar = orderData.p1_aadhar || orderData.p1Aadhar || null;
-    const trackingNumber = orderData.tracking_number || (isPickup ? 'GATE-PASS-CLEARED' : `AWB-IND-${txnId.slice(-6).toUpperCase()}`);
+    const trackingNumber = orderData.tracking_number || (isPickup ? `GATE-PASS-CLEARED-${txnId.slice(-6).toUpperCase()}` : `AWB-IND-${txnId.slice(-6).toUpperCase()}`);
     const receiverName = orderData.receiver_name || buyerContactPerson;
     const receiverPhone = orderData.receiver_phone || buyerPhone;
 
@@ -89,7 +152,7 @@ export async function sendTotalInvoiceEmail(orderData, options = {}) {
     const orange = '#ea580c';
     const emerald = '#16a34a';
 
-    // Plain text invoice
+    // Plain text invoice with Terms & Conditions FIRST, and visitor details STRICTLY BELOW
     const textContent = `================================================================================
 B2B INDIA — OFFICIAL GST TAX INVOICE & FINAL SETTLEMENT BILL
 ================================================================================
@@ -114,7 +177,7 @@ Address: ${seller.address}
 PARTY 2: BUYER / CONSIGNEE (BILLED TO):
 --------------------------------------------------------------------------------
 Company Name: ${buyerCompanyName}
-Contact Person: ${buyerContactPerson}
+Authorized Contact: ${buyerContactPerson}
 GSTIN Number: ${buyerGstin}
 Contact Phone: ${buyerPhone}
 Email Address: ${buyerEmail}
@@ -137,10 +200,24 @@ TOTAL RECONCILED: ₹${Math.round(totalReconciled).toLocaleString('en-IN')} (100
 OUTSTANDING BALANCE DUE: ₹0.00 (NIL / FULLY PAID)
 
 --------------------------------------------------------------------------------
-FULFILLMENT & DISPATCH RECORD:
+TERMS & CONDITIONS OF WHOLESALE SALE:
 --------------------------------------------------------------------------------
-Mode: ${isDeliver ? 'Direct Delivery to Destination' : 'Central Godown Self-Pickup'}
-${isDeliver ? `Delivery Date: ${deliveryDate}\nDestination Address: ${deliveryAddress}\nConsignee: ${receiverName} (${receiverPhone})\nTracking Ref: ${trackingNumber}` : `Clearance Date: ${deliveryDate}\nGate Pass Ref: ${trackingNumber}`}
+1. Escrow Settlement: 10% advance deposit received at booking. Remaining 90% balance was cleared at truck loading at warehouse/godown prior to vehicle departure.
+2. Direct Sale Billing: Goods sold and billed directly by Aaudumbar Agro Pvt. Ltd. to ${buyerCompanyName} with full GST & HSN compliance.
+3. Dispute & Jurisdiction: All transactions are subject to the exclusive jurisdiction of the competent courts at Chhatrapati Sambhajinagar, Maharashtra.
+
+--------------------------------------------------------------------------------
+${isPickup ? 'VISITOR & VEHICLE GATE PASS CLEARANCE (DETAILS BELOW TERMS & CONDITIONS):' : 'DIRECT DELIVERY FULFILLMENT DOSSIER (DETAILS BELOW TERMS & CONDITIONS):'}
+--------------------------------------------------------------------------------
+Mode: ${isPickup ? 'Central Godown Self-Pickup' : 'Direct Doorstep Delivery'}
+${isPickup ? `Clearance Date: ${deliveryDate}
+Vehicle / Truck No.: ${vehicleNumber || 'Reported at gate'}
+Visitor 1 (Driver / Visitor): ${p1Name} (Phone: ${p1Phone}${p1Aadhar ? ` | Aadhar: ${p1Aadhar}` : ''})
+Gate Pass Clearance Ref: ${trackingNumber}
+Godown Premises: Plot 14, MIDC Shendra, Chhatrapati Sambhajinagar 431154, Maharashtra` : `Delivery Date: ${deliveryDate}
+Destination Address: ${deliveryAddress}
+Authorized Consignee: ${receiverName} (${receiverPhone})
+Tracking Ref: ${trackingNumber}`}
 
 This is an electronically verified GST Tax Invoice issued by Aaudumbar Agro Pvt. Ltd.`;
 
@@ -188,13 +265,16 @@ This is an electronically verified GST Tax Invoice issued by Aaudumbar Agro Pvt.
                 Thank you for your business. Your procurement contract has been fulfilled and 100% reconciled. Below is the official <strong>GST Tax Invoice & Final Settlement Statement</strong> issued by <strong>Aaudumbar Agro Pvt. Ltd.</strong>
               </p>
 
-              <!-- Invoice Metadata Bar -->
+              <!-- Invoice Metadata Bar with Connected Order ID & Transaction ID -->
               <div style="background:#f8fafc;border-radius:12px;padding:14px 18px;border:1px solid #e2e8f0;margin-bottom:20px;">
-                <table width="100%" style="font-size:12px;color:#334155;">
+                <table width="100%" style="font-size:12px;color:#334155;border-collapse:collapse;">
                   <tr>
-                    <td><strong style="color:${navy};">Invoice Number:</strong> <span style="font-family:monospace;font-weight:bold;color:#0f172a;background:#e2e8f0;padding:2px 8px;border-radius:4px;">${invoiceNumber}</span></td>
-                    <td align="center"><strong style="color:${navy};">Transaction ID:</strong> <span style="font-family:monospace;font-weight:bold;">${txnId}</span></td>
-                    <td align="right"><strong style="color:${navy};">Invoice Date:</strong> ${dateStr}</td>
+                    <td style="padding-bottom:6px;"><strong style="color:${navy};">Invoice No:</strong> <span style="font-family:monospace;font-weight:bold;color:#0f172a;background:#e2e8f0;padding:2px 8px;border-radius:4px;">${invoiceNumber}</span></td>
+                    <td align="right" style="padding-bottom:6px;"><strong style="color:${navy};">Invoice Date:</strong> ${dateStr}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding-top:4px;"><strong style="color:${navy};">Order ID:</strong> <span style="font-family:monospace;font-weight:bold;color:#0f172a;background:#e0f2fe;padding:2px 8px;border-radius:4px;border:1px solid #bae6fd;">${orderId}</span></td>
+                    <td align="right" style="padding-top:4px;"><strong style="color:${navy};">Transaction ID:</strong> <span style="font-family:monospace;font-weight:bold;color:#166534;background:#dcfce7;padding:2px 8px;border-radius:4px;border:1px solid #bbf7d0;">${txnId}</span></td>
                   </tr>
                 </table>
               </div>
@@ -220,17 +300,18 @@ This is an electronically verified GST Tax Invoice issued by Aaudumbar Agro Pvt.
 
                   <td width="4%"></td>
 
-                  <!-- Party 2: Buyer / Consignee (Billed To) -->
+                  <!-- Party 2: Buyer / Consignee (Billed To) — ALWAYS BUYER COMPANY NAME -->
                   <td width="48%" style="vertical-align:top;background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:16px;">
                     <div style="font-size:11px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;border-bottom:1px solid #bbf7d0;padding-bottom:5px;">
                       👤 BUYER / BILLED TO (PARTY 2)
                     </div>
                     <div style="font-size:14px;font-weight:800;color:#0f172a;">${buyerCompanyName}</div>
                     <div style="font-size:12px;color:#334155;margin-top:6px;line-height:1.7;">
+                      ${buyerContactPerson && buyerContactPerson !== buyerCompanyName ? `<strong>Authorized Contact:</strong> ${buyerContactPerson}<br>` : ''}
                       <strong>GSTIN:</strong> <span style="font-family:monospace;font-weight:bold;color:#166534;background:#dcfce7;padding:1px 6px;border-radius:4px;">${buyerGstin}</span><br>
                       <strong>Contact Phone:</strong> <span style="font-family:monospace;font-weight:bold;color:#15803d;">📞 ${buyerPhone}</span><br>
                       <strong>Email:</strong> ${buyerEmail}<br>
-                      <strong>Destination Address:</strong> ${deliveryAddress}
+                      <strong>Registered Address:</strong> ${deliveryAddress}
                     </div>
                   </td>
                 </tr>
@@ -240,13 +321,13 @@ This is an electronically verified GST Tax Invoice issued by Aaudumbar Agro Pvt.
               <!-- COMPLETE ITEMIZED GOODS & TAX BREAKDOWN TABLE (WITH HSN & QTY) -->
               <!-- ========================================================= -->
               <h3 style="font-size:14px;color:${navy};margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">
-                📦 Itemized Goods, HSN & Tax Breakdown
+                📦 Itemized Goods, HSN &amp; Tax Breakdown
               </h3>
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #cbd5e1;margin-bottom:20px;">
                 <thead>
                   <tr style="background:${navy};color:#ffffff;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">
                     <th style="padding:10px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.15);">#</th>
-                    <th style="padding:10px 10px;text-align:left;border-right:1px solid rgba(255,255,255,0.15);">Product Name & Description</th>
+                    <th style="padding:10px 10px;text-align:left;border-right:1px solid rgba(255,255,255,0.15);">Product Name &amp; Description</th>
                     <th style="padding:10px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.15);">HSN Code</th>
                     <th style="padding:10px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.15);">Quantity</th>
                     <th style="padding:10px 8px;text-align:right;border-right:1px solid rgba(255,255,255,0.15);">Base Rate</th>
@@ -283,7 +364,7 @@ This is an electronically verified GST Tax Invoice issued by Aaudumbar Agro Pvt.
                   ${logisticsCost > 0 ? `
                   <tr style="background:#f8fafc;">
                     <td style="padding:10px 8px;text-align:center;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">2</td>
-                    <td style="padding:10px 10px;font-weight:600;color:#0f172a;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">Logistics & Dedicated Freight</td>
+                    <td style="padding:10px 10px;font-weight:600;color:#0f172a;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">Logistics &amp; Dedicated Freight</td>
                     <td style="padding:10px 8px;text-align:center;font-family:monospace;color:#64748b;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">9965</td>
                     <td style="padding:10px 8px;text-align:center;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">${displayQty}</td>
                     <td style="padding:10px 8px;text-align:right;font-family:monospace;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">—</td>
@@ -302,7 +383,7 @@ This is an electronically verified GST Tax Invoice issued by Aaudumbar Agro Pvt.
               <!-- Escrow Settlement Reconciliation -->
               <div style="background:#f0fdf4;border-left:4px solid ${emerald};padding:18px 20px;border-radius:10px;margin-bottom:20px;border:1px solid #bbf7d0;">
                 <div style="font-size:13px;font-weight:bold;color:#166534;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">
-                  ✓ 100% Payment Reconciliation & Settlement Certificate
+                  ✓ 100% Payment Reconciliation &amp; Settlement Certificate
                 </div>
                 <table width="100%" style="font-size:13px;color:#166534;line-height:1.9;">
                   <tr>
@@ -324,29 +405,49 @@ This is an electronically verified GST Tax Invoice issued by Aaudumbar Agro Pvt.
                 </table>
               </div>
 
-              <!-- Dispatch & Logistics Record -->
-              <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
-                <div style="font-size:11px;font-weight:800;color:${navy};text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
-                  🚚 Fulfillment & Physical Dispatch Dossier
-                </div>
-                <table width="100%" style="font-size:12px;color:#475569;line-height:1.7;">
-                  <tr><td width="160" style="font-weight:700;color:#334155;">Logistics Mode:</td><td><strong>${isDeliver ? 'Direct Doorstep Delivery' : 'Central Godown Self-Pickup'}</strong></td></tr>
-                  <tr><td style="font-weight:700;color:#334155;">Fulfillment Date:</td><td>${deliveryDate}</td></tr>
-                  ${isPickup && vehicleNumber ? `<tr><td style="font-weight:700;color:#334155;">Vehicle / Truck No.:</td><td><strong style="font-family:monospace;color:#4338ca;background:#e0e7ff;padding:2px 6px;border-radius:4px;">${vehicleNumber}</strong></td></tr>` : ''}
-                  ${isPickup ? `<tr><td style="font-weight:700;color:#334155;">Driver / Visitor:</td><td>${p1Name} (📞 ${p1Phone}${p1Aadhar ? ` | Aadhar: ${p1Aadhar}` : ''})</td></tr>` : ''}
-                  <tr><td style="font-weight:700;color:#334155;">${isDeliver ? 'Destination Address:' : 'Dispatch Godown:'}</td><td>${deliveryAddress}</td></tr>
-                  ${isDeliver ? `<tr><td style="font-weight:700;color:#334155;">Authorized Consignee:</td><td>${receiverName} (📞 ${receiverPhone})</td></tr>` : ''}
-                  <tr><td style="font-weight:700;color:#334155;">${isDeliver ? 'Consignment Tracking Ref:' : 'Godown Gate Pass Ref:'}</td><td style="font-family:monospace;font-weight:bold;color:#2563eb;">${trackingNumber}</td></tr>
-                </table>
-              </div>
-
-              <!-- Standard Terms & Conditions -->
-              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:11px;color:#64748b;line-height:1.6;">
+              <!-- ========================================================= -->
+              <!-- TERMS & CONDITIONS OF WHOLESALE SALE -->
+              <!-- ========================================================= -->
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:11px;color:#64748b;line-height:1.7;">
                 <strong style="color:#334155;text-transform:uppercase;letter-spacing:0.5px;">Terms &amp; Conditions of Wholesale Sale:</strong><br>
                 1. <strong>Escrow Settlement:</strong> 10% advance deposit received at booking. Remaining 90% balance was cleared at truck loading at warehouse/godown prior to vehicle departure.<br>
-                2. <strong>Direct Sale Billing:</strong> Goods sold and billed directly by <strong>Aaudumbar Agro Pvt. Ltd.</strong> to the Buyer with full GST &amp; HSN compliance.<br>
+                2. <strong>Direct Sale Billing:</strong> Goods sold and billed directly by <strong>Aaudumbar Agro Pvt. Ltd.</strong> to <strong>${buyerCompanyName}</strong> with full GST &amp; HSN compliance.<br>
                 3. <strong>Dispute &amp; Jurisdiction:</strong> All transactions are subject to the exclusive jurisdiction of the competent courts at Chhatrapati Sambhajinagar, Maharashtra.
               </div>
+
+              <!-- ========================================================= -->
+              <!-- DETAILS BELOW TERMS & CONDITIONS (VISITORS / DELIVERY) -->
+              <!-- ========================================================= -->
+              ${isPickup ? `
+              <!-- Central Godown Self-Pickup Visitor Clearance & Gate Pass Dossier (BELOW TERMS) -->
+              <div style="background:#f8fafc;border:2px solid #cbd5e1;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+                <div style="font-size:12px;font-weight:800;color:${navy};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
+                  🏢 Central Godown Self-Pickup — Authorized Visitor(s) &amp; Vehicle Gate Pass
+                </div>
+                <table width="100%" style="font-size:12px;color:#475569;line-height:1.8;">
+                  <tr><td width="180" style="font-weight:700;color:#334155;">Fulfillment Mode:</td><td><strong>Central Godown Self-Pickup</strong></td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Clearance Date:</td><td>${deliveryDate}</td></tr>
+                  ${vehicleNumber ? `<tr><td style="font-weight:700;color:#334155;">Vehicle / Truck No.:</td><td><strong style="font-family:monospace;color:#4338ca;background:#e0e7ff;padding:2px 6px;border-radius:4px;">${vehicleNumber}</strong></td></tr>` : ''}
+                  <tr><td style="font-weight:700;color:#334155;">Visitor 1 (Driver / Visitor):</td><td><strong style="color:#0f172a;">${p1Name}</strong> (📞 ${p1Phone}${p1Aadhar ? ` | Aadhar: ${p1Aadhar}` : ''})</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Dispatch Warehouse:</td><td>Central Godown, Plot 14, MIDC Shendra, Chhatrapati Sambhajinagar 431154, Maharashtra</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Gate Pass Clearance Ref:</td><td style="font-family:monospace;font-weight:bold;color:#2563eb;">${trackingNumber}</td></tr>
+                </table>
+              </div>
+              ` : `
+              <!-- Direct Delivery Fulfillment & Destination Record (BELOW TERMS) -->
+              <div style="background:#f8fafc;border:2px solid #cbd5e1;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+                <div style="font-size:12px;font-weight:800;color:${navy};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
+                  🚚 Direct Delivery Fulfillment &amp; Destination Record
+                </div>
+                <table width="100%" style="font-size:12px;color:#475569;line-height:1.8;">
+                  <tr><td width="180" style="font-weight:700;color:#334155;">Logistics Mode:</td><td><strong>Direct Doorstep Delivery</strong></td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Delivery Date:</td><td>${deliveryDate}</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Destination Address:</td><td>${deliveryAddress}</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Authorized Consignee:</td><td><strong>${receiverName}</strong> (📞 ${receiverPhone})</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Consignment Tracking Ref:</td><td style="font-family:monospace;font-weight:bold;color:#2563eb;">${trackingNumber}</td></tr>
+                </table>
+              </div>
+              `}
 
               <!-- Authorised Signatory Footer -->
               <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #e2e8f0;padding-top:16px;margin-top:10px;">

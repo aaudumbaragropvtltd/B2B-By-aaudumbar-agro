@@ -21,8 +21,8 @@ export async function sendOrderReceiptEmail(orderData, options = {}) {
     const dateStr = today.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
     const timeStr = today.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
-    const txnId = orderData.transaction_id || orderData.transactionId || `TXN-IND-${Date.now().toString().slice(-6)}`;
-    const orderId = orderData.id || `ORD-IND-${Date.now().toString().slice(-6)}`;
+    const txnId = orderData.transaction_id || orderData.transactionId || orderData.payment_reference || orderData.razorpay_payment_id || `TXN-IND-${Date.now().toString().slice(-6)}`;
+    const orderId = orderData.order_id || orderData.orderId || orderData.id || `ORD-IND-${Date.now().toString().slice(-6)}`;
     const receiptRef = `AAPL/REC/2026/${(txnId.replace(/[^0-9a-zA-Z]/g, '')).slice(-6).toUpperCase() || Math.floor(100000 + Math.random() * 900000)}`;
 
     // Party 1: Seller / Billing Entity Details
@@ -38,8 +38,71 @@ export async function sendOrderReceiptEmail(orderData, options = {}) {
     };
 
     // Party 2: Buyer / Billed To Entity Details
-    const buyerCompanyName = options.buyerCompanyName || orderData.buyer_company_name || orderData.company_name || orderData.buyer_name || 'Enterprise Buyer';
-    const buyerContactPerson = orderData.buyer_contact_person || orderData.receiver_name || orderData.buyer_name || buyerCompanyName;
+    let buyerCompanyName = (
+      options.buyerCompanyName || 
+      orderData.buyer_company_name || 
+      orderData.company_name || 
+      orderData.buyer?.company_name || 
+      ''
+    ).trim();
+
+    // Prevent visitor/driver names from polluting company name
+    const visitorNames = [
+      orderData.p1_name, orderData.p1Name,
+      orderData.p2_name, orderData.p2Name,
+      orderData.receiver_name, orderData.receiverName
+    ].filter(Boolean).map(n => n.trim().toLowerCase());
+
+    if (buyerCompanyName && visitorNames.includes(buyerCompanyName.toLowerCase())) {
+      buyerCompanyName = '';
+    }
+
+    // Lookup company name from Supabase users if not already resolved
+    if (!buyerCompanyName || buyerCompanyName === 'Enterprise Buyer' || buyerCompanyName === 'Verified Buyer') {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ihsgymlxdgmdrtwlnetr.supabase.co';
+        const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imloc2d5bWx4ZGdtZHJ0d2xuZXRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzQ5NDY3OCwiZXhwIjoyMDk5MDcwNjc4fQ.kog1SWIohMiQ76VIOtL5Paa5MSZlV96_nOFjUW0UPII';
+        if (sbUrl && sbKey) {
+          const supabaseAdmin = createClient(sbUrl, sbKey);
+          const buyerId = orderData.buyer_id || orderData.buyerId;
+          if (buyerId) {
+            const { data: uData } = await supabaseAdmin.from('users').select('company_name, full_name').eq('id', buyerId).maybeSingle();
+            if (uData?.company_name) buyerCompanyName = uData.company_name;
+          }
+          if (!buyerCompanyName && buyerEmail) {
+            const { data: uData } = await supabaseAdmin.from('users').select('company_name, full_name').eq('registered_email', buyerEmail).maybeSingle();
+            if (uData?.company_name) buyerCompanyName = uData.company_name;
+          }
+        }
+      } catch (lookupErr) {
+        // Non-fatal lookup
+      }
+    }
+
+    if (!buyerCompanyName) {
+      const candidate = (orderData.buyer_name || orderData.buyerName || '').trim();
+      if (candidate && !visitorNames.includes(candidate.toLowerCase())) {
+        buyerCompanyName = candidate.toLowerCase().includes('enterprise') || candidate.toLowerCase().includes('expo') || candidate.toLowerCase().includes('agro') || candidate.toLowerCase().includes('ltd') || candidate.toLowerCase().includes('co')
+          ? candidate
+          : `${candidate} Enterprises`;
+      } else {
+        buyerCompanyName = 'Enterprise Commercial Buyer';
+      }
+    }
+
+    let buyerContactPerson = (
+      orderData.buyer_contact_person || 
+      options.buyerContactPerson || 
+      orderData.buyer_name || 
+      orderData.buyerName || 
+      buyerCompanyName
+    ).trim();
+
+    if (visitorNames.includes(buyerContactPerson.toLowerCase()) && buyerContactPerson !== buyerCompanyName) {
+      buyerContactPerson = buyerCompanyName;
+    }
+
     const buyerPhone = options.buyerPhone || orderData.buyer_phone || orderData.buyer_whatsapp || orderData.receiver_phone || '+91 98765 43210';
     const buyerGstin = options.buyerGstin || orderData.buyer_gstin || orderData.gstin || '27AAACR1234F1Z5';
     const deliveryAddress = orderData.delivery_address || orderData.buyer_location || 'Registered Commercial Premises';
@@ -83,24 +146,25 @@ export async function sendOrderReceiptEmail(orderData, options = {}) {
     const visitorCount = orderData.visitor_count || orderData.visitorCount || 1;
     const vehicleNumber = orderData.vehicle_number || orderData.vehicleNumber || null;
     const transporterName = orderData.transporter_name || orderData.transporterName || 'B2B Dedicated Fleet';
-    const p1Name = orderData.p1_name || orderData.p1Name || buyerContactPerson;
+    const p1Name = orderData.p1_name || orderData.p1Name || 'Authorized Driver / Visitor';
     const p1Phone = orderData.p1_phone || orderData.p1Phone || 'N/A';
     const p1Aadhar = orderData.p1_aadhar || orderData.p1Aadhar || 'N/A';
     const p2Name = orderData.p2_name || orderData.p2Name || null;
     const p2Phone = orderData.p2_phone || orderData.p2Phone || null;
     const p2Aadhar = orderData.p2_aadhar || orderData.p2Aadhar || null;
-    const trackingNumber = orderData.tracking_number || (isPickup ? 'GATE-PASS-PENDING' : `AWB-IND-${txnId.slice(-6).toUpperCase()}`);
+    const trackingNumber = orderData.tracking_number || (isPickup ? `GATE-PASS-${txnId.slice(-6).toUpperCase()}` : `AWB-IND-${txnId.slice(-6).toUpperCase()}`);
 
     // Brand Colors
     const navy = '#1B3A5C';
     const orange = '#E8792B';
     const green = '#2E7D32';
 
-    // Plain text version
+    // Plain text version - structured with Terms & Conditions FIRST, and visitor details STRICTLY BELOW
     const textContent = `================================================================================
 B2B INDIA — ORDER BOOKING & 10% ESCROW ADVANCE RECEIPT
 ================================================================================
 Receipt No: ${receiptRef}
+Order ID: ${orderId}
 Transaction ID: ${txnId}
 Date: ${dateStr} ${timeStr}
 
@@ -119,11 +183,11 @@ Address: ${seller.address}
 PARTY 2: BUYER / CONSIGNEE (BILLED TO):
 --------------------------------------------------------------------------------
 Company Name: ${buyerCompanyName}
-Contact Person: ${buyerContactPerson}
+Authorized Contact: ${buyerContactPerson}
 GSTIN Number: ${buyerGstin}
 Contact Phone: ${buyerPhone}
 Email Address: ${buyerEmail}
-Billing/Delivery Address: ${deliveryAddress}
+Billing/Premises Address: ${deliveryAddress}
 
 --------------------------------------------------------------------------------
 ITEMIZED GOODS & TAX BREAKDOWN:
@@ -137,18 +201,36 @@ TOTAL CONTRACT VALUE: ₹${Math.round(totalAmount).toLocaleString('en-IN')}
 ESCROW ADVANCE CLEARANCE & PAYMENT STATUS:
 --------------------------------------------------------------------------------
 >>> 10% ADVANCE PAID (ESCROW CLEARED): ₹${Math.round(advancePaid).toLocaleString('en-IN')} <<<
-REMAINING BALANCE (90%): ₹${Math.round(balanceRemaining).toLocaleString('en-IN')} (Payable at the time of loading goods into the truck at warehouse/godown)
+REMAINING BALANCE (90%): ₹${Math.round(balanceRemaining).toLocaleString('en-IN')} (Payable strictly at the time of loading goods into the truck at warehouse/godown)
 Escrow Status: 10% Advance Cleared into B2B India Escrow Protection.
 
 --------------------------------------------------------------------------------
-FULFILLMENT & DISPATCH SCHEDULE:
+TERMS & CONDITIONS OF WHOLESALE SALE & ESCROW GUARANTEE:
 --------------------------------------------------------------------------------
-Mode: ${isDeliver ? 'Direct Delivery to Destination' : 'Central Godown Self-Pickup'}
-${isDeliver ? `Delivery Date: ${deliveryDate || 'Scheduled'}\nDestination Address: ${deliveryAddress}\nReceiver: ${receiverName} (${receiverPhone})` : `Arrival Date: ${arrivalDate || 'Scheduled'}\nVisitors: ${visitorCount}\nP1: ${p1Name} (${p1Phone}) [Aadhar: ${p1Aadhar}]${p2Name ? `\nP2: ${p2Name} (${p2Phone}) [Aadhar: ${p2Aadhar}]` : ''}`}
+1. Escrow Settlement: 10% advance deposit held securely in B2B India Escrow to lock commodity rate & initiate packaging.
+2. 90% Balance at Truck Loading: Remaining 90% balance is payable strictly at the time of loading the goods into the truck at warehouse/godown.
+3. Direct Sale Billing: Direct commercial wholesale purchase billed directly by Aaudumbar Agro Pvt. Ltd. to ${buyerCompanyName} with complete GST & HSN compliance.
+4. Dispute & Jurisdiction: Exclusive jurisdiction of competent courts at Chhatrapati Sambhajinagar, Maharashtra.
+
+--------------------------------------------------------------------------------
+${isPickup ? 'VISITOR & VEHICLE GATE PASS CLEARANCE (DETAILS BELOW TERMS & CONDITIONS):' : 'DIRECT DELIVERY FULFILLMENT DOSSIER (DETAILS BELOW TERMS & CONDITIONS):'}
+--------------------------------------------------------------------------------
+Mode: ${isPickup ? 'Central Godown Self-Pickup' : 'Direct Doorstep Delivery'}
+${isPickup ? `Scheduled Arrival Date: ${arrivalDate || 'Scheduled'}
+Vehicle / Truck Number: ${vehicleNumber || 'Reported at gate'}
+Visitor Count: ${visitorCount} Person(s)
+Visitor 1 (Primary / Driver): ${p1Name} (Phone: ${p1Phone} | Aadhar: ${p1Aadhar})
+${p2Name ? `Visitor 2 (Secondary): ${p2Name} (Phone: ${p2Phone} | Aadhar: ${p2Aadhar})\n` : ''}Gate Pass Reference: ${trackingNumber}
+Pickup Godown: Central Godown, Plot 14, MIDC Shendra, Chhatrapati Sambhajinagar 431154, Maharashtra
+Accommodation: Complimentary hotel stay near godown arranged for verified buyer visitors.` : `Fulfillment Date: ${deliveryDate || 'Scheduled'}
+Destination Address: ${deliveryAddress}
+Authorized Consignee: ${receiverName} (${receiverPhone})
+Tracking Ref: ${trackingNumber}
+Transporter Fleet: ${transporterName}`}
 
 Contact Desk: +91 84088 41998 | b2bbharat.in@gmail.com`;
 
-    // Professional HTML Email Matching Quotation & Two-Party Matrix
+    // Professional HTML Email Matching Quotation & Two-Party Matrix with Visitors BELOW Terms
     const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -189,22 +271,25 @@ Contact Desk: +91 84088 41998 | b2bbharat.in@gmail.com`;
             <td style="padding:30px 36px;">
               <p style="font-size:16px;color:#1e293b;font-weight:bold;margin:0 0 6px;">Dear ${buyerCompanyName},</p>
               <p style="font-size:14px;color:#475569;line-height:1.6;margin:0 0 20px;">
-                Thank you for ordering with B2B India. Below is your official <strong>10% Advance Payment Receipt & Order Booking Certificate</strong> issued by <strong>Aaudumbar Agro Pvt. Ltd.</strong>
+                Thank you for ordering with B2B India. Below is your official <strong>10% Advance Payment Receipt &amp; Order Booking Certificate</strong> issued to <strong>${buyerCompanyName}</strong> by <strong>Aaudumbar Agro Pvt. Ltd.</strong>
               </p>
 
-              <!-- Receipt Metadata Bar -->
+              <!-- Receipt Metadata Bar with Connected Order ID & Transaction ID -->
               <div style="background:#f8fafc;border-radius:12px;padding:14px 18px;border:1px solid #e2e8f0;margin-bottom:20px;">
-                <table width="100%" style="font-size:12px;color:#334155;">
+                <table width="100%" style="font-size:12px;color:#334155;border-collapse:collapse;">
                   <tr>
-                    <td><strong style="color:${navy};">Receipt Number:</strong> <span style="font-family:monospace;font-weight:bold;color:#0f172a;background:#e2e8f0;padding:2px 8px;border-radius:4px;">${receiptRef}</span></td>
-                    <td align="center"><strong style="color:${navy};">Transaction ID:</strong> <span style="font-family:monospace;font-weight:bold;">${txnId}</span></td>
-                    <td align="right"><strong style="color:${navy};">Receipt Date:</strong> ${dateStr}</td>
+                    <td style="padding-bottom:6px;"><strong style="color:${navy};">Receipt No:</strong> <span style="font-family:monospace;font-weight:bold;color:#0f172a;background:#e2e8f0;padding:2px 8px;border-radius:4px;">${receiptRef}</span></td>
+                    <td align="right" style="padding-bottom:6px;"><strong style="color:${navy};">Receipt Date:</strong> ${dateStr}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding-top:4px;"><strong style="color:${navy};">Order ID:</strong> <span style="font-family:monospace;font-weight:bold;color:#0f172a;background:#e0f2fe;padding:2px 8px;border-radius:4px;border:1px solid #bae6fd;">${orderId}</span></td>
+                    <td align="right" style="padding-top:4px;"><strong style="color:${navy};">Transaction ID:</strong> <span style="font-family:monospace;font-weight:bold;color:#166534;background:#dcfce7;padding:2px 8px;border-radius:4px;border:1px solid #bbf7d0;">${txnId}</span></td>
                   </tr>
                 </table>
               </div>
 
               <!-- ========================================================= -->
-              <!-- TWO PARTIES DETAIL MATRIX: SELLER & BUYER COMPANY + GSTIN + PHONES -->
+              <!-- TWO PARTIES DETAIL MATRIX: SELLER & BUYER COMPANY -->
               <!-- ========================================================= -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
                 <tr>
@@ -224,17 +309,18 @@ Contact Desk: +91 84088 41998 | b2bbharat.in@gmail.com`;
 
                   <td width="4%"></td>
 
-                  <!-- Party 2: Buyer / Consignee (Billed To) -->
+                  <!-- Party 2: Buyer / Consignee (Billed To) — ALWAYS BUYER COMPANY NAME -->
                   <td width="48%" style="vertical-align:top;background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:16px;">
                     <div style="font-size:11px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;border-bottom:1px solid #bbf7d0;padding-bottom:5px;">
                       👤 BUYER / BILLED TO (PARTY 2)
                     </div>
                     <div style="font-size:14px;font-weight:800;color:#0f172a;">${buyerCompanyName}</div>
                     <div style="font-size:12px;color:#334155;margin-top:6px;line-height:1.7;">
+                      ${buyerContactPerson && buyerContactPerson !== buyerCompanyName ? `<strong>Authorized Contact:</strong> ${buyerContactPerson}<br>` : ''}
                       <strong>GSTIN:</strong> <span style="font-family:monospace;font-weight:bold;color:#166534;background:#dcfce7;padding:1px 6px;border-radius:4px;">${buyerGstin}</span><br>
                       <strong>Contact Phone:</strong> <span style="font-family:monospace;font-weight:bold;color:#15803d;">📞 ${buyerPhone}</span><br>
                       <strong>Email:</strong> ${buyerEmail}<br>
-                      <strong>Destination Address:</strong> ${deliveryAddress}
+                      <strong>Registered Address:</strong> ${deliveryAddress}
                     </div>
                   </td>
                 </tr>
@@ -249,7 +335,7 @@ Contact Desk: +91 84088 41998 | b2bbharat.in@gmail.com`;
                         ✓ 10% ADVANCE PAYMENT CLEARED (ESCROW PROTECTED)
                       </div>
                       <div style="font-size:12px;color:#2e7d32;margin-top:4px;">
-                        Advance Amount of <strong>₹${Math.round(advancePaid).toLocaleString('en-IN')}</strong> has been locked into B2B India Protected Escrow. Goods preparation and fulfillment initiated.
+                        Advance Amount of <strong>₹${Math.round(advancePaid).toLocaleString('en-IN')}</strong> has been locked into B2B India Protected Escrow. Goods preparation and fulfillment initiated for <strong>${buyerCompanyName}</strong>.
                       </div>
                     </td>
                   </tr>
@@ -260,13 +346,13 @@ Contact Desk: +91 84088 41998 | b2bbharat.in@gmail.com`;
               <!-- COMPLETE ITEMIZED GOODS & TAX BREAKDOWN TABLE (WITH HSN & QTY) -->
               <!-- ========================================================= -->
               <h3 style="font-size:14px;color:${navy};margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">
-                📦 Itemized Goods, HSN & Tax Breakdown
+                📦 Itemized Goods, HSN &amp; Tax Breakdown
               </h3>
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #cbd5e1;margin-bottom:20px;">
                 <thead>
                   <tr style="background:${navy};color:#ffffff;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">
                     <th style="padding:10px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.15);">#</th>
-                    <th style="padding:10px 10px;text-align:left;border-right:1px solid rgba(255,255,255,0.15);">Product Name & Description</th>
+                    <th style="padding:10px 10px;text-align:left;border-right:1px solid rgba(255,255,255,0.15);">Product Name &amp; Description</th>
                     <th style="padding:10px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.15);">HSN Code</th>
                     <th style="padding:10px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.15);">Quantity</th>
                     <th style="padding:10px 8px;text-align:right;border-right:1px solid rgba(255,255,255,0.15);">Base Rate</th>
@@ -303,7 +389,7 @@ Contact Desk: +91 84088 41998 | b2bbharat.in@gmail.com`;
                   ${logisticsCost > 0 ? `
                   <tr style="background:#f8fafc;">
                     <td style="padding:10px 8px;text-align:center;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">2</td>
-                    <td style="padding:10px 10px;font-weight:600;color:#0f172a;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">Logistics & Dedicated Freight</td>
+                    <td style="padding:10px 10px;font-weight:600;color:#0f172a;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">Logistics &amp; Dedicated Freight</td>
                     <td style="padding:10px 8px;text-align:center;font-family:monospace;color:#64748b;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">9965</td>
                     <td style="padding:10px 8px;text-align:center;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">${displayQty}</td>
                     <td style="padding:10px 8px;text-align:right;font-family:monospace;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">—</td>
@@ -339,48 +425,60 @@ Contact Desk: +91 84088 41998 | b2bbharat.in@gmail.com`;
                 </tr>
               </table>
 
-              <!-- Logistics / Dispatch Configuration -->
-              <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
-                <div style="font-size:11px;font-weight:800;color:${navy};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
-                  ${isDeliver ? '🚚 Direct Delivery Logistics Dossier' : '🏢 Central Godown Self-Pickup Dossier'}
-                </div>
-                
-                ${isDeliver ? `
-                <table width="100%" cellpadding="0" cellspacing="0" style="font-size:12px;color:#475569;line-height:1.7;">
-                  <tr><td width="160" style="font-weight:700;color:#334155;">Scheduled Fulfillment:</td><td>${deliveryDate || 'To be confirmed by operations'}</td></tr>
-                  <tr><td style="font-weight:700;color:#334155;">Destination Address:</td><td>${deliveryAddress || 'On file'}</td></tr>
-                  <tr><td style="font-weight:700;color:#334155;">Site Receiver Name:</td><td>${receiverName}</td></tr>
-                  <tr><td style="font-weight:700;color:#334155;">Contact Phone:</td><td style="font-family:monospace;font-weight:700;">${receiverPhone}</td></tr>
-                  <tr><td style="font-weight:700;color:#334155;">Consignment Tracking:</td><td style="font-family:monospace;font-weight:700;color:#2563eb;">${trackingNumber}</td></tr>
-                </table>
-                ` : `
-                <table width="100%" cellpadding="0" cellspacing="0" style="font-size:12px;color:#475569;line-height:1.7;">
-                  <tr><td width="160" style="font-weight:700;color:#334155;">Arrival Date at Godown:</td><td style="font-weight:700;color:${navy};">${arrivalDate || 'Pending Schedule'}</td></tr>
-                  ${vehicleNumber ? `<tr><td style="font-weight:700;color:#334155;">Vehicle / Truck No.:</td><td><strong style="font-family:monospace;color:#4338ca;background:#e0e7ff;padding:2px 6px;border-radius:4px;">${vehicleNumber}</strong></td></tr>` : ''}
-                  <tr><td style="font-weight:700;color:#334155;">Visitor Count:</td><td>${visitorCount} Person(s)</td></tr>
-                  <tr><td style="font-weight:700;color:#334155;">Visitor 1 (Primary):</td><td>${p1Name} (Phone: <span style="font-family:monospace;">${p1Phone}</span> | Aadhar: <span style="font-family:monospace;font-weight:700;">${p1Aadhar}</span>)</td></tr>
-                  ${p2Name ? `<tr><td style="font-weight:700;color:#334155;">Visitor 2:</td><td>${p2Name} (Phone: <span style="font-family:monospace;">${p2Phone}</span> | Aadhar: <span style="font-family:monospace;font-weight:700;">${p2Aadhar}</span>)</td></tr>` : ''}
-                  <tr><td style="font-weight:700;color:#334155;">Gate Pass Ref:</td><td style="font-family:monospace;font-weight:700;color:${green};">${trackingNumber}</td></tr>
-                  <tr><td style="font-weight:700;color:#334155;">Accommodation:</td><td>Complimentary hotel stay near central godown arranged for verified visitors.</td></tr>
-                </table>
-                `}
-              </div>
-
-              <!-- Escrow Terms & Buyer Protection -->
+              <!-- ========================================================= -->
+              <!-- TERMS & CONDITIONS AND ESCROW PROTECTION GUARANTEE -->
+              <!-- ========================================================= -->
               <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8faf9;border:1px solid ${green}40;border-left:4px solid ${green};border-radius:10px;margin-bottom:20px;">
                 <tr>
                   <td style="padding:16px 20px;">
                     <div style="font-size:12px;font-weight:800;color:${green};text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
-                      🛡️ B2B India Escrow Protection Guarantee
+                      🛡️ B2B India Escrow Protection Guarantee &amp; Terms
                     </div>
                     <table cellpadding="0" cellspacing="0" style="font-size:12px;color:#555;line-height:1.8;">
-                      <tr><td style="padding-right:8px;color:${green};font-weight:700;">•</td><td><strong>10% Advance Protection:</strong> Held securely in B2B India Escrow to lock commodity rate & initiate packaging.</td></tr>
-                      <tr><td style="padding-right:8px;color:${green};font-weight:700;">•</td><td><strong>90% Balance at Truck Loading:</strong> Remaining 90% balance is payable strictly at the time of loading the goods into the truck at warehouse/godown.</td></tr>
-                      <tr><td style="padding-right:8px;color:${green};font-weight:700;">•</td><td><strong>100% Quality & Tax Billing:</strong> Direct sale on the official bill of Aaudumbar Agro Pvt. Ltd. with GSTIN & HSN codes.</td></tr>
+                      <tr><td style="padding-right:8px;color:${green};font-weight:700;">•</td><td><strong>10% Advance Protection:</strong> Held securely in B2B India Escrow to lock commodity rate &amp; initiate packaging.</td></tr>
+                      <tr><td style="padding-right:8px;color:${green};font-weight:700;">•</td><td><strong>90% Balance at Truck Loading:</strong> Remaining 90% balance is payable strictly at the time of loading goods into the truck at warehouse/godown.</td></tr>
+                      <tr><td style="padding-right:8px;color:${green};font-weight:700;">•</td><td><strong>100% Tax Billing to Company:</strong> Direct wholesale sale on the official bill of Aaudumbar Agro Pvt. Ltd. to <strong>${buyerCompanyName}</strong> with GSTIN &amp; HSN codes.</td></tr>
+                      <tr><td style="padding-right:8px;color:${green};font-weight:700;">•</td><td><strong>Dispute &amp; Legal Jurisdiction:</strong> Subject to the exclusive jurisdiction of the competent courts at Chhatrapati Sambhajinagar, Maharashtra.</td></tr>
                     </table>
                   </td>
                 </tr>
               </table>
+
+              <!-- ========================================================= -->
+              <!-- DETAILS BELOW TERMS & CONDITIONS (VISITORS / DELIVERY) -->
+              <!-- ========================================================= -->
+              ${isPickup ? `
+              <!-- Central Godown Self-Pickup Visitor Clearance & Gate Pass Dossier (BELOW TERMS) -->
+              <div style="background:#f8fafc;border:2px solid #cbd5e1;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+                <div style="font-size:12px;font-weight:800;color:${navy};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
+                  🏢 Central Godown Self-Pickup — Authorized Visitor(s) &amp; Vehicle Gate Pass
+                </div>
+                <table width="100%" cellpadding="0" cellspacing="0" style="font-size:12px;color:#475569;line-height:1.8;">
+                  <tr><td width="180" style="font-weight:700;color:#334155;">Scheduled Arrival Date:</td><td style="font-weight:700;color:${navy};">${arrivalDate || 'Pending Schedule'}</td></tr>
+                  ${vehicleNumber ? `<tr><td style="font-weight:700;color:#334155;">Vehicle / Truck Number:</td><td><strong style="font-family:monospace;color:#4338ca;background:#e0e7ff;padding:2px 6px;border-radius:4px;">${vehicleNumber}</strong></td></tr>` : ''}
+                  <tr><td style="font-weight:700;color:#334155;">Authorized Visitor Count:</td><td>${visitorCount} Person(s)</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Visitor 1 (Primary / Driver):</td><td><strong style="color:#0f172a;">${p1Name}</strong> (📞 <span style="font-family:monospace;">${p1Phone}</span> | Aadhar: <span style="font-family:monospace;font-weight:700;">${p1Aadhar}</span>)</td></tr>
+                  ${p2Name ? `<tr><td style="font-weight:700;color:#334155;">Visitor 2 (Secondary):</td><td><strong style="color:#0f172a;">${p2Name}</strong> (📞 <span style="font-family:monospace;">${p2Phone}</span> | Aadhar: <span style="font-family:monospace;font-weight:700;">${p2Aadhar}</span>)</td></tr>` : ''}
+                  <tr><td style="font-weight:700;color:#334155;">Godown Gate Pass Ref:</td><td style="font-family:monospace;font-weight:700;color:${green};">${trackingNumber}</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Pickup Warehouse / Godown:</td><td>Central Godown, Plot 14, MIDC Shendra, Chhatrapati Sambhajinagar 431154, Maharashtra</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Complimentary Stay:</td><td>Complimentary hotel stay near central godown arranged for verified buyer visitors.</td></tr>
+                </table>
+              </div>
+              ` : `
+              <!-- Direct Delivery Fulfillment & Destination Record (BELOW TERMS) -->
+              <div style="background:#f8fafc;border:2px solid #cbd5e1;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+                <div style="font-size:12px;font-weight:800;color:${navy};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
+                  🚚 Direct Delivery Fulfillment &amp; Destination Record
+                </div>
+                <table width="100%" cellpadding="0" cellspacing="0" style="font-size:12px;color:#475569;line-height:1.8;">
+                  <tr><td width="180" style="font-weight:700;color:#334155;">Scheduled Fulfillment:</td><td>${deliveryDate || 'To be confirmed by operations'}</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Destination Address:</td><td>${deliveryAddress || 'On file'}</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Authorized Consignee:</td><td><strong>${receiverName}</strong> (📞 <span style="font-family:monospace;">${receiverPhone}</span>)</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Consignment Tracking Ref:</td><td style="font-family:monospace;font-weight:700;color:#2563eb;">${trackingNumber}</td></tr>
+                  <tr><td style="font-weight:700;color:#334155;">Dedicated Transporter:</td><td>${transporterName}</td></tr>
+                </table>
+              </div>
+              `}
 
               <!-- Authorised Signatory Footer -->
               <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #e2e8f0;padding-top:16px;margin-top:10px;">
@@ -413,7 +511,6 @@ Contact Desk: +91 84088 41998 | b2bbharat.in@gmail.com`;
   </table>
 </body>
 </html>`;
-
     // Nodemailer configuration
     const transporter = nodemailer.createTransport({
       service: 'gmail',

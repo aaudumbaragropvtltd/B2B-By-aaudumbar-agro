@@ -14,7 +14,7 @@ export async function POST(request) {
 
     const timestamp = Date.now();
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const txnId = body.transactionId || body.transaction_id || `TXN-IND-${timestamp.toString().slice(-6)}${randomSuffix}`;
+    const txnId = body.transactionId || body.transaction_id || body.razorpayPaymentId || body.razorpay_payment_id || body.payment_reference || `TXN-IND-${timestamp.toString().slice(-6)}${randomSuffix}`;
     const targetOrderId = body.orderId || body.order_id || null;
 
     // Check if order already exists in store
@@ -49,14 +49,61 @@ export async function POST(request) {
       } catch (e) {}
     }
 
+    const buyerEmail = body.buyerEmail || body.buyer_email || existingOrder?.buyer_email || 'buyer@b2bindia.site';
+
+    // Resolve official Buyer Company Name (NEVER driver / visitor name)
+    let resolvedBuyerCompany = (
+      body.buyerCompanyName || 
+      body.company_name || 
+      existingOrder?.buyer_company_name || 
+      existingOrder?.company_name || 
+      ''
+    ).trim();
+
+    let resolvedBuyerContact = (
+      body.buyerName || 
+      existingOrder?.buyer_contact_person || 
+      existingOrder?.buyer_name || 
+      ''
+    ).trim();
+
+    // Prevent visitor/driver names from polluting company name
+    const visitorFilter = [body.p1Name, body.p2Name, body.receiverName].filter(Boolean).map(n => n.trim().toLowerCase());
+    if (visitorFilter.includes(resolvedBuyerCompany.toLowerCase())) {
+      resolvedBuyerCompany = '';
+    }
+    if (visitorFilter.includes(resolvedBuyerContact.toLowerCase())) {
+      resolvedBuyerContact = '';
+    }
+
+    if (!resolvedBuyerCompany || resolvedBuyerCompany === 'Verified Buyer' || resolvedBuyerCompany === 'Enterprise Buyer') {
+      try {
+        const supabase = createAdminClient();
+        const { data: dbUser } = await supabase
+          .from('users')
+          .select('company_name, full_name')
+          .eq('registered_email', buyerEmail)
+          .maybeSingle();
+        if (dbUser?.company_name) resolvedBuyerCompany = dbUser.company_name;
+        if (dbUser?.full_name && !resolvedBuyerContact) resolvedBuyerContact = dbUser.full_name;
+      } catch (e) {}
+    }
+
+    if (!resolvedBuyerCompany) {
+      resolvedBuyerCompany = resolvedBuyerContact ? `${resolvedBuyerContact} Enterprises` : 'Enterprise Commercial Buyer';
+    }
+
     // Standardized payload ensuring user updates are completely preserved and propagated to Admin Panel
     const orderPayload = {
       id: existingOrder?.id || targetOrderId || null,
       order_id: targetOrderId || existingOrder?.order_id || existingOrder?.id || null,
       transaction_id: txnId || existingOrder?.transaction_id,
-      buyer_email: body.buyerEmail || body.buyer_email || existingOrder?.buyer_email || 'buyer@b2bindia.site',
-      buyer_name: existingOrder?.buyer_name || body.buyerName || body.receiverName || body.p1Name || 'Verified Buyer',
-      buyer_phone: existingOrder?.buyer_phone || body.buyerPhone || body.receiverPhone || body.p1Phone || '',
+      buyer_email: buyerEmail,
+      buyer_company_name: resolvedBuyerCompany,
+      company_name: resolvedBuyerCompany,
+      buyer_contact_person: resolvedBuyerContact || 'Authorized Representative',
+      buyer_name: resolvedBuyerContact || resolvedBuyerCompany,
+      buyer_phone: existingOrder?.buyer_phone || body.buyerPhone || body.receiverPhone || '',
       product_id: body.productId || body.product_id || existingOrder?.product_id || null,
       product_name: body.productTitle || body.product_name || body.productName || existingOrder?.product_name || 'Commercial Goods',
       quantity: Number(body.quantity) || existingOrder?.quantity || 1000,
@@ -70,6 +117,7 @@ export async function POST(request) {
       payment_status: existingOrder?.payment_status || 'paid_to_escrow',
       order_status: existingOrder?.order_status || 'confirmed',
       delivery_status: existingOrder?.delivery_status || existingOrder?.order_status || 'confirmed',
+      receipt_sent: Boolean(existingOrder?.receipt_sent),
       
       delivery_option: finalDeliveryOption,
       delivery_date: (body.deliveryDate !== undefined ? body.deliveryDate : body.delivery_date) ?? existingOrder?.delivery_date ?? null,
@@ -165,7 +213,7 @@ export async function POST(request) {
             .update({
               buyer_notes: updatedNotes,
               current_state: existingTradeOrder?.current_state === 'quotation_issued' ? 'price_locked_10' : (existingTradeOrder?.current_state || 'price_locked_10'),
-              qr_payment_reference: existingTradeOrder?.qr_payment_reference || txnId || undefined,
+              qr_payment_reference: txnId || existingTradeOrder?.qr_payment_reference || undefined,
               updated_at: new Date().toISOString()
             })
             .eq('id', targetDbOrderId);
@@ -213,18 +261,33 @@ export async function POST(request) {
     }
 
     // 3. Automatically send 10% payment clearance & order booking receipt email
+    // Dispatches EXACTLY ONE receipt matching the selected fulfillment mode (Self-Pickup OR Delivery),
+    // billed strictly to the Buyer Company Name, with visitor details positioned below Terms & Conditions.
     try {
-      sendOrderReceiptEmail(savedOrder)
-        .then(result => {
-          if (result.success) {
-            console.log('10% Order Booking Receipt Email sent successfully:', result.receiptRef);
-          } else {
-            console.warn('10% Receipt email notice:', result.error);
-          }
+      if (!existingOrder?.receipt_sent || body.forceResend) {
+        sendOrderReceiptEmail(savedOrder, {
+          buyerCompanyName: resolvedBuyerCompany,
+          buyerContactPerson: resolvedBuyerContact,
+          buyerEmail: orderPayload.buyer_email
         })
-        .catch(emailErr => {
-          console.error('Async receipt email dispatch error:', emailErr);
-        });
+          .then(result => {
+            if (result.success) {
+              console.log(`✅ 10% ${finalDeliveryOption === 'pickup' ? 'Self-Pickup' : 'Delivery'} Receipt Email sent successfully to ${orderPayload.buyer_email}:`, result.receiptRef);
+              updateOrder(savedOrder.id || savedOrder.transaction_id, { 
+                receipt_sent: true, 
+                receipt_sent_at: new Date().toISOString(),
+                receipt_mode: finalDeliveryOption
+              });
+            } else {
+              console.warn('10% Receipt email notice:', result.error);
+            }
+          })
+          .catch(emailErr => {
+            console.error('Async receipt email dispatch error:', emailErr);
+          });
+      } else {
+        console.log('ℹ️ Order receipt already sent for this transaction. Skipping duplicate email.');
+      }
     } catch (emailTriggerErr) {
       console.error('Receipt email trigger error:', emailTriggerErr);
     }

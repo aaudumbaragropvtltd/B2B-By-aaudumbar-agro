@@ -66,6 +66,9 @@ export async function POST(request) {
             created_at: so.created_at,
             buyer_id: so.buyer_id,
             buyer_email: so.buyer?.registered_email || 'buyer@b2bindia.site',
+            buyer_company_name: so.buyer?.company_name || 'Enterprise Buyer',
+            company_name: so.buyer?.company_name || 'Enterprise Buyer',
+            buyer_contact_person: so.buyer?.full_name || 'Authorized Representative',
             buyer_name: so.buyer?.company_name || so.buyer?.full_name || 'Registered Buyer',
             buyer_phone: buyerPhone,
             buyer_whatsapp: so.buyer?.whatsapp_number || buyerPhone,
@@ -110,7 +113,8 @@ export async function POST(request) {
 
     const options = {
       buyerEmail: effectiveBuyerEmail,
-      buyerCompanyName: buyerCompanyName || order.buyer_company_name || order.buyer_name,
+      buyerCompanyName: buyerCompanyName || order.buyer_company_name || order.company_name || order.buyer_name,
+      buyerContactPerson: order.buyer_contact_person || order.buyer_name,
       buyerGstin: buyerGstin || order.buyer_gstin || order.gstin,
       buyerPhone: buyerPhone || order.buyer_phone || order.receiver_phone,
       hsnCode: hsnCode || order.hsn_code || order.hsn || '1006.30',

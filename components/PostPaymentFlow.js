@@ -28,7 +28,14 @@ export default function PostPaymentFlow({
   const [copiedTxn, setCopiedTxn] = useState(false);
   
   // Use Razorpay payment ID as transaction reference when available
-  const [transactionId] = useState(() => paymentData?.razorpay_payment_id || `TXN-IND-${Math.floor(100000 + Math.random() * 900000)}`);
+  const [transactionId] = useState(() => 
+    paymentData?.razorpay_payment_id || 
+    paymentData?.razorpayPaymentId || 
+    paymentData?.transactionId || 
+    paymentData?.transaction_id || 
+    paymentData?.payment_reference || 
+    `TXN-IND-${Math.floor(100000 + Math.random() * 900000)}`
+  );
   
   const productTitle = product?.title || product?.name || 'Bulk Commodity Trade Order';
   const unitPrice = pricePerUnit || product?.base_price_per_unit || 99.91;
@@ -162,9 +169,10 @@ export default function PostPaymentFlow({
     try {
       const payload = {
         ...formData,
-        orderId: orderId || paymentData?.orderId || null,
+        orderId: orderId || paymentData?.orderId || paymentData?.order_id || null,
         deliveryOption,
         transactionId,
+        razorpayPaymentId: paymentData?.razorpayPaymentId || paymentData?.razorpay_payment_id || transactionId,
         productId: product?.id || 'prod-direct-order',
         productTitle,
         quantity: numQuantity,
@@ -173,6 +181,7 @@ export default function PostPaymentFlow({
         subtotal: orderSubtotal,
         gst: orderGst,
         logisticsCost: orderLogistics,
+        buyerCompanyName: paymentData?.buyerCompanyName || (typeof window !== 'undefined' ? localStorage.getItem('b2b_company_name') : '') || '',
         totalAmount,
         advanceAmount
       };
@@ -335,15 +344,15 @@ export default function PostPaymentFlow({
               <span><strong>Escrow Protected:</strong> Advance held securely until goods are verified at dock.</span>
             </motion.div>
 
-            {/* Email Receipt Confirmation Badge */}
+            {/* Logistics Next Step Notice */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.85 }}
               className="flex items-center justify-center gap-2 text-xs text-blue-800 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 max-w-md mx-auto"
             >
-              <span className="text-base">✉️</span>
-              <span><strong>10% Advance Receipt Sent:</strong> Official booking receipt dispatched to <strong>{initialEmail || 'your email'}</strong>.</span>
+              <span className="text-base">📋</span>
+              <span><strong>Next Step:</strong> Select Pickup or Delivery below to receive your official GST Booking Receipt &amp; Gate Pass.</span>
             </motion.div>
 
             {/* Continue Button */}
@@ -976,6 +985,12 @@ export default function PostPaymentFlow({
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Email Dispatch Notice */}
+            <div className="w-full bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 text-center text-xs text-emerald-800 font-bold flex items-center justify-center gap-2">
+              <span className="text-base">✉️</span>
+              <span>Official {deliveryOption === 'pickup' ? 'Self-Pickup Booking Receipt & Gate Pass' : 'Direct Delivery Booking Receipt'} dispatched to <strong>{formData.buyerEmail}</strong>.</span>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-3">

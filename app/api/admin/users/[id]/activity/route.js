@@ -42,9 +42,9 @@ export async function GET(request, { params }) {
         .order('created_at', { ascending: false })
         .limit(50),
       supabaseAdmin
-        .from('payments')
+        .from('platform_ledger')
         .select('*')
-        .eq('user_id', id)
+        .eq('from_entity_id', id)
         .order('created_at', { ascending: false })
         .limit(50)
     ]);

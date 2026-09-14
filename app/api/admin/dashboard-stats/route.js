@@ -55,10 +55,10 @@ export async function GET() {
           .limit(4);
         if (unverified) pendingVerificationUsers = unverified;
 
-        // Fetch actual subscription payments if available
+        // Fetch actual platform payments from platform_ledger
         try {
           const { data: pays } = await supabaseAdmin
-            .from('payments')
+            .from('platform_ledger')
             .select('*')
             .order('created_at', { ascending: false });
           if (pays) paymentsRecords = pays;
@@ -70,7 +70,7 @@ export async function GET() {
     }
 
     // Merge and compute real order volume (strictly completed payments only)
-    const COMPLETED_PAYMENT_STATES = ['price_locked_10', 'warehouse_loading', 'in_transit', 'dispatched', 'ready_for_pickup', 'delivered', 'completed', 'settled'];
+    const COMPLETED_PAYMENT_STATES = ['price_locked_10', 'warehouse_loading', 'settled'];
     const COMPLETED_PAYMENT_STATUSES = ['paid_to_escrow', 'paid', 'completed', 'settled', 'released_to_supplier'];
 
     const paidDirect = directOrders.filter(o => 

@@ -116,8 +116,11 @@ export function saveNewOrder(orderData) {
     transaction_id: generatedTxn,
     created_at: orderData.created_at || new Date().toISOString(),
     buyer_email: orderData.buyer_email || orderData.buyerEmail || 'buyer@example.com',
-    buyer_name: orderData.buyer_name || orderData.buyerName || orderData.receiver_name || orderData.receiverName || orderData.p1_name || orderData.p1Name || 'Verified Buyer',
-    buyer_phone: orderData.buyer_phone || orderData.buyerPhone || orderData.receiver_phone || orderData.receiverPhone || orderData.p1_phone || orderData.p1Phone || '',
+    buyer_company_name: orderData.buyer_company_name || orderData.company_name || 'Enterprise Buyer',
+    company_name: orderData.company_name || orderData.buyer_company_name || 'Enterprise Buyer',
+    buyer_contact_person: orderData.buyer_contact_person || orderData.buyer_name || orderData.buyerName || 'Authorized Representative',
+    buyer_name: orderData.buyer_name || orderData.buyerName || orderData.buyer_company_name || orderData.company_name || 'Verified Buyer',
+    buyer_phone: orderData.buyer_phone || orderData.buyerPhone || orderData.receiver_phone || orderData.receiverPhone || '',
     product_id: orderData.product_id || orderData.productId || 'custom-order',
     product_name: orderData.product_name || orderData.productName || orderData.productTitle || 'Commercial Trade Goods',
     quantity: Number(orderData.quantity) || 1,
@@ -130,6 +133,7 @@ export function saveNewOrder(orderData) {
     advance_amount: Number(orderData.advance_amount || orderData.advanceAmount) || ((Number(orderData.total_amount || orderData.totalAmount || orderData.total) || 0) * 0.1),
     payment_status: orderData.payment_status || 'paid_to_escrow',
     order_status: orderData.order_status || 'confirmed',
+    receipt_sent: Boolean(orderData.receipt_sent),
     
     // Supplier specifics
     supplier_id: orderData.supplier_id || 'sup-aaudumbar-1',

@@ -36,11 +36,31 @@ function CheckoutContent() {
   const [quantity, setQuantity] = useState(initialQty);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [buyerEmail, setBuyerEmail] = useState(initialEmail);
+  const [buyerCompany, setBuyerCompany] = useState('');
   const [paymentOption, setPaymentOption] = useState('upi'); // 'upi' | 'cards'
   const [isProcessingRazorpay, setIsProcessingRazorpay] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [activeOrderId, setActiveOrderId] = useState(initialOrderId);
   const [paymentSuccessData, setPaymentSuccessData] = useState(null);
+
+  // Load authenticated user profile for company name
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const { createClient } = await import('@/services/supabase');
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          if (!buyerEmail && user.email) setBuyerEmail(user.email);
+          const { data: profile } = await supabase.from('users').select('company_name, full_name').eq('id', user.id).maybeSingle();
+          if (profile?.company_name) {
+            setBuyerCompany(profile.company_name);
+          }
+        }
+      } catch (e) {}
+    }
+    loadUser();
+  }, [buyerEmail]);
 
   // Ensure body scroll is never locked
   useEffect(() => {
@@ -236,6 +256,7 @@ function CheckoutContent() {
                   razorpay_signature: response.razorpay_signature,
                   amount: totalPayableNow,
                   buyerEmail: buyerEmail,
+                  buyerCompanyName: buyerCompany || undefined,
                   productTitle: product?.title || 'Wholesale Commodity',
                   deliveryAddress: deliveryAddress
                 }),
@@ -252,6 +273,7 @@ function CheckoutContent() {
                   totalContractValue: totalAmount,
                   productTitle: product?.title || 'Wholesale Commodity',
                   supplierName: product?.supplier_id?.company_name || 'Verified Supplier',
+                  buyerCompanyName: buyerCompany || vData.buyerCompanyName || undefined,
                   paymentVerified: true,
                   receiptEmailSent: vData.receiptEmailSent || false
                 });

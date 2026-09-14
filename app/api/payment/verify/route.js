@@ -151,14 +151,27 @@ export async function POST(request) {
 
     // 5. Fetch order from Supabase trade_orders or local store
     let order = null;
+    const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
     try {
-      const { data: dbOrder } = await supabaseAdmin
-        .from('trade_orders')
-        .select('*')
-        .eq('id', orderId)
-        .maybeSingle();
+      if (isUuid(orderId)) {
+        const { data: dbOrder } = await supabaseAdmin
+          .from('trade_orders')
+          .select('*')
+          .eq('id', orderId)
+          .maybeSingle();
 
-      if (dbOrder) order = dbOrder;
+        if (dbOrder) order = dbOrder;
+      } else {
+        const { data: dbOrder } = await supabaseAdmin
+          .from('trade_orders')
+          .select('*')
+          .or(`qr_payment_reference.eq.${orderId},buyer_notes.ilike.%${orderId}%`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (dbOrder) order = dbOrder;
+      }
     } catch (dbErr) {
       console.warn('Could not query Supabase trade_orders:', dbErr.message);
     }
@@ -179,7 +192,7 @@ export async function POST(request) {
           .from('trade_orders')
           .update({
             current_state: 'price_locked_10',
-            qr_payment_reference: `RZP-${razorpay_payment_id}`,
+            qr_payment_reference: razorpay_payment_id,
             advance_paid_10: effectiveAdvance,
             updated_at: new Date().toISOString(),
           })
@@ -189,10 +202,29 @@ export async function POST(request) {
       }
     }
 
+    // Resolve official Buyer Company Name
+    let resolvedBuyerCompany = (body.buyerCompanyName || body.company_name || profile?.company_name || order?.buyer_company_name || order?.company_name || '').trim();
+    if (!resolvedBuyerCompany && effectiveBuyerEmail) {
+      try {
+        const { data: dbUser } = await supabaseAdmin
+          .from('users')
+          .select('company_name, full_name, corporate_phone, gstin')
+          .eq('registered_email', effectiveBuyerEmail)
+          .maybeSingle();
+        if (dbUser?.company_name) resolvedBuyerCompany = dbUser.company_name;
+      } catch (e) {}
+    }
+    if (!resolvedBuyerCompany) {
+      resolvedBuyerCompany = profile?.full_name ? `${profile.full_name} Enterprises` : 'Enterprise Commercial Buyer';
+    }
+
+    const resolvedContactPerson = profile?.full_name || buyerName || order?.buyer_contact_person || order?.buyer_name || 'Authorized Representative';
+
     // 7. Update or create in local ordersStore (sync across both stores)
     const orderDataForStore = {
       id: orderId,
-      transaction_id: `TXN-RZP-${razorpay_payment_id.slice(-6).toUpperCase()}`,
+      order_id: orderId,
+      transaction_id: razorpay_payment_id,
       order_status: 'confirmed',
       current_state: 'price_locked_10',
       payment_status: 'paid_to_escrow',
@@ -208,12 +240,16 @@ export async function POST(request) {
       balance_due_90: effectiveTotal - effectiveAdvance,
       product_name: productTitle || order?.product_name || order?.productTitle || 'Commercial Goods',
       buyer_email: effectiveBuyerEmail,
-      buyer_name: buyerName || order?.buyer_name || profile?.full_name || 'Enterprise Buyer',
+      buyer_company_name: resolvedBuyerCompany,
+      company_name: resolvedBuyerCompany,
+      buyer_contact_person: resolvedContactPerson,
+      buyer_name: resolvedContactPerson,
       buyer_phone: buyerPhone || order?.buyer_phone || profile?.corporate_phone || '+91-9876543210',
       buyer_gstin: buyerGstin || order?.buyer_gstin || profile?.gst_number || '27AAECR1234F1Z5',
       delivery_address: deliveryAddress || order?.delivery_address || 'Registered Warehouse',
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      receipt_sent: Boolean(order?.receipt_sent)
     };
 
     try {
@@ -242,20 +278,34 @@ export async function POST(request) {
       console.warn('Ledger recording notice for advance:', ledgerErr.message);
     }
 
-    // 9. Send official 10% Advance Escrow Payment Receipt Email to Buyer
-    let emailResult = { success: false };
-    try {
-      if (effectiveBuyerEmail && effectiveBuyerEmail.includes('@')) {
-        emailResult = await sendOrderReceiptEmail(orderDataForStore, {
-          buyerEmail: effectiveBuyerEmail,
-          buyerCompanyName: orderDataForStore.buyer_name,
-          buyerPhone: orderDataForStore.buyer_phone,
-          buyerGstin: orderDataForStore.buyer_gstin
-        });
-        console.log('✅ 10% Advance Escrow Receipt Email sent to:', effectiveBuyerEmail, emailResult);
+    // 9. Send official 10% Advance Escrow Payment Receipt Email ONLY if logistics is already locked
+    // If buyer has not yet chosen between Self-Pickup and Delivery (standard post-payment flow),
+    // defer receipt dispatch to /api/logistics/confirm so EXACTLY ONE receipt is dispatched per purchase!
+    let emailResult = { success: false, deferred: true };
+    const isLogisticsAlreadyConfirmed = Boolean(
+      order?.delivery_option && 
+      (order?.delivery_address || order?.arrival_date || order?.vehicle_number || body.deliveryOption)
+    );
+
+    if (isLogisticsAlreadyConfirmed && !order?.receipt_sent) {
+      try {
+        if (effectiveBuyerEmail && effectiveBuyerEmail.includes('@')) {
+          emailResult = await sendOrderReceiptEmail(orderDataForStore, {
+            buyerEmail: effectiveBuyerEmail,
+            buyerCompanyName: resolvedBuyerCompany,
+            buyerContactPerson: resolvedContactPerson,
+            buyerPhone: orderDataForStore.buyer_phone,
+            buyerGstin: orderDataForStore.buyer_gstin
+          });
+          orderDataForStore.receipt_sent = true;
+          try { updateOrder(orderId, { receipt_sent: true }); } catch (e) {}
+          console.log('✅ 10% Advance Escrow Receipt Email sent to:', effectiveBuyerEmail, emailResult);
+        }
+      } catch (mailErr) {
+        console.warn('Could not dispatch 10% Advance Escrow Receipt email:', mailErr.message);
       }
-    } catch (mailErr) {
-      console.warn('Could not dispatch 10% Advance Escrow Receipt email:', mailErr.message);
+    } else {
+      console.log('ℹ️ Logistics choice pending in PostPaymentFlow. Receipt email deferred to /api/logistics/confirm so only 1 receipt is sent per purchase.');
     }
 
     // 9.5 Update RFQ & Quotation statuses if converted from quotation
@@ -303,7 +353,12 @@ export async function POST(request) {
       verified: true,
       newState: 'price_locked_10',
       orderId,
+      order_id: orderId,
       paymentId: razorpay_payment_id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpay_payment_id: razorpay_payment_id,
+      transactionId: razorpay_payment_id,
+      transaction_id: razorpay_payment_id,
       advancePaid: effectiveAdvance,
       totalContractValue: effectiveTotal,
       receiptEmailSent: emailResult.success || false,
