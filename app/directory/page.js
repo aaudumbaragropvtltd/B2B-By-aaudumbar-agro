@@ -12,9 +12,12 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata = {
-  title: "India B2B Trade Directory — Verified Manufacturers, Wholesale Prices & Suppliers",
-  description: "Explore India's largest verified B2B trade directory across 38 industrial sectors. Compare live factory wholesale prices, check MOQ, get instant quotations, and trade with automated escrow protection.",
+  title: "India B2B Trade Directory — Verified Manufacturers & Wholesale Prices | b2bindia.site",
+  description: "Explore India's largest verified B2B trade directory on b2bindia.site across 38 industrial sectors. Compare live factory wholesale prices, check MOQ, get instant quotations, and trade with automated escrow protection.",
   keywords: [
+    "b2bindia.site",
+    "b2bindia",
+    "b2bindia directory",
     "India B2B trade directory",
     "wholesale suppliers directory India",
     "verified Indian manufacturers",
@@ -24,15 +27,20 @@ export const metadata = {
     "factory direct wholesale price",
   ],
   alternates: {
-    canonical: "https://b2bindia.site/directory",
+    canonical: "https://www.b2bindia.site/directory",
   },
   openGraph: {
-    title: "India B2B Trade Directory — Verified Manufacturers & Wholesale Suppliers",
-    description: "Browse 38 sectors, compare wholesale prices, and trade directly with verified Indian manufacturers.",
-    url: "https://b2bindia.site/directory",
-    siteName: "B2B India",
+    title: "India B2B Trade Directory — Verified Manufacturers & Wholesale Suppliers | b2bindia.site",
+    description: "Browse 38 sectors, compare wholesale prices, and trade directly with verified Indian manufacturers on b2bindia.site.",
+    url: "https://www.b2bindia.site/directory",
+    siteName: "b2bindia.site | B2B India",
     locale: "en_IN",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "India B2B Trade Directory | b2bindia.site",
+    description: "Browse 38 industrial sectors and connect with verified Indian manufacturers on b2bindia.site.",
   },
 };
 

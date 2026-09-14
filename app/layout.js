@@ -14,12 +14,16 @@ const baseUrl = getSiteUrl();
 export const metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "B2B India — India's Cross-Industry Automated B2B Wholesale Marketplace",
-    template: "%s | B2B India",
+    default: "b2bindia.site — India's Cross-Industry Automated B2B Wholesale Marketplace",
+    template: "%s | b2bindia.site",
   },
   description:
-    "Direct B2B wholesale procurement across 38 industrial sectors. Buy wholesale from verified Indian manufacturers with escrow payment clearing, GST tax invoices, and pan-India logistics dispatch.",
+    "Direct B2B wholesale procurement on b2bindia.site across 38 industrial sectors. Buy wholesale from verified Indian manufacturers with escrow payment clearing, GST tax invoices, and pan-India logistics dispatch.",
   keywords: [
+    "b2bindia.site",
+    "b2bindia",
+    "b2bindia wholesale",
+    "b2bindia marketplace",
     "B2B wholesale marketplace India",
     "buy wholesale online India",
     "verified B2B suppliers India",
@@ -41,17 +45,17 @@ export const metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "B2B India — Cross-Industry Automated B2B Marketplace",
+    title: "b2bindia.site — Cross-Industry Automated B2B Marketplace",
     description:
-      "India's premier B2B platform connecting verified manufacturers across 38 sectors with automated escrow and AI pricing.",
+      "India's premier B2B platform on b2bindia.site connecting verified manufacturers across 38 sectors with automated escrow and AI pricing.",
     url: baseUrl,
-    siteName: "B2B India",
+    siteName: "b2bindia.site | B2B India",
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'B2B India Platform Preview',
+        alt: 'b2bindia.site Platform Preview',
       },
     ],
     locale: "en_IN",
@@ -59,8 +63,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "B2B India — India's Cross-Industry Automated Marketplace",
-    description: "India's premier B2B platform connecting verified manufacturers across 38 sectors with automated escrow and AI pricing.",
+    title: "b2bindia.site — India's Cross-Industry Automated Marketplace",
+    description: "India's premier B2B platform on b2bindia.site connecting verified manufacturers across 38 sectors with automated escrow and AI pricing.",
     images: ['/og-image.jpg'],
   },
   robots: {
@@ -85,6 +89,54 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const globalSiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${baseUrl}/#website`,
+        url: `${baseUrl}/`,
+        name: 'b2bindia.site',
+        alternateName: [
+          'B2B India',
+          'b2bindia',
+          'www.b2bindia.site',
+          'B2B India Marketplace',
+          'b2bindia.site Wholesale',
+        ],
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${baseUrl}/directory?q={search_term_string}`,
+          },
+          'query-input': 'required name=search_term_string',
+        },
+        inLanguage: 'en-IN',
+      },
+      {
+        '@type': 'Organization',
+        '@id': `${baseUrl}/#organization`,
+        name: 'b2bindia.site | B2B India',
+        url: `${baseUrl}/`,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${baseUrl}/og-image.jpg`,
+          width: 1200,
+          height: 630,
+        },
+        contactPoint: {
+          '@type': 'ContactPoint',
+          telephone: '+91-8408841998',
+          contactType: 'customer support',
+          email: 'support@b2bindia.site',
+          areaServed: 'IN',
+          availableLanguage: ['en', 'hi', 'mr'],
+        },
+      },
+    ],
+  };
+
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
@@ -93,6 +145,10 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="preconnect" href="https://5.imimg.com" />
         <link rel="dns-prefetch" href="https://5.imimg.com" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSiteJsonLd) }}
+        />
       </head>
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         {children}

@@ -36,8 +36,15 @@ export default async function HomePage() {
         '@type': 'WebSite',
         '@id': `${siteUrl}/#website`,
         url: `${siteUrl}/`,
-        name: 'B2B India',
-        description: "India's Largest B2B Wholesale Marketplace — Direct Manufacturer Sourcing & Automated Escrow",
+        name: 'b2bindia.site',
+        alternateName: [
+          'B2B India',
+          'b2bindia',
+          'www.b2bindia.site',
+          'B2B India Marketplace',
+          'b2bindia.site Wholesale',
+        ],
+        description: "India's Largest B2B Wholesale Marketplace on b2bindia.site — Direct Manufacturer Sourcing & Automated Escrow",
         potentialAction: [
           {
             '@type': 'SearchAction',
@@ -53,7 +60,7 @@ export default async function HomePage() {
       {
         '@type': 'Organization',
         '@id': `${siteUrl}/#organization`,
-        name: 'B2B India',
+        name: 'b2bindia.site | B2B India',
         url: `${siteUrl}/`,
         logo: {
           '@type': 'ImageObject',
@@ -63,7 +70,7 @@ export default async function HomePage() {
           contentUrl: `${siteUrl}/og-image.jpg`,
           width: 1200,
           height: 630,
-          caption: 'B2B India',
+          caption: 'b2bindia.site',
         },
         image: {
           '@id': `${siteUrl}/#logo`,
