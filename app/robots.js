@@ -26,6 +26,8 @@ export default function robots() {
           '/shipping-policy',
           '/refund-policy',
           '/public/*',
+          '/sitemap.xml',
+          '/api/sitemap.xml',
         ],
         disallow: [
           '/api/',
@@ -46,6 +48,8 @@ export default function robots() {
           '/directory/supplier/*',
           '/market-rates/',
           '/public/*',
+          '/sitemap.xml',
+          '/api/sitemap.xml',
         ],
         disallow: [
           '/api/',
@@ -55,7 +59,10 @@ export default function robots() {
         ],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: [
+      `${baseUrl}/sitemap.xml`,
+      `${baseUrl}/api/sitemap.xml`,
+    ],
     host: baseUrl,
   };
 }

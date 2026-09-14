@@ -1,4 +1,13 @@
 User-agent: *
-Disallow:
 Allow: /
-Sitemap: https://b2bindia.site/api/sitemap.xml
+Allow: /sitemap.xml
+Allow: /api/sitemap.xml
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /test-flow/
+Disallow: /cookie/
+
+Sitemap: https://www.b2bindia.site/sitemap.xml
+Sitemap: https://www.b2bindia.site/api/sitemap.xml

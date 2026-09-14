@@ -23,6 +23,16 @@ const nextConfig = {
 
   // Optimize serverless function bundling for Vercel Free Tier
   serverExternalPackages: ['firebase-admin'],
+
+  // Ensure /api/sitemap redirects to /api/sitemap.xml
+  async rewrites() {
+    return [
+      {
+        source: '/api/sitemap',
+        destination: '/api/sitemap.xml',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
