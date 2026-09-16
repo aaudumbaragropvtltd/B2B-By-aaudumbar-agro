@@ -14,11 +14,11 @@ const baseUrl = getSiteUrl();
 export const metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "B2B India — Verified B2B Wholesale Marketplace in India | b2bindia.site",
+    default: "B2B India — Verified Wholesale Marketplace in India",
     template: "%s | B2B India",
   },
   description:
-    "B2B India (b2bindia.site) is India's leading verified B2B wholesale marketplace. Direct B2B procurement across 38 industrial sectors with escrow payment protection, GST invoices, and pan-India logistics dispatch.",
+    "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 100% escrow protection, verified GST suppliers & bulk freight.",
   keywords: [
     "B2B",
     "B2B India",
@@ -57,9 +57,9 @@ export const metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "B2B India — Verified B2B Wholesale Marketplace in India | b2bindia.site",
+    title: "B2B India — Verified Wholesale Marketplace in India",
     description:
-      "India's premier B2B platform on b2bindia.site connecting verified manufacturers across 38 sectors with automated escrow and AI pricing.",
+      "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 100% escrow protection, verified GST suppliers & bulk freight.",
     url: baseUrl,
     siteName: "B2B India | b2bindia.site",
     images: [
@@ -81,8 +81,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "B2B India — Verified B2B Wholesale Marketplace | b2bindia.site",
-    description: "India's premier B2B platform on b2bindia.site connecting verified manufacturers across 38 sectors with automated escrow and AI pricing.",
+    title: "B2B India — Verified Wholesale Marketplace in India",
+    description: "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 100% escrow protection, verified GST suppliers & bulk freight.",
     images: [`${baseUrl}/logo.png`, `${baseUrl}/og-image.png`],
   },
   robots: {
@@ -100,8 +100,10 @@ export const metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'google0e8c1d2b0dc6688c',
   },
   other: {
-    'geo.region': 'IN',
-    'geo.placename': 'India',
+    'geo.region': 'IN-MH',
+    'geo.placename': 'Chhatrapati Sambhajinagar, Maharashtra, India',
+    'geo.position': '19.8631;75.3588',
+    'ICBM': '19.8631, 75.3588',
     'rating': 'general',
   },
 };
@@ -142,6 +144,7 @@ export default function RootLayout({ children }) {
         '@type': 'Organization',
         '@id': `${baseUrl}/#organization`,
         name: 'B2B India | b2bindia.site',
+        legalName: 'Aaudumbar Agro Pvt. Ltd.',
         url: `${baseUrl}/`,
         logo: {
           '@type': 'ImageObject',
@@ -154,6 +157,13 @@ export default function RootLayout({ children }) {
           caption: 'B2B India Official Logo',
         },
         image: `${baseUrl}/logo.png`,
+        sameAs: [
+          'https://www.linkedin.com/company/b2b-bharat',
+          'https://twitter.com/b2bindia_site',
+          'https://www.facebook.com/b2bindia.site',
+          'https://www.instagram.com/b2bindia.site',
+          'https://www.youtube.com/@b2bindia-official',
+        ],
         contactPoint: {
           '@type': 'ContactPoint',
           telephone: '+91-8408841998',
@@ -162,6 +172,49 @@ export default function RootLayout({ children }) {
           areaServed: 'IN',
           availableLanguage: ['en', 'hi', 'mr'],
         },
+      },
+      {
+        '@type': ['LocalBusiness', 'WholesaleStore'],
+        '@id': `${baseUrl}/#localbusiness`,
+        name: 'B2B India — Aaudumbar Agro Pvt. Ltd.',
+        description:
+          "India's verified cross-industry B2B wholesale marketplace with automated escrow protection and direct manufacturer sourcing across 38 sectors.",
+        url: `${baseUrl}/`,
+        telephone: '+91-8408841998',
+        email: 'support@b2bindia.site',
+        image: `${baseUrl}/logo.png`,
+        logo: `${baseUrl}/logo.png`,
+        priceRange: '₹₹₹',
+        currenciesAccepted: 'INR',
+        paymentAccepted: 'Cash, Credit Card, Bank Transfer, Escrow, UPI, RTGS, NEFT',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Plot No. 5, Prerna Nagar, Garkheda Parisar',
+          addressLocality: 'Chhatrapati Sambhajinagar',
+          addressRegion: 'Maharashtra',
+          postalCode: '431009',
+          addressCountry: 'IN',
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: 19.8631,
+          longitude: 75.3588,
+        },
+        openingHoursSpecification: [
+          {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            opens: '09:00',
+            closes: '20:00',
+          },
+        ],
+        sameAs: [
+          'https://www.linkedin.com/company/b2b-bharat',
+          'https://twitter.com/b2bindia_site',
+          'https://www.facebook.com/b2bindia.site',
+          'https://www.instagram.com/b2bindia.site',
+          'https://www.youtube.com/@b2bindia-official',
+        ],
       },
     ],
   };

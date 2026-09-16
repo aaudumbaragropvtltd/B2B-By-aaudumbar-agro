@@ -60,9 +60,9 @@ function ProductCard({ product, index }) {
 
           {/* Content */}
           <div className="p-4 relative z-10 bg-white">
-            <h4 className="text-sm font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-brand-600 transition-colors min-h-[2.5rem]">
+            <h3 className="text-sm font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-brand-600 transition-colors min-h-[2.5rem]">
               {product.name}
-            </h4>
+            </h3>
             <div className="mt-2.5 flex items-baseline gap-1">
               <span className="text-xl font-extrabold text-gray-900">{formatPrice(product.price)}</span>
               <span className="text-xs text-gray-400 font-medium">/{product.unit}</span>

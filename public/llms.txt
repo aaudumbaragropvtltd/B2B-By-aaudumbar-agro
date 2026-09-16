@@ -1,0 +1,36 @@
+# B2B India (b2bindia.site)
+
+> India's premier verified cross-industry B2B wholesale marketplace, featuring automated milestone escrow settlements, verified primary manufacturers, transparent bulk pricing, and pan-India logistics. Operated by Aaudumbar Agro Pvt. Ltd.
+
+## Core Capabilities
+- **Direct Factory Procurement**: Connect verified institutional buyers with primary manufacturers, mills, and fabricators across India.
+- **100% Escrow Protection**: Milestone-based fund release ensuring zero default risk for buyers and instant settlement for suppliers upon warehouse dock clearance.
+- **Live RFQ Reverse Auction**: Buyers post volume specifications, receiving competitive factory bids within 4 hours.
+- **Transparent Wholesale Pricing**: Multi-tier quantity discount slabs (Pilot, Commercial Distribution, Full Truckload/FTL).
+- **Compliance & Credentialing**: Strict verification of GSTIN, MSME Udyam, BIS, ISO, FSSAI, and WHO-GMP certifications.
+
+## Key Industrial Sectors (38 Categories)
+- **Food & Agriculture**: Spices (Turmeric, Chilli), Grains (Basmati Rice, Wheat Atta), Edible Oils (Mustard Oil), Pulses.
+- **Building & Construction**: TMT Steel Bars (Fe-550D), Vitrified Tiles, Cement, Sanitaryware, Structural Steel.
+- **Industrial Machinery**: VFFS Packaging Machines, CNC Lathes, Industrial Mixers, Conveyors.
+- **Solar & Renewable Energy**: Mono PERC Bifacial Solar PV Panels, Inverters, Lithium-ion ESS Batteries.
+- **Pharmaceuticals & APIs**: Paracetamol IP/BP/USP, Active Pharmaceutical Ingredients, Formulations.
+- **Textiles & Fabrics**: Combed Cotton Yarn (30s/40s), Greige Fabric, Industrial Garments, Knitted Textiles.
+- **Automobile & EV Components**: Electric Vehicle Batteries, Braking Systems, Precision Machined Parts.
+- **Chemicals & Minerals**: Industrial Solvents, Fertilizers, Polymers, Caustic Soda.
+
+## Primary Endpoints & Directory Links
+- [Marketplace Homepage](https://www.b2bindia.site/): Main discovery, verified trending products, and live buy leads.
+- [Wholesale Directory](https://www.b2bindia.site/directory): Comprehensive catalog of verified suppliers and wholesale commodities.
+- [Live RFQ Board](https://www.b2bindia.site/rfq/live-board): Real-time buyer procurement requirements and auction bidding.
+- [Post Buy RFQ](https://www.b2bindia.site/rfq/create): 1-click submission for commercial and industrial supply quotes.
+- [Escrow Safety Program](https://www.b2bindia.site/escrow-protection): Complete documentation of the 3-stage milestone escrow payment protocol.
+- [Supplier Verification & Trade Pass](https://www.b2bindia.site/trade-pass): Fast-track KYC and GST verification for Indian manufacturers.
+
+## Corporate Entity & Contact
+- **Entity**: Aaudumbar Agro Pvt. Ltd.
+- **Registered Address**: Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar, Maharashtra 431009, India
+- **GSTIN**: 27AAECR1234F1Z5
+- **Enterprise Helpline**: +91-8408841998 / +91-9226497450
+- **Official Email**: support@b2bindia.site
+- **Sitemap**: https://www.b2bindia.site/sitemap.xml

@@ -36,9 +36,9 @@ function ProductMiniCard({ product }) {
         </div>
         {/* Content */}
         <div className="p-2.5 flex-1 flex flex-col">
-          <h4 className="text-[11px] font-semibold text-gray-800 leading-tight line-clamp-2 group-hover:text-brand-600 transition-colors">
+          <h3 className="text-[11px] font-semibold text-gray-800 leading-tight line-clamp-2 group-hover:text-brand-600 transition-colors">
             {product.name}
-          </h4>
+          </h3>
           <div className="mt-auto pt-2 flex items-baseline gap-1">
             <span className="text-sm font-extrabold text-gray-900">
               {formatPrice(product.price)}

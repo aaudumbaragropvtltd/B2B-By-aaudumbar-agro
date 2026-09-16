@@ -63,9 +63,9 @@ function ProductCard({ product, index }) {
 
           {/* Content */}
           <div className="p-4 sm:p-5 relative z-10 bg-white">
-            <h4 className="text-sm font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-brand-600 transition-colors min-h-[2.5rem]">
+            <h3 className="text-sm font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-brand-600 transition-colors min-h-[2.5rem]">
               {product.name}
-            </h4>
+            </h3>
 
             {/* Price Row */}
             <div className="mt-2 flex items-baseline gap-1.5">
