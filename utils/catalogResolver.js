@@ -212,7 +212,7 @@ function resolveSupplierByProductTitle(title, category) {
  */
 function normalizeStaticProduct(p) {
   const categoryObj = CATEGORIES.find(c => c.id === p.category) || { name: p.category || 'General', id: p.category };
-  const resolvedSupplier = p.supplier || p.supplier_id || resolveSupplierByProductTitle(p.name || p.title, p.category);
+  const resolvedSupplier = resolveSupplierByProductTitle(p.name || p.title, p.category);
   const heroImg = p.image || p.hero_image_url || 'https://images.unsplash.com/photo-1592982537447-6f2a6a0c8b39?w=800';
   const gallery = Array.isArray(p.gallery_image_urls) && p.gallery_image_urls.length > 0
     ? p.gallery_image_urls.slice(0, 5)

@@ -12,20 +12,14 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata = {
-  title: "India B2B Trade Directory — Verified Wholesale Suppliers & Manufacturers | B2B India",
-  description: "Explore India's verified B2B trade directory across 38 industrial sectors on b2bindia.site. Compare wholesale factory prices, check MOQ, connect directly with Indian manufacturers, and transact safely with 100% Escrow Protection.",
+  title: "India B2B Trade Directory — Verified Manufacturers & Wholesale Prices | b2bindia.site",
+  description: "Explore India's largest verified B2B trade directory on b2bindia.site across 38 industrial sectors. Compare live factory wholesale prices, check MOQ, get instant quotations, and trade with automated escrow protection.",
   keywords: [
     "b2bindia.site",
     "b2bindia",
     "b2bindia directory",
     "India B2B trade directory",
     "wholesale suppliers directory India",
-    "wholesale suppliers in india",
-    "manufacturers in india directory",
-    "bulk suppliers wholesale",
-    "exporters in india wholesale",
-    "low MOQ wholesale marketplace",
-    "escrow protected B2B trade",
     "verified Indian manufacturers",
     "industrial commodity marketplace",
     "bulk product suppliers",
@@ -36,8 +30,8 @@ export const metadata = {
     canonical: "https://www.b2bindia.site/directory",
   },
   openGraph: {
-    title: "India B2B Trade Directory — Verified Wholesale Suppliers & Manufacturers | B2B India",
-    description: "Browse 38 industrial sectors, compare wholesale prices, and source directly from verified Indian manufacturers with Escrow protection on B2B India.",
+    title: "India B2B Trade Directory — Verified Manufacturers & Wholesale Suppliers | b2bindia.site",
+    description: "Browse 38 sectors, compare wholesale prices, and trade directly with verified Indian manufacturers on b2bindia.site.",
     url: "https://www.b2bindia.site/directory",
     siteName: "b2bindia.site | B2B India",
     locale: "en_IN",
@@ -45,8 +39,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "India B2B Trade Directory — Wholesale Suppliers & Manufacturers | B2B India",
-    description: "Connect with verified Indian manufacturers, check transparent MOQ & wholesale pricing, and trade with Escrow protection on B2B India.",
+    title: "India B2B Trade Directory | b2bindia.site",
+    description: "Browse 38 industrial sectors and connect with verified Indian manufacturers on b2bindia.site.",
   },
 };
 
