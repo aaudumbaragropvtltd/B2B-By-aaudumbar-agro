@@ -5,7 +5,7 @@
     "transaction_id": "pay_TbvfL2ta8KG90j",
     "payment_reference": "pay_TbvfL2ta8KG90j",
     "created_at": "2026-09-14T13:12:40.958Z",
-    "updated_at": "2026-09-14T14:23:24.276Z",
+    "updated_at": "2026-09-14T18:09:42.914Z",
     "buyer_email": "raghavendra.sevalikar5002@gmail.com",
     "buyer_company_name": "SATYAM EXPO",
     "company_name": "SATYAM EXPO",
@@ -23,7 +23,7 @@
     "total_amount": 110.25,
     "advance_amount": 11.03,
     "payment_status": "paid_to_escrow",
-    "order_status": "confirmed",
+    "order_status": "warehouse_loading",
     "current_state": "price_locked_10",
     "receipt_sent": true,
     "supplier_id": "sup-aaudumbar-1",
@@ -46,7 +46,8 @@
     "p2_phone": "9423453700",
     "p2_aadhar": "625770343109",
     "tracking_number": "GATE-PASS-3848",
-    "notes": "Direct Wholesale Escrow Order."
+    "notes": "Direct Wholesale Escrow Order.",
+    "delivery_status": "warehouse_loading"
   },
   {
     "id": "5ee947a6-0279-4766-8aef-9f7e3b730698",
