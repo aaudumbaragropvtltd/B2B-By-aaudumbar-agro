@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 import { getSiteUrl } from "@/utils/seoUtils";
@@ -237,13 +238,20 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="preconnect" href="https://5.imimg.com" />
         <link rel="dns-prefetch" href="https://5.imimg.com" />
-        {/* Google Analytics 4 Tracking */}
         <script
-          async
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSiteJsonLd) }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
+        {/* Google Analytics 4 Tracking via Next.js Script */}
+        <Script
+          strategy="afterInteractive"
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-B2BINDIA01'}`}
         />
-        <script
+        <Script
           id="google-analytics"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -255,12 +263,6 @@ export default function RootLayout({ children }) {
             `,
           }}
         />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSiteJsonLd) }}
-        />
-      </head>
-      <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         {children}
       </body>
     </html>
