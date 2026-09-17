@@ -114,7 +114,7 @@ export function getStatesForCommodity(commoditySlug) {
 
   if (html) {
     const stateMatches = [...html.matchAll(/<option[^>]*value=["']([^"']*)["'][^>]*>([^<]+)<\/option>/gi)]
-      .filter(m => m[1])
+      .filter(m => m[1] && m[1] !== 'all' && m[1] !== '')
       .map(m => ({ slug: m[1], name: m[2].trim() }));
 
     if (stateMatches.length > 0) {
@@ -124,7 +124,6 @@ export function getStatesForCommodity(commoditySlug) {
   }
 
   return [
-    { slug: 'all', name: 'All States' },
     { slug: 'maharashtra', name: 'Maharashtra' },
     { slug: 'gujarat', name: 'Gujarat' },
     { slug: 'madhya-pradesh', name: 'Madhya Pradesh' },
@@ -138,7 +137,7 @@ export function getStatesForCommodity(commoditySlug) {
  */
 export function getMarketsForCommodityAndState(commoditySlug, stateSlug) {
   if (!commoditySlug || !stateSlug || stateSlug === 'all') {
-    return [{ slug: 'all', name: 'All Markets' }];
+    return [];
   }
 
   const cacheKey = `markets_${commoditySlug}_${stateSlug}`;
@@ -151,7 +150,7 @@ export function getMarketsForCommodityAndState(commoditySlug, stateSlug) {
 
   if (html) {
     const marketMatches = [...html.matchAll(/<option[^>]*value=["']([^"']*)["'][^>]*>([^<]+)<\/option>/gi)]
-      .filter(m => m[1])
+      .filter(m => m[1] && m[1] !== 'all' && m[1] !== '')
       .map(m => ({ slug: m[1], name: m[2].trim() }));
 
     if (marketMatches.length > 0) {
@@ -160,7 +159,7 @@ export function getMarketsForCommodityAndState(commoditySlug, stateSlug) {
     }
   }
 
-  return [{ slug: 'all', name: 'All Markets' }];
+  return [];
 }
 
 /**

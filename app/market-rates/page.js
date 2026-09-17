@@ -99,7 +99,8 @@ export default function MarketRatesPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.states && Array.isArray(data.states)) {
-            setStates([{ slug: 'all', name: 'All States' }, ...data.states]);
+            const cleanStates = data.states.filter((s) => s.slug && s.slug !== 'all');
+            setStates([{ slug: 'all', name: 'All States' }, ...cleanStates]);
           }
         }
       } catch (err) {
@@ -124,7 +125,8 @@ export default function MarketRatesPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.markets && Array.isArray(data.markets)) {
-            setMarkets([{ slug: 'all', name: 'All Markets / Mandis' }, ...data.markets]);
+            const cleanMarkets = data.markets.filter((m) => m.slug && m.slug !== 'all');
+            setMarkets([{ slug: 'all', name: 'All Markets / Mandis' }, ...cleanMarkets]);
           }
         }
       } catch (err) {
@@ -401,8 +403,8 @@ export default function MarketRatesPage() {
                   onChange={(e) => setSelectedState(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none min-h-[42px] cursor-pointer"
                 >
-                  {states.map((st) => (
-                    <option key={st.slug} value={st.slug}>
+                  {states.map((st, sIdx) => (
+                    <option key={`${st.slug}-${sIdx}`} value={st.slug}>
                       {st.name}
                     </option>
                   ))}
@@ -419,8 +421,8 @@ export default function MarketRatesPage() {
                   onChange={(e) => setSelectedMarket(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none min-h-[42px] cursor-pointer"
                 >
-                  {markets.map((m) => (
-                    <option key={m.slug} value={m.slug}>
+                  {markets.map((m, mIdx) => (
+                    <option key={`${m.slug}-${mIdx}`} value={m.slug}>
                       {m.name}
                     </option>
                   ))}
