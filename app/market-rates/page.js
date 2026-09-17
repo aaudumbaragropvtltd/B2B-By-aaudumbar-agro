@@ -286,16 +286,11 @@ export default function MarketRatesPage() {
 
           {/* ── COMMODITYONLINE FILTER CONTROLS ── */}
           <div className="p-4 sm:p-6 bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🔍</span>
-                <h2 className="text-sm sm:text-base font-black text-slate-900">
-                  Mandi Rate Filter: Commodity, State &amp; Market
-                </h2>
-              </div>
-              <span className="text-xs text-slate-500 font-medium">
-                Sourced from CommodityOnline Mandi Prices
-              </span>
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+              <span className="text-lg">🔍</span>
+              <h2 className="text-sm sm:text-base font-black text-slate-900">
+                Mandi Rate Filter: Commodity, State &amp; Market
+              </h2>
             </div>
 
             {/* Quick Staples Bar */}
@@ -465,16 +460,6 @@ export default function MarketRatesPage() {
                   Showing {displayRecords.length} market arrivals across India • Updated live
                 </p>
               </div>
-
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-indigo-700 hover:text-indigo-800 font-bold flex items-center gap-1 self-start sm:self-auto hover:underline"
-              >
-                <span>View Full Index on CommodityOnline</span>
-                <span>↗</span>
-              </a>
             </div>
 
             {loading ? (
