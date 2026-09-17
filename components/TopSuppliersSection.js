@@ -207,15 +207,18 @@ export default function TopSuppliersSection({ initialSuppliers = [] }) {
 
                       {/* Stats Grid */}
                       <div className="grid grid-cols-3 gap-2 mb-3">
-                        <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100">
-                          <div className="text-sm font-extrabold text-gray-900">{supplier.responseRate}</div>
+                        <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100 group-hover:bg-brand-50/50 transition-colors">
+                          <div className="text-sm font-extrabold text-gray-900 flex items-center justify-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 live-pulse-dot" />
+                            {supplier.responseRate}
+                          </div>
                           <div className="text-[9px] text-gray-400 uppercase tracking-wider">Response</div>
                         </div>
-                        <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100">
+                        <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100 group-hover:bg-brand-50/50 transition-colors">
                           <div className="text-sm font-extrabold text-gray-900">{supplier.responseTime}</div>
                           <div className="text-[9px] text-gray-400 uppercase tracking-wider">Avg Time</div>
                         </div>
-                        <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100">
+                        <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100 group-hover:bg-brand-50/50 transition-colors">
                           <div className="text-sm font-extrabold text-gray-900">{supplier.products}</div>
                           <div className="text-[9px] text-gray-400 uppercase tracking-wider">Products</div>
                         </div>
@@ -248,7 +251,7 @@ export default function TopSuppliersSection({ initialSuppliers = [] }) {
         >
           <Link
             href="/directory"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-50 text-brand-700 font-semibold hover:bg-brand-100 transition-colors border border-brand-100"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-50 text-brand-700 font-semibold hover:bg-brand-100 transition-all border border-brand-100 btn-shine hover:scale-105 active:scale-95 shadow-sm"
           >
             Explore All Suppliers
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

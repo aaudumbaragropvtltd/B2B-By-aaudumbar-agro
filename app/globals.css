@@ -406,6 +406,120 @@ body {
   animation: counterGlow 2s ease-in-out infinite;
 }
 
+/* Glossy Shimmer Light Sweep for Buttons */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 80%
+  );
+  transform: rotate(25deg);
+  animation: btnShineSweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes btnShineSweep {
+  0%, 60% { transform: translateX(0) rotate(25deg); opacity: 0; }
+  65% { opacity: 1; }
+  85%, 100% { transform: translateX(550%) rotate(25deg); opacity: 0; }
+}
+
+/* Live Radar Beacon */
+.radar-beacon {
+  position: relative;
+  display: inline-flex;
+}
+
+.radar-beacon::before,
+.radar-beacon::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background-color: inherit;
+  opacity: 0.75;
+  animation: radarWave 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  pointer-events: none;
+}
+
+.radar-beacon::after {
+  animation-delay: 1s;
+}
+
+@keyframes radarWave {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* Live Status Pulse Dot */
+.live-pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.live-pulse-dot::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: inherit;
+  animation: livePing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  opacity: 0.6;
+}
+
+@keyframes livePing {
+  0% { transform: scale(1); opacity: 0.8; }
+  75%, 100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes floatFast {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float-fast {
+  animation: floatFast 2.5s ease-in-out infinite;
+}
+
+@keyframes haloGlowShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.halo-glow {
+  background-size: 250% 250%;
+  animation: haloGlowShift 4s ease infinite;
+}
+
+.glow-border-brand:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 10px 30px -5px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1);
+}
+
+.glow-border-amber:hover {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.2), 0 0 15px rgba(245, 158, 11, 0.1);
+}
+
 /* ============================================================================
    PREMIUM CARD EFFECTS
    ============================================================================ */

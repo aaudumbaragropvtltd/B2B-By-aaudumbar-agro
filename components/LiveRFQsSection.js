@@ -136,8 +136,8 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 radar-beacon mr-1" />
               Live Buy Leads & Broadcasts
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
@@ -152,7 +152,7 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
             <button
               onClick={() => setShowSmartRFQModal(true)}
               suppressHydrationWarning
-              className="px-6 py-3.5 bg-gradient-to-r from-accent-500 to-amber-500 hover:from-accent-600 hover:to-amber-600 text-slate-950 font-extrabold rounded-2xl shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 cursor-pointer text-sm"
+              className="px-6 py-3.5 bg-gradient-to-r from-accent-500 via-amber-500 to-accent-600 hover:from-accent-600 hover:to-amber-600 text-slate-950 font-extrabold rounded-2xl shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer text-sm btn-shine"
             >
               <span>⚡ Broadcast Your RFQ</span>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -161,7 +161,7 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
             </button>
             <Link
               href="/dashboard/rfqs"
-              className="px-5 py-3.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold rounded-2xl transition-all text-sm flex items-center gap-1.5"
+              className="px-5 py-3.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold rounded-2xl transition-all text-sm flex items-center gap-1.5 hover:scale-105 active:scale-95"
             >
               <span>Explore Marketplace</span>
               <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -180,14 +180,15 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.08 }}
-              className="bg-slate-800/80 backdrop-blur-md rounded-3xl border border-slate-700/60 p-6 flex flex-col justify-between hover:border-brand-500/50 hover:shadow-2xl hover:shadow-brand-500/10 transition-all group"
+              whileHover={{ y: -6 }}
+              className="bg-slate-800/80 backdrop-blur-md rounded-3xl border border-slate-700/60 p-6 flex flex-col justify-between hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10 transition-all group glow-border-amber"
             >
               <div>
                 {/* Top Badge & Date */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-full uppercase tracking-wider flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-full uppercase tracking-wider flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 radar-beacon flex-shrink-0" />
                       Open for Quotes
                     </span>
                     {rfq.sector && (

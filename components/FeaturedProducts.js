@@ -35,27 +35,27 @@ function ProductCard({ product, index }) {
     >
       <Link href={getProductUrl(product)}>
         <motion.div
-          whileHover={{ y: -4 }}
+          whileHover={{ y: -6 }}
           whileTap={{ scale: 0.98 }}
-          className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-xs hover:shadow-md transition-all duration-300 relative flex flex-col"
+          className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-xs hover:shadow-xl hover:border-brand-200 transition-all duration-300 relative flex flex-col glow-border-brand"
         >
           {/* Image Area */}
           <div className="relative h-36 sm:h-48 md:h-56 bg-gray-50 overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
             <img
               src={imageSrc}
               alt={displayName}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
               loading="lazy"
             />
             {/* Badge */}
             {product.badge && (
-              <div className={`absolute top-2 left-2 sm:top-3 sm:left-3 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest shadow-md ${BADGE_STYLES[product.badge] || 'bg-brand-600 text-white'}`}>
+              <div className={`absolute top-2 left-2 sm:top-3 sm:left-3 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest shadow-md ${BADGE_STYLES[product.badge] || 'bg-brand-600 text-white'} group-hover:scale-105 transition-transform duration-300`}>
                 {product.badge}
               </div>
             )}
             {/* Quick View Overlay (Desktop only) */}
-            <div className="hidden sm:flex absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-4">
-              <span className="px-5 py-2 rounded-xl bg-white/95 text-xs font-bold text-gray-900 backdrop-blur-md shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+            <div className="hidden sm:flex absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-4">
+              <span className="px-5 py-2 rounded-xl bg-white/95 text-xs font-bold text-gray-900 backdrop-blur-md shadow-lg transform translate-y-3 group-hover:translate-y-0 transition-all duration-300 btn-shine">
                 View Details →
               </span>
             </div>
@@ -73,7 +73,7 @@ function ProductCard({ product, index }) {
 
               {/* Price Row */}
               <div className="mt-2 flex items-baseline gap-1 sm:gap-1.5 flex-wrap">
-                <span className="text-base sm:text-xl font-extrabold text-gray-900 font-mono">
+                <span className="text-base sm:text-xl font-extrabold text-gray-900 font-mono group-hover:text-brand-700 transition-colors">
                   {formatPrice(product.price)}
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium">
@@ -90,12 +90,12 @@ function ProductCard({ product, index }) {
             {/* Supplier Info */}
             <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-gray-50 flex items-center justify-between gap-1.5">
               <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
-                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 flex-shrink-0" />
-                <span className="text-[10px] sm:text-[11px] text-gray-600 font-medium truncate">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 live-pulse-dot" />
+                <span className="text-[10px] sm:text-[11px] text-gray-600 font-medium truncate group-hover:text-gray-900 transition-colors">
                   {product.supplierName || 'Verified Supplier'}
                 </span>
               </div>
-              <span className="flex-shrink-0 px-1.5 py-0.5 rounded bg-emerald-50 text-[8px] sm:text-[9px] font-bold text-emerald-700 uppercase">
+              <span className="flex-shrink-0 px-1.5 py-0.5 rounded bg-emerald-50 text-[8px] sm:text-[9px] font-bold text-emerald-700 uppercase group-hover:bg-emerald-100 transition-colors">
                 ✓ Verified
               </span>
             </div>

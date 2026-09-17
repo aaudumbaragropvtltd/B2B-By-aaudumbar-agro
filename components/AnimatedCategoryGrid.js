@@ -71,20 +71,20 @@ export default function AnimatedCategoryGrid({ categoryCounts = null }) {
                 <Link href={`/directory/${cat.id}`} className="block h-full">
                   <motion.div
                     whileHover={{
-                      scale: 1.03,
-                      y: -4,
-                      boxShadow: '0 16px 32px rgba(0,0,0,0.06)',
+                      scale: 1.04,
+                      y: -5,
+                      boxShadow: '0 20px 35px -10px rgba(0,0,0,0.08)',
                     }}
                     whileTap={{ scale: 0.97 }}
-                    className="relative overflow-hidden p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-gray-100 cursor-pointer group shadow-sm h-full flex flex-col transition-all duration-300 hover:border-brand-200"
+                    className="relative overflow-hidden p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-gray-100 cursor-pointer group shadow-xs h-full flex flex-col transition-all duration-300 hover:border-brand-300"
                   >
                     {/* Gradient Accent Bar */}
                     <div
-                      className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${cat.color} opacity-60 group-hover:opacity-100 transition-opacity`}
+                      className={`absolute top-0 left-0 w-full h-1 sm:h-1.5 bg-gradient-to-r ${cat.color} opacity-70 group-hover:opacity-100 group-hover:h-2 transition-all duration-300`}
                     />
 
                     {/* Icon */}
-                    <div className="text-2xl sm:text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                    <div className="text-2xl sm:text-3xl mb-2 group-hover:scale-125 group-hover:-translate-y-1 transition-transform duration-300 transform-gpu origin-left">
                       {cat.icon}
                     </div>
 
@@ -99,7 +99,7 @@ export default function AnimatedCategoryGrid({ categoryCounts = null }) {
                     <div className="mt-2 sm:mt-3 flex items-center justify-between">
                       <span className="text-[10px] sm:text-xs font-semibold text-brand-600 flex items-center gap-1 group-hover:underline">
                         Browse
-                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">
+                        <span className="transform group-hover:translate-x-1.5 transition-transform duration-300">
                           →
                         </span>
                       </span>

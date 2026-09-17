@@ -41,19 +41,19 @@ function ProductCard({ product, index }) {
         <motion.div
           whileHover={{ y: -6 }}
           whileTap={{ scale: 0.98 }}
-          className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-xs hover:shadow-md transition-all duration-300 relative flex flex-col"
+          className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-xs hover:shadow-xl hover:border-brand-200 transition-all duration-300 relative flex flex-col glow-border-brand"
         >
           {/* Image Area */}
           <div className="h-36 sm:h-44 bg-gray-50 relative overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
             <img
               src={imageSrc}
               alt={displayName}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
               loading="lazy"
             />
             {/* Badge */}
             {product.badge && (
-              <div className={`absolute top-2.5 right-2.5 sm:top-3 sm:right-3 px-2 sm:px-2.5 py-1 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest shadow-md ${BADGE_STYLES[product.badge] || 'bg-brand-600 text-white'}`}>
+              <div className={`absolute top-2.5 right-2.5 sm:top-3 sm:right-3 px-2 sm:px-2.5 py-1 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest shadow-md ${BADGE_STYLES[product.badge] || 'bg-brand-600 text-white'} group-hover:scale-105 transition-transform duration-300`}>
                 {product.badge}
               </div>
             )}
@@ -69,7 +69,7 @@ function ProductCard({ product, index }) {
                 {displayName}
               </h3>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-base sm:text-xl font-extrabold text-gray-900 font-mono">{formatPrice(product.price)}</span>
+                <span className="text-base sm:text-xl font-extrabold text-gray-900 font-mono group-hover:text-brand-700 transition-colors">{formatPrice(product.price)}</span>
                 <span className="text-[10px] sm:text-xs text-gray-400 font-medium">/{product.unit || 'Unit'}</span>
               </div>
               <div className="mt-1 text-[10px] sm:text-xs text-gray-500 font-medium">
@@ -77,9 +77,14 @@ function ProductCard({ product, index }) {
               </div>
             </div>
 
-            <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-gray-50 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 flex-shrink-0" />
-              <span className="text-[10px] sm:text-xs text-gray-600 font-medium truncate">{product.supplierName || 'Verified Supplier'}</span>
+            <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-gray-50 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 live-pulse-dot" />
+                <span className="text-[10px] sm:text-xs text-gray-600 font-medium truncate group-hover:text-gray-900 transition-colors">{product.supplierName || 'Verified Supplier'}</span>
+              </div>
+              <span className="flex-shrink-0 px-1.5 py-0.5 rounded bg-emerald-50 text-[8px] sm:text-[9px] font-bold text-emerald-700 uppercase group-hover:bg-emerald-100 transition-colors">
+                ✓
+              </span>
             </div>
           </div>
         </motion.div>

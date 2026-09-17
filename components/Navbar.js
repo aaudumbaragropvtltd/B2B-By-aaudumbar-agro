@@ -404,7 +404,7 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/login?mode=signup"
-                      className="px-4 py-2 rounded-xl text-sm font-extrabold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 shadow-md shadow-emerald-900/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 flex-shrink-0"
+                      className="px-4 py-2 rounded-xl text-sm font-extrabold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 shadow-md shadow-emerald-900/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 flex-shrink-0 btn-shine"
                     >
                       <span>Sign Up Free</span>
                       <span className="text-xs">→</span>
@@ -518,7 +518,7 @@ export default function Navbar() {
                     <Link
                       href="/login?mode=signup"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 text-center shadow-md shadow-emerald-900/10 transition-all active:scale-95"
+                      className="block w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 text-center shadow-md shadow-emerald-900/10 transition-all active:scale-95 btn-shine"
                     >
                       ✨ Sign Up as Buyer / Supplier →
                     </Link>
