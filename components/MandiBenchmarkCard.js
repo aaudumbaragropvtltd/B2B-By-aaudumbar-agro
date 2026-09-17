@@ -33,10 +33,10 @@ export default function MandiBenchmarkCard({ product }) {
 
   if (loading) {
     return (
-      <div className="rounded-2xl bg-white border border-border-subtle p-5 animate-pulse space-y-3">
-        <div className="h-4 bg-slate-200 rounded w-1/3" />
-        <div className="h-10 bg-slate-100 rounded-xl" />
-        <div className="h-20 bg-slate-50 rounded-xl" />
+      <div className="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-4 sm:p-6 animate-pulse space-y-3 shadow-xs">
+        <div className="h-4 bg-slate-200 rounded-md w-1/3" />
+        <div className="h-14 bg-slate-100 rounded-2xl" />
+        <div className="h-20 bg-slate-50 rounded-2xl" />
       </div>
     );
   }
@@ -54,65 +54,63 @@ export default function MandiBenchmarkCard({ product }) {
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white p-5 sm:p-6 border border-slate-800 shadow-xl space-y-5"
+      transition={{ duration: 0.35 }}
+      className="rounded-2xl sm:rounded-3xl bg-white text-slate-900 p-4 sm:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow space-y-4 sm:space-y-5 overflow-hidden"
     >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 sm:pb-4 border-b border-slate-100">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-            <h3 className="text-sm sm:text-base font-extrabold text-white flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse ring-4 ring-emerald-100" />
+            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
               <span>📊 Live APMC Mandi Benchmark Rates</span>
             </h3>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5">
             Benchmarked against major wholesale APMCs across India
           </p>
         </div>
 
         <a
-          href={mandiData.sourceUrl}
+          href={mandiData.sourceUrl || 'https://www.commodityonline.com/mandiprices/turmeric'}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-[11px] text-brand-400 hover:text-brand-300 font-bold bg-brand-500/10 px-2.5 py-1 rounded-full border border-brand-500/20 transition-colors w-fit"
+          className="inline-flex items-center gap-1.5 text-[11px] text-indigo-700 hover:text-indigo-800 font-bold bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 px-3 py-1 rounded-full transition-colors w-fit self-start sm:self-auto"
           title="View source on CommodityOnline"
         >
           <span>Source: CommodityOnline</span>
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
+          <span className="text-[10px]">↗</span>
         </a>
       </div>
 
       {/* Price Comparison Callout */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 border border-slate-200/80 shadow-xs">
         <div className="space-y-1">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             B2B India Factory Rate
           </div>
-          <div className="text-xl sm:text-2xl font-black text-emerald-400 font-mono">
-            ₹{ourPrice.toLocaleString('en-IN')}<span className="text-xs text-slate-400 font-normal"> / {product.unit_label || 'kg'}</span>
+          <div className="text-2xl sm:text-3xl font-black text-emerald-700 font-mono">
+            ₹{ourPrice.toLocaleString('en-IN')}<span className="text-xs text-slate-500 font-normal"> / {product.unit_label || 'kg'}</span>
           </div>
-          <div className="text-[11px] text-slate-400">
-            Direct ex-warehouse / manufacturer
+          <div className="text-[11px] text-slate-500 font-medium">
+            Direct ex-warehouse / manufacturer rate
           </div>
         </div>
 
-        <div className="space-y-1 sm:border-l sm:border-slate-800 sm:pl-4">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+        <div className="space-y-1 pt-3 sm:pt-0 sm:border-l sm:border-slate-200 sm:pl-4 border-t border-slate-100 sm:border-t-0">
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
             <span>Mandi Modal Average</span>
-            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${mandiData.trend === 'up' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
+            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${mandiData.trend === 'up' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
               {mandiData.trend === 'up' ? '▲' : '▼'} {Math.abs(mandiData.change)}% Today
             </span>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-white font-mono">
-            ₹{Math.round(mandiModalPricePerKg).toLocaleString('en-IN')}<span className="text-xs text-slate-400 font-normal"> / kg</span>
-            <span className="text-xs text-slate-400 block sm:inline sm:ml-2 font-mono">
+          <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
+            ₹{Math.round(mandiModalPricePerKg).toLocaleString('en-IN')}<span className="text-xs text-slate-500 font-normal"> / kg</span>
+            <span className="text-xs text-slate-500 block sm:inline sm:ml-2 font-mono font-medium">
               (₹{mandiData.nationalModalPrice.toLocaleString('en-IN')}/qtl)
             </span>
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-slate-500 font-medium">
             Weighted modal average across major APMCs
           </div>
         </div>
@@ -120,29 +118,29 @@ export default function MandiBenchmarkCard({ product }) {
 
       {/* Savings Callout Banner */}
       {isLowerThanMandi && (
-        <div className="p-3 bg-emerald-950/50 border border-emerald-500/30 rounded-xl flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-emerald-300 font-medium">
-            <span className="text-base">🏷️</span>
+        <div className="p-3 sm:p-3.5 bg-emerald-50 border border-emerald-200/90 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-start sm:items-center gap-2 text-emerald-900 font-medium leading-relaxed">
+            <span className="text-base leading-none">🏷️</span>
             <span>
               Direct Wholesale Deal: <strong>Save ₹{diffPerKg.toFixed(2)}/kg ({percentDiff}%)</strong> vs APMC Mandi average!
             </span>
           </div>
-          <span className="text-[10px] uppercase font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">
+          <span className="text-[10px] uppercase font-black tracking-wider bg-emerald-600 text-white px-2.5 py-1 rounded-full w-fit self-start sm:self-auto shadow-xs">
             Best Value
           </span>
         </div>
       )}
 
-      {/* APMC Mandis Table */}
+      {/* APMC Mandis Breakdown */}
       <div className="space-y-2.5">
-        <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+        <div className="flex items-center justify-between text-xs font-bold text-slate-700">
           <span>Regional APMC Mandi Breakdown ({mandiData.mandis?.length || 0} Mandis):</span>
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
-            className="text-brand-400 hover:text-brand-300 underline font-semibold text-[11px] cursor-pointer"
+            className="text-emerald-700 hover:text-emerald-800 font-bold text-xs py-1 px-2.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors cursor-pointer"
           >
-            {expanded ? 'Show Less' : 'View All Mandis'}
+            {expanded ? '▲ Show Less' : '▼ View All Mandis'}
           </button>
         </div>
 
@@ -150,23 +148,25 @@ export default function MandiBenchmarkCard({ product }) {
           {(expanded ? mandiData.mandis : mandiData.mandis.slice(0, 3)).map((m, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between p-3 bg-slate-950/60 hover:bg-slate-950 border border-slate-800/80 rounded-xl text-xs transition-colors"
+              className="p-3 bg-slate-50/80 hover:bg-slate-100/90 border border-slate-200/70 rounded-xl text-xs transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2"
             >
-              <div>
-                <div className="font-extrabold text-white flex items-center gap-1.5">
-                  <span>{m.market} APMC</span>
-                  <span className="text-[10px] font-normal text-slate-400">({m.state})</span>
+              <div className="min-w-0">
+                <div className="font-extrabold text-slate-900 flex items-center gap-1.5 flex-wrap">
+                  <span className="truncate">{m.market} APMC</span>
+                  <span className="text-[10px] font-medium text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200/60">
+                    {m.state}
+                  </span>
                 </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  Variety: <span className="text-slate-300 font-medium">{m.variety}</span> • Volume: {m.arrivals}
+                <div className="text-[11px] text-slate-500 mt-0.5">
+                  Variety: <span className="text-slate-700 font-semibold">{m.variety}</span> • Volume: {m.arrivals}
                 </div>
               </div>
 
-              <div className="text-right">
-                <div className="font-mono font-black text-white text-sm">
-                  ₹{m.modalPrice.toLocaleString('en-IN')}<span className="text-[10px] text-slate-400 font-normal">/qtl</span>
+              <div className="flex sm:flex-col justify-between sm:text-right sm:items-end items-center border-t border-slate-200/50 sm:border-t-0 pt-1.5 sm:pt-0">
+                <div className="font-mono font-black text-slate-900 text-sm sm:text-base">
+                  ₹{m.modalPrice.toLocaleString('en-IN')}<span className="text-[10px] text-slate-500 font-normal">/qtl</span>
                 </div>
-                <div className="text-[11px] font-mono text-emerald-400">
+                <div className="text-[11px] font-mono font-bold text-emerald-700">
                   ₹{m.pricePerKg.toFixed(2)}/kg
                 </div>
               </div>
@@ -177,20 +177,20 @@ export default function MandiBenchmarkCard({ product }) {
 
       {/* Market Commentary */}
       {mandiData.marketSummary && (
-        <div className="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl text-[11px] text-slate-400 leading-relaxed">
-          <strong className="text-slate-300">Market Insight: </strong>
+        <div className="p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl text-[11px] text-amber-950 leading-relaxed">
+          <strong className="text-amber-900 font-bold">Market Insight: </strong>
           {mandiData.marketSummary}
         </div>
       )}
 
       {/* Footer Navigation */}
-      <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800 text-xs">
-        <span className="text-[11px] text-slate-400">
-          Updated live today from CommodityOnline &amp; APMC Agmarknet
+      <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2.5 border-t border-slate-100 text-xs">
+        <span className="text-[11px] text-slate-500 text-center sm:text-left">
+          Updated live from CommodityOnline &amp; APMC Agmarknet
         </span>
         <Link
           href="/market-rates"
-          className="text-brand-400 hover:text-brand-300 font-bold flex items-center gap-1"
+          className="text-emerald-700 hover:text-emerald-800 font-extrabold flex items-center gap-1 hover:underline text-xs"
         >
           <span>Open Full Mandi Rates Terminal</span>
           <span>→</span>

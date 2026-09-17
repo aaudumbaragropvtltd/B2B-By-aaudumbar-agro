@@ -1,0 +1,2109 @@
+{
+  "totalCommodities": 498,
+  "commodities": [
+    {
+      "slug": "absinthe",
+      "name": "Absinthe"
+    },
+    {
+      "slug": "adulsa",
+      "name": "Adulsa"
+    },
+    {
+      "slug": "ajwain-husk",
+      "name": "Ajwain Husk"
+    },
+    {
+      "slug": "ajwan",
+      "name": "Ajwan"
+    },
+    {
+      "slug": "akarkara",
+      "name": "Akarkara"
+    },
+    {
+      "slug": "alasande-gram",
+      "name": "Alasande Gram"
+    },
+    {
+      "slug": "almond-badam",
+      "name": "Almond(Badam)"
+    },
+    {
+      "slug": "alsandikai",
+      "name": "Alsandikai"
+    },
+    {
+      "slug": "amaltas",
+      "name": "Amaltas"
+    },
+    {
+      "slug": "amaranthus",
+      "name": "Amaranthus"
+    },
+    {
+      "slug": "ambada-seed",
+      "name": "Ambada Seed"
+    },
+    {
+      "slug": "ambadymesta",
+      "name": "Ambady/Mesta"
+    },
+    {
+      "slug": "ambadymestapatson",
+      "name": "Ambady/Mesta/Patson"
+    },
+    {
+      "slug": "ambrette-seedmuskmallow",
+      "name": "Ambrette Seed/Muskmallow"
+    },
+    {
+      "slug": "amla-nelli-kai",
+      "name": "Amla(Nelli Kai)"
+    },
+    {
+      "slug": "amphophalus",
+      "name": "Amphophalus"
+    },
+    {
+      "slug": "amranthas-red",
+      "name": "Amranthas Red"
+    },
+    {
+      "slug": "antawala",
+      "name": "Antawala"
+    },
+    {
+      "slug": "anthorium",
+      "name": "Anthorium"
+    },
+    {
+      "slug": "apple",
+      "name": "Apple"
+    },
+    {
+      "slug": "apricot-jardalukhumani",
+      "name": "Apricot(Jardalu/Khumani)"
+    },
+    {
+      "slug": "arecanut-betelnutsupari",
+      "name": "Arecanut(Betelnut/Supari)"
+    },
+    {
+      "slug": "aretha",
+      "name": "Aretha"
+    },
+    {
+      "slug": "arhar-turred-gram-whole",
+      "name": "Arhar (Tur/Red Gram)(Whole)"
+    },
+    {
+      "slug": "arhar-dal-tur-dal",
+      "name": "Arhar Dal(Tur Dal)"
+    },
+    {
+      "slug": "arhar-turred-gram-whole",
+      "name": "Arhar(Tur/Red Gram)(Whole)"
+    },
+    {
+      "slug": "arrowroot",
+      "name": "Arrowroot"
+    },
+    {
+      "slug": "asalia",
+      "name": "Asalia"
+    },
+    {
+      "slug": "asgand",
+      "name": "Asgand"
+    },
+    {
+      "slug": "ashgourd",
+      "name": "Ashgourd"
+    },
+    {
+      "slug": "ashoka",
+      "name": "Ashoka"
+    },
+    {
+      "slug": "ashwagandha",
+      "name": "Ashwagandha"
+    },
+    {
+      "slug": "asparagus",
+      "name": "Asparagus"
+    },
+    {
+      "slug": "astera",
+      "name": "Astera"
+    },
+    {
+      "slug": "avare-dal",
+      "name": "Avare Dal"
+    },
+    {
+      "slug": "avocado",
+      "name": "Avocado"
+    },
+    {
+      "slug": "baboolphali",
+      "name": "Baboolphali"
+    },
+    {
+      "slug": "baby-corn",
+      "name": "Baby Corn"
+    },
+    {
+      "slug": "bael",
+      "name": "Bael"
+    },
+    {
+      "slug": "bajra-pearl-milletcumbu",
+      "name": "Bajra(Pearl Millet/Cumbu)"
+    },
+    {
+      "slug": "balekai",
+      "name": "Balekai"
+    },
+    {
+      "slug": "bamboo",
+      "name": "Bamboo"
+    },
+    {
+      "slug": "bamboo-shoot",
+      "name": "Bamboo Shoot"
+    },
+    {
+      "slug": "banana",
+      "name": "Banana"
+    },
+    {
+      "slug": "banana-green",
+      "name": "Banana - Green"
+    },
+    {
+      "slug": "banana-stem",
+      "name": "Banana Stem"
+    },
+    {
+      "slug": "barley-jau",
+      "name": "Barley (Jau)"
+    },
+    {
+      "slug": "barley-jau",
+      "name": "Barley(Jau)"
+    },
+    {
+      "slug": "basil",
+      "name": "basil"
+    },
+    {
+      "slug": "bay-leaf-tejpatta",
+      "name": "Bay leaf (Tejpatta)"
+    },
+    {
+      "slug": "bay-leaf-tejpatta",
+      "name": "Bay leaf(Tejpatta)"
+    },
+    {
+      "slug": "beans",
+      "name": "Beans"
+    },
+    {
+      "slug": "beaten-rice",
+      "name": "Beaten Rice"
+    },
+    {
+      "slug": "beetroot",
+      "name": "Beetroot"
+    },
+    {
+      "slug": "behada",
+      "name": "Behada"
+    },
+    {
+      "slug": "bejhar",
+      "name": "Bejhar"
+    },
+    {
+      "slug": "bengal-gram-dal-chana-dal",
+      "name": "Bengal Gram Dal (Chana Dal)"
+    },
+    {
+      "slug": "bengal-gram-dal-chana-dal",
+      "name": "Bengal Gram Dal(Chana Dal)"
+    },
+    {
+      "slug": "bengal-gram-gram-whole",
+      "name": "Bengal Gram(Gram)(Whole)"
+    },
+    {
+      "slug": "ber",
+      "name": "Ber"
+    },
+    {
+      "slug": "ber-zizyphusborehannu",
+      "name": "Ber(Zizyphus/Borehannu)"
+    },
+    {
+      "slug": "betal-leaves",
+      "name": "Betal Leaves"
+    },
+    {
+      "slug": "betelnuts",
+      "name": "Betelnuts"
+    },
+    {
+      "slug": "bhindi-ladies-finger",
+      "name": "Bhindi(Ladies Finger)"
+    },
+    {
+      "slug": "bhui-amlaya",
+      "name": "Bhui Amlaya"
+    },
+    {
+      "slug": "big-gram",
+      "name": "Big Gram"
+    },
+    {
+      "slug": "bilimbi",
+      "name": "Bilimbi"
+    },
+    {
+      "slug": "bitter-gourd",
+      "name": "Bitter gourd"
+    },
+    {
+      "slug": "black-gram-urd-beans-whole",
+      "name": "Black Gram (Urd Beans)(Whole)"
+    },
+    {
+      "slug": "black-gram-dal-urd-dal",
+      "name": "Black Gram Dal (Urd Dal)"
+    },
+    {
+      "slug": "black-gram-dal-urd-dal",
+      "name": "Black Gram Dal(Urd Dal)"
+    },
+    {
+      "slug": "black-gram-urd-beans-whole",
+      "name": "Black Gram(Urd Beans)(Whole)"
+    },
+    {
+      "slug": "black-pepper",
+      "name": "Black pepper"
+    },
+    {
+      "slug": "blueberry",
+      "name": "Blueberry"
+    },
+    {
+      "slug": "bop",
+      "name": "BOP"
+    },
+    {
+      "slug": "bottle-gourd",
+      "name": "Bottle gourd"
+    },
+    {
+      "slug": "bran",
+      "name": "Bran"
+    },
+    {
+      "slug": "brinjal",
+      "name": "Brinjal"
+    },
+    {
+      "slug": "broccoli",
+      "name": "Broccoli"
+    },
+    {
+      "slug": "broken-rice",
+      "name": "Broken Rice"
+    },
+    {
+      "slug": "broomstick-flower-broom",
+      "name": "Broomstick(Flower Broom)"
+    },
+    {
+      "slug": "bull",
+      "name": "Bull"
+    },
+    {
+      "slug": "bullar",
+      "name": "Bullar"
+    },
+    {
+      "slug": "bunch-beans",
+      "name": "Bunch Beans"
+    },
+    {
+      "slug": "butter",
+      "name": "Butter"
+    },
+    {
+      "slug": "buttery",
+      "name": "buttery"
+    },
+    {
+      "slug": "cabbage",
+      "name": "Cabbage"
+    },
+    {
+      "slug": "calendula",
+      "name": "Calendula"
+    },
+    {
+      "slug": "calf",
+      "name": "Calf"
+    },
+    {
+      "slug": "capsicum",
+      "name": "Capsicum"
+    },
+    {
+      "slug": "cardamom",
+      "name": "Cardamom"
+    },
+    {
+      "slug": "cardamoms",
+      "name": "Cardamoms"
+    },
+    {
+      "slug": "carnation",
+      "name": "Carnation"
+    },
+    {
+      "slug": "carrot",
+      "name": "Carrot"
+    },
+    {
+      "slug": "cashewnuts",
+      "name": "Cashewnuts"
+    },
+    {
+      "slug": "castor-seed",
+      "name": "Castor Seed"
+    },
+    {
+      "slug": "catechu-black-cutch-khairkatha",
+      "name": "Catechu(Black Cutch/ Khair/Katha)"
+    },
+    {
+      "slug": "cauliflower",
+      "name": "Cauliflower"
+    },
+    {
+      "slug": "chakotha",
+      "name": "Chakotha"
+    },
+    {
+      "slug": "chandrashoor",
+      "name": "Chandrashoor"
+    },
+    {
+      "slug": "chapparad-avare",
+      "name": "Chapparad Avare"
+    },
+    {
+      "slug": "chena",
+      "name": "Chena"
+    },
+    {
+      "slug": "chennangi-dal",
+      "name": "Chennangi Dal"
+    },
+    {
+      "slug": "cherry",
+      "name": "Cherry"
+    },
+    {
+      "slug": "chiaseeds",
+      "name": "Chiaseeds"
+    },
+    {
+      "slug": "chicory-chikorikasni",
+      "name": "Chicory(Chikori/Kasni)"
+    },
+    {
+      "slug": "chikoos-sapota",
+      "name": "Chikoos(Sapota)"
+    },
+    {
+      "slug": "chili-red",
+      "name": "Chili Red"
+    },
+    {
+      "slug": "chilly-capsicum",
+      "name": "Chilly Capsicum"
+    },
+    {
+      "slug": "chironji",
+      "name": "Chironji"
+    },
+    {
+      "slug": "chow-chow",
+      "name": "Chow Chow"
+    },
+    {
+      "slug": "chrysanthemum",
+      "name": "Chrysanthemum"
+    },
+    {
+      "slug": "chrysanthemum-loose",
+      "name": "Chrysanthemum(Loose)"
+    },
+    {
+      "slug": "cinamon-dalchini",
+      "name": "Cinamon(Dalchini)"
+    },
+    {
+      "slug": "cloves",
+      "name": "Cloves"
+    },
+    {
+      "slug": "cluster-beans",
+      "name": "Cluster beans"
+    },
+    {
+      "slug": "coca",
+      "name": "Coca"
+    },
+    {
+      "slug": "cock",
+      "name": "Cock"
+    },
+    {
+      "slug": "cocoa",
+      "name": "Cocoa"
+    },
+    {
+      "slug": "coconut",
+      "name": "Coconut"
+    },
+    {
+      "slug": "coconut-coir",
+      "name": "Coconut Coir"
+    },
+    {
+      "slug": "coconut-coirdecorticated-fibr",
+      "name": "COCONUT COIR_DECORTICATED FIBR"
+    },
+    {
+      "slug": "coconut-oil",
+      "name": "Coconut Oil"
+    },
+    {
+      "slug": "coconut-seed",
+      "name": "Coconut Seed"
+    },
+    {
+      "slug": "coffee",
+      "name": "Coffee"
+    },
+    {
+      "slug": "coir",
+      "name": "Coir"
+    },
+    {
+      "slug": "colacasia",
+      "name": "Colacasia"
+    },
+    {
+      "slug": "coleus",
+      "name": "Coleus"
+    },
+    {
+      "slug": "copra",
+      "name": "Copra"
+    },
+    {
+      "slug": "coriander-leaves",
+      "name": "Coriander(Leaves)"
+    },
+    {
+      "slug": "corriander-seed",
+      "name": "Corriander seed"
+    },
+    {
+      "slug": "cotton",
+      "name": "Cotton"
+    },
+    {
+      "slug": "cotton-seed",
+      "name": "Cotton Seed"
+    },
+    {
+      "slug": "cotton-bags",
+      "name": "Cotton-Bags"
+    },
+    {
+      "slug": "cow",
+      "name": "Cow"
+    },
+    {
+      "slug": "cowpea-lobiakaramani",
+      "name": "Cowpea (Lobia/Karamani)"
+    },
+    {
+      "slug": "cowpea-lobiakaramani",
+      "name": "Cowpea(Lobia/Karamani)"
+    },
+    {
+      "slug": "cowpea-veg",
+      "name": "Cowpea(Veg)"
+    },
+    {
+      "slug": "cucumbar-kheera",
+      "name": "Cucumbar(Kheera)"
+    },
+    {
+      "slug": "cummin-seed-jeera",
+      "name": "Cummin Seed(Jeera)"
+    },
+    {
+      "slug": "custard-apple-sharifa",
+      "name": "Custard Apple (Sharifa)"
+    },
+    {
+      "slug": "custard-apple-sharifa",
+      "name": "Custard Apple(Sharifa)"
+    },
+    {
+      "slug": "daila-chandni",
+      "name": "Daila(Chandni)"
+    },
+    {
+      "slug": "dal-mix",
+      "name": "Dal Mix"
+    },
+    {
+      "slug": "dalda",
+      "name": "Dalda"
+    },
+    {
+      "slug": "dates",
+      "name": "Dates"
+    },
+    {
+      "slug": "delha",
+      "name": "Delha"
+    },
+    {
+      "slug": "dhaincha",
+      "name": "Dhaincha"
+    },
+    {
+      "slug": "dhawai-flowers",
+      "name": "dhawai flowers"
+    },
+    {
+      "slug": "dried-mango",
+      "name": "dried mango"
+    },
+    {
+      "slug": "drumstick",
+      "name": "Drumstick"
+    },
+    {
+      "slug": "dry-chillies",
+      "name": "Dry Chillies"
+    },
+    {
+      "slug": "dry-fodder",
+      "name": "Dry Fodder"
+    },
+    {
+      "slug": "dry-grapes",
+      "name": "Dry Grapes"
+    },
+    {
+      "slug": "duck",
+      "name": "Duck"
+    },
+    {
+      "slug": "duster-beans",
+      "name": "Duster Beans"
+    },
+    {
+      "slug": "egg",
+      "name": "Egg"
+    },
+    {
+      "slug": "elephant-yam-suran",
+      "name": "Elephant Yam (Suran)"
+    },
+    {
+      "slug": "elephant-yam-suran-amorphophallus",
+      "name": "Elephant Yam(Suran)/Amorphophallus"
+    },
+    {
+      "slug": "field-bean-anumulu",
+      "name": "Field Bean(Anumulu)"
+    },
+    {
+      "slug": "field-pea",
+      "name": "Field Pea"
+    },
+    {
+      "slug": "fig-anjuraanjeer",
+      "name": "Fig(Anjura/Anjeer)"
+    },
+    {
+      "slug": "firewood",
+      "name": "Firewood"
+    },
+    {
+      "slug": "fish",
+      "name": "Fish"
+    },
+    {
+      "slug": "flax-seeds",
+      "name": "Flax seeds"
+    },
+    {
+      "slug": "flowers-others",
+      "name": "Flowers-Others"
+    },
+    {
+      "slug": "foxtail-millet-navane",
+      "name": "Foxtail Millet(Navane)"
+    },
+    {
+      "slug": "french-beans-frasbean",
+      "name": "French Beans (Frasbean)"
+    },
+    {
+      "slug": "french-beans-frasbean",
+      "name": "French Beans(Frasbean)"
+    },
+    {
+      "slug": "galgal-lemon",
+      "name": "Galgal(Lemon)"
+    },
+    {
+      "slug": "garlic",
+      "name": "Garlic"
+    },
+    {
+      "slug": "ghee",
+      "name": "Ghee"
+    },
+    {
+      "slug": "gherkin",
+      "name": "Gherkin"
+    },
+    {
+      "slug": "giloy",
+      "name": "Giloy"
+    },
+    {
+      "slug": "gingelly-oil",
+      "name": "Gingelly Oil"
+    },
+    {
+      "slug": "ginger-dry",
+      "name": "Ginger(Dry)"
+    },
+    {
+      "slug": "ginger-green",
+      "name": "Ginger(Green)"
+    },
+    {
+      "slug": "gladiolus-cut-flower",
+      "name": "Gladiolus Cut Flower"
+    },
+    {
+      "slug": "goat",
+      "name": "Goat"
+    },
+    {
+      "slug": "gokhru",
+      "name": "Gokhru"
+    },
+    {
+      "slug": "gond",
+      "name": "Gond"
+    },
+    {
+      "slug": "gram-raw-chholia",
+      "name": "Gram Raw(Chholia)"
+    },
+    {
+      "slug": "gramflour",
+      "name": "Gramflour"
+    },
+    {
+      "slug": "grapefruit",
+      "name": "Grapefruit"
+    },
+    {
+      "slug": "grapes",
+      "name": "Grapes"
+    },
+    {
+      "slug": "green-avare-w",
+      "name": "Green Avare (W)"
+    },
+    {
+      "slug": "green-avare-w",
+      "name": "Green Avare(W)"
+    },
+    {
+      "slug": "green-chilli",
+      "name": "Green Chilli"
+    },
+    {
+      "slug": "green-fodder",
+      "name": "Green Fodder"
+    },
+    {
+      "slug": "green-gram-moong-whole",
+      "name": "Green Gram (Moong)(Whole)"
+    },
+    {
+      "slug": "green-gram-dal-moong-dal",
+      "name": "Green Gram Dal (Moong Dal)"
+    },
+    {
+      "slug": "green-gram-dal-moong-dal",
+      "name": "Green Gram Dal(Moong Dal)"
+    },
+    {
+      "slug": "green-gram-moong-whole",
+      "name": "Green Gram(Moong)(Whole)"
+    },
+    {
+      "slug": "green-peas",
+      "name": "Green Peas"
+    },
+    {
+      "slug": "ground-nut-oil",
+      "name": "Ground Nut Oil"
+    },
+    {
+      "slug": "ground-nut-seed",
+      "name": "Ground Nut Seed"
+    },
+    {
+      "slug": "groundnut",
+      "name": "Groundnut"
+    },
+    {
+      "slug": "groundnut-split",
+      "name": "Groundnut (Split)"
+    },
+    {
+      "slug": "groundnut-pods-raw",
+      "name": "Groundnut pods (raw)"
+    },
+    {
+      "slug": "groundnut-pods-raw",
+      "name": "Groundnut pods(raw)"
+    },
+    {
+      "slug": "groundnut-split",
+      "name": "Groundnut(Split)"
+    },
+    {
+      "slug": "guar",
+      "name": "Guar"
+    },
+    {
+      "slug": "guar-seed-cluster-beans-seed",
+      "name": "Guar Seed(Cluster Beans Seed)"
+    },
+    {
+      "slug": "guava",
+      "name": "Guava"
+    },
+    {
+      "slug": "gudmar",
+      "name": "Gudmar"
+    },
+    {
+      "slug": "gulli",
+      "name": "gulli"
+    },
+    {
+      "slug": "gur-jaggery",
+      "name": "Gur(Jaggery)"
+    },
+    {
+      "slug": "gurellu",
+      "name": "Gurellu"
+    },
+    {
+      "slug": "harrah",
+      "name": "Harrah"
+    },
+    {
+      "slug": "he-buffalo",
+      "name": "He Buffalo"
+    },
+    {
+      "slug": "heena",
+      "name": "Heena"
+    },
+    {
+      "slug": "hen",
+      "name": "Hen"
+    },
+    {
+      "slug": "hingot",
+      "name": "Hingot"
+    },
+    {
+      "slug": "hippe-seed",
+      "name": "Hippe Seed"
+    },
+    {
+      "slug": "honge-seed",
+      "name": "Honge seed"
+    },
+    {
+      "slug": "hybrid-cumbu",
+      "name": "Hybrid Cumbu"
+    },
+    {
+      "slug": "indian-beans-seam",
+      "name": "Indian Beans (Seam)"
+    },
+    {
+      "slug": "indian-beans-seam",
+      "name": "Indian Beans(Seam)"
+    },
+    {
+      "slug": "indian-colza-sarson",
+      "name": "Indian Colza(Sarson)"
+    },
+    {
+      "slug": "isabgul-psyllium",
+      "name": "Isabgul (Psyllium)"
+    },
+    {
+      "slug": "isabgul-psyllium",
+      "name": "Isabgul(Psyllium)"
+    },
+    {
+      "slug": "jack-fruit",
+      "name": "Jack Fruit"
+    },
+    {
+      "slug": "jack-fruit-ripe",
+      "name": "Jack Fruit(Ripe)"
+    },
+    {
+      "slug": "jackfruit-seed",
+      "name": "Jackfruit Seed"
+    },
+    {
+      "slug": "jackfruit-greenrawunripe",
+      "name": "Jackfruit(Green/Raw/Unripe)"
+    },
+    {
+      "slug": "jaee",
+      "name": "Jaee"
+    },
+    {
+      "slug": "jaffri",
+      "name": "Jaffri"
+    },
+    {
+      "slug": "jaggery",
+      "name": "Jaggery"
+    },
+    {
+      "slug": "jamamkhan",
+      "name": "Jamamkhan"
+    },
+    {
+      "slug": "jamun",
+      "name": "Jamun"
+    },
+    {
+      "slug": "jamun-narale-hannu",
+      "name": "Jamun(Narale Hannu)"
+    },
+    {
+      "slug": "jarbara",
+      "name": "Jarbara"
+    },
+    {
+      "slug": "jasmine",
+      "name": "Jasmine"
+    },
+    {
+      "slug": "javi",
+      "name": "Javi"
+    },
+    {
+      "slug": "jowar-sorghum",
+      "name": "Jowar(Sorghum)"
+    },
+    {
+      "slug": "jute",
+      "name": "Jute"
+    },
+    {
+      "slug": "kabuli-chana-chickpeas-white",
+      "name": "Kabuli Chana(Chickpeas-White)"
+    },
+    {
+      "slug": "kacholam",
+      "name": "Kacholam"
+    },
+    {
+      "slug": "kakada",
+      "name": "Kakada"
+    },
+    {
+      "slug": "kalmegh",
+      "name": "Kalmegh"
+    },
+    {
+      "slug": "kankambra",
+      "name": "Kankambra"
+    },
+    {
+      "slug": "kantakari",
+      "name": "Kantakari"
+    },
+    {
+      "slug": "karamani",
+      "name": "Karamani"
+    },
+    {
+      "slug": "karanja-seeds",
+      "name": "karanja seeds"
+    },
+    {
+      "slug": "karbuja-musk-melon",
+      "name": "Karbuja(Musk Melon)"
+    },
+    {
+      "slug": "kartali-kantola",
+      "name": "Kartali (Kantola)"
+    },
+    {
+      "slug": "kartali-kantola",
+      "name": "Kartali(Kantola)"
+    },
+    {
+      "slug": "kaunch",
+      "name": "Kaunch"
+    },
+    {
+      "slug": "khandsari-desi-khand",
+      "name": "Khandsari(Desi Khand)"
+    },
+    {
+      "slug": "khirni",
+      "name": "Khirni"
+    },
+    {
+      "slug": "khoya",
+      "name": "Khoya"
+    },
+    {
+      "slug": "kidney-beans-rajma",
+      "name": "Kidney Beans(Rajma)"
+    },
+    {
+      "slug": "kinnow",
+      "name": "Kinnow"
+    },
+    {
+      "slug": "kiwi-fruit",
+      "name": "Kiwi Fruit"
+    },
+    {
+      "slug": "knool-khol",
+      "name": "Knool Khol"
+    },
+    {
+      "slug": "kodo-millet-varagu",
+      "name": "Kodo Millet(Varagu)"
+    },
+    {
+      "slug": "kuchur",
+      "name": "Kuchur"
+    },
+    {
+      "slug": "kulthi-horse-gram",
+      "name": "Kulthi(Horse Gram)"
+    },
+    {
+      "slug": "kutki",
+      "name": "Kutki"
+    },
+    {
+      "slug": "kutki",
+      "name": "kutki"
+    },
+    {
+      "slug": "ladies-finger",
+      "name": "Ladies Finger"
+    },
+    {
+      "slug": "laha",
+      "name": "Laha"
+    },
+    {
+      "slug": "lak-teora",
+      "name": "Lak(Teora)"
+    },
+    {
+      "slug": "lakhteora",
+      "name": "Lakh/Teora"
+    },
+    {
+      "slug": "leafy-vegetable",
+      "name": "Leafy Vegetable"
+    },
+    {
+      "slug": "lemon",
+      "name": "Lemon"
+    },
+    {
+      "slug": "lentil-masur-whole",
+      "name": "Lentil (Masur)(Whole)"
+    },
+    {
+      "slug": "lentil-masur-whole",
+      "name": "Lentil(Masur)(Whole)"
+    },
+    {
+      "slug": "lilly",
+      "name": "Lilly"
+    },
+    {
+      "slug": "lime",
+      "name": "Lime"
+    },
+    {
+      "slug": "linseed",
+      "name": "Linseed"
+    },
+    {
+      "slug": "lint",
+      "name": "Lint"
+    },
+    {
+      "slug": "liquor-turmeric",
+      "name": "liquor turmeric"
+    },
+    {
+      "slug": "litchi",
+      "name": "Litchi"
+    },
+    {
+      "slug": "little-gourd-kundru",
+      "name": "Little gourd (Kundru)"
+    },
+    {
+      "slug": "little-gourd-kundru",
+      "name": "Little gourd(Kundru)"
+    },
+    {
+      "slug": "long-melon-kakri",
+      "name": "Long Melon(Kakri)"
+    },
+    {
+      "slug": "lotus",
+      "name": "Lotus"
+    },
+    {
+      "slug": "lotus-sticks",
+      "name": "Lotus Sticks"
+    },
+    {
+      "slug": "lukad",
+      "name": "Lukad"
+    },
+    {
+      "slug": "mace",
+      "name": "Mace"
+    },
+    {
+      "slug": "mahedi",
+      "name": "Mahedi"
+    },
+    {
+      "slug": "mahua",
+      "name": "Mahua"
+    },
+    {
+      "slug": "mahua-seed-hippe-seed",
+      "name": "Mahua Seed(Hippe seed)"
+    },
+    {
+      "slug": "maida-atta",
+      "name": "Maida Atta"
+    },
+    {
+      "slug": "maize",
+      "name": "Maize"
+    },
+    {
+      "slug": "makhana-foxnut",
+      "name": "Makhana(Foxnut)"
+    },
+    {
+      "slug": "mango",
+      "name": "Mango"
+    },
+    {
+      "slug": "mango-raw-ripe",
+      "name": "Mango (Raw-Ripe)"
+    },
+    {
+      "slug": "mango-powder",
+      "name": "mango powder"
+    },
+    {
+      "slug": "mango-raw-ripe",
+      "name": "Mango(Raw-Ripe)"
+    },
+    {
+      "slug": "maragensu",
+      "name": "Maragensu"
+    },
+    {
+      "slug": "marasebu",
+      "name": "Marasebu"
+    },
+    {
+      "slug": "marget",
+      "name": "Marget"
+    },
+    {
+      "slug": "marigold-calcutta",
+      "name": "Marigold(Calcutta)"
+    },
+    {
+      "slug": "marigold-loose",
+      "name": "Marigold(loose)"
+    },
+    {
+      "slug": "mashrooms",
+      "name": "Mashrooms"
+    },
+    {
+      "slug": "masur-dal",
+      "name": "Masur Dal"
+    },
+    {
+      "slug": "mataki",
+      "name": "Mataki"
+    },
+    {
+      "slug": "mentha-oil",
+      "name": "Mentha Oil"
+    },
+    {
+      "slug": "methi-seeds",
+      "name": "Methi Seeds"
+    },
+    {
+      "slug": "methi-leaves",
+      "name": "Methi(Leaves)"
+    },
+    {
+      "slug": "millets",
+      "name": "Millets"
+    },
+    {
+      "slug": "mint-pudina",
+      "name": "Mint(Pudina)"
+    },
+    {
+      "slug": "moath-dal",
+      "name": "Moath Dal"
+    },
+    {
+      "slug": "mousambi-sweet-lime",
+      "name": "Mousambi(Sweet Lime)"
+    },
+    {
+      "slug": "muesli",
+      "name": "Muesli"
+    },
+    {
+      "slug": "muleti",
+      "name": "Muleti"
+    },
+    {
+      "slug": "muskmelon-seeds",
+      "name": "Muskmelon Seeds"
+    },
+    {
+      "slug": "mustard",
+      "name": "Mustard"
+    },
+    {
+      "slug": "mustard-leaf",
+      "name": "Mustard Leaf"
+    },
+    {
+      "slug": "mustard-oil",
+      "name": "Mustard Oil"
+    },
+    {
+      "slug": "myrobolan-harad",
+      "name": "Myrobolan(Harad)"
+    },
+    {
+      "slug": "nagarmotha",
+      "name": "Nagarmotha"
+    },
+    {
+      "slug": "neem-seed",
+      "name": "Neem Seed"
+    },
+    {
+      "slug": "nigella",
+      "name": "nigella"
+    },
+    {
+      "slug": "nigella-seeds",
+      "name": "nigella seeds"
+    },
+    {
+      "slug": "niger-seed-ramtil",
+      "name": "Niger Seed (Ramtil)"
+    },
+    {
+      "slug": "niger-seed-ramtil",
+      "name": "Niger Seed(Ramtil)"
+    },
+    {
+      "slug": "nutmeg",
+      "name": "Nutmeg"
+    },
+    {
+      "slug": "onion",
+      "name": "Onion"
+    },
+    {
+      "slug": "onion-green",
+      "name": "Onion Green"
+    },
+    {
+      "slug": "orange",
+      "name": "Orange"
+    },
+    {
+      "slug": "orchid",
+      "name": "Orchid"
+    },
+    {
+      "slug": "other-green-and-fresh-vegetables",
+      "name": "Other green and fresh vegetables"
+    },
+    {
+      "slug": "other-pulses",
+      "name": "Other Pulses"
+    },
+    {
+      "slug": "ox",
+      "name": "Ox"
+    },
+    {
+      "slug": "paddy-culture",
+      "name": "Paddy Culture"
+    },
+    {
+      "slug": "paddy-basmati",
+      "name": "Paddy(Basmati)"
+    },
+    {
+      "slug": "paddy-common",
+      "name": "Paddy(Common)"
+    },
+    {
+      "slug": "paddy-dhan-basmati",
+      "name": "Paddy(Dhan)(Basmati)"
+    },
+    {
+      "slug": "paddy-dhan-common",
+      "name": "Paddy(Dhan)(Common)"
+    },
+    {
+      "slug": "palash-flowers",
+      "name": "Palash flowers"
+    },
+    {
+      "slug": "papaya",
+      "name": "Papaya"
+    },
+    {
+      "slug": "papaya-raw",
+      "name": "Papaya (Raw)"
+    },
+    {
+      "slug": "papaya-raw",
+      "name": "Papaya(Raw)"
+    },
+    {
+      "slug": "passion-fruit",
+      "name": "Passion Fruit"
+    },
+    {
+      "slug": "patti-calcutta",
+      "name": "Patti Calcutta"
+    },
+    {
+      "slug": "pea-podpea-codhara-matara",
+      "name": "Pea Pod/Pea Cod/हरी मटर"
+    },
+    {
+      "slug": "peach",
+      "name": "Peach"
+    },
+    {
+      "slug": "pear-marasebu",
+      "name": "Pear(Marasebu)"
+    },
+    {
+      "slug": "peas-cod",
+      "name": "Peas cod"
+    },
+    {
+      "slug": "peas-wet",
+      "name": "Peas Wet"
+    },
+    {
+      "slug": "peas-dry",
+      "name": "Peas(Dry)"
+    },
+    {
+      "slug": "pegeon-pea-arhar-fali",
+      "name": "Pegeon Pea (Arhar Fali)"
+    },
+    {
+      "slug": "pegeon-pea-arhar-fali",
+      "name": "Pegeon Pea(Arhar Fali)"
+    },
+    {
+      "slug": "pepper-garbled",
+      "name": "Pepper garbled"
+    },
+    {
+      "slug": "pepper-ungarbled",
+      "name": "Pepper ungarbled"
+    },
+    {
+      "slug": "persimon-japani-fal",
+      "name": "Persimon(Japani Fal)"
+    },
+    {
+      "slug": "pigs",
+      "name": "Pigs"
+    },
+    {
+      "slug": "pineapple",
+      "name": "Pineapple"
+    },
+    {
+      "slug": "plum",
+      "name": "Plum"
+    },
+    {
+      "slug": "pointed-gourd-parval",
+      "name": "Pointed gourd (Parval)"
+    },
+    {
+      "slug": "pointed-gourd-parval",
+      "name": "Pointed gourd(Parval)"
+    },
+    {
+      "slug": "pomegranate",
+      "name": "Pomegranate"
+    },
+    {
+      "slug": "poppy-seeds",
+      "name": "poppy seeds"
+    },
+    {
+      "slug": "potato",
+      "name": "Potato"
+    },
+    {
+      "slug": "prawn",
+      "name": "Prawn"
+    },
+    {
+      "slug": "pumpkin",
+      "name": "Pumpkin"
+    },
+    {
+      "slug": "pundi-seed",
+      "name": "Pundi Seed"
+    },
+    {
+      "slug": "pupadia",
+      "name": "Pupadia"
+    },
+    {
+      "slug": "purslane",
+      "name": "Purslane"
+    },
+    {
+      "slug": "quince-nakh",
+      "name": "Quince(Nakh)"
+    },
+    {
+      "slug": "quinoa",
+      "name": "Quinoa"
+    },
+    {
+      "slug": "rabliquid-jaggerymolasses",
+      "name": "Rab/Liquid Jaggery/Molasses"
+    },
+    {
+      "slug": "raddish",
+      "name": "Raddish"
+    },
+    {
+      "slug": "ragi-finger-millet",
+      "name": "Ragi (Finger Millet)"
+    },
+    {
+      "slug": "ragi-finger-millet",
+      "name": "Ragi(Finger Millet)"
+    },
+    {
+      "slug": "raibel",
+      "name": "Raibel"
+    },
+    {
+      "slug": "rajgir",
+      "name": "Rajgir"
+    },
+    {
+      "slug": "rajma",
+      "name": "Rajma"
+    },
+    {
+      "slug": "rala",
+      "name": "Rala"
+    },
+    {
+      "slug": "ram",
+      "name": "Ram"
+    },
+    {
+      "slug": "rambans-agave-century-plant",
+      "name": "Rambans(Agave /Century plant)"
+    },
+    {
+      "slug": "ramphal",
+      "name": "Ramphal"
+    },
+    {
+      "slug": "rat-tail-radish-mogari",
+      "name": "Rat Tail Radish (Mogari)"
+    },
+    {
+      "slug": "rat-tail-radish-mogari",
+      "name": "Rat Tail Radish(Mogari)"
+    },
+    {
+      "slug": "ratanjot",
+      "name": "Ratanjot"
+    },
+    {
+      "slug": "raw-biomassagro-residue",
+      "name": "Raw Biomass(Agro Residue)"
+    },
+    {
+      "slug": "raw-cashewnut-kaaju",
+      "name": "Raw Cashewnut-Kaaju"
+    },
+    {
+      "slug": "raya",
+      "name": "Raya"
+    },
+    {
+      "slug": "rayee",
+      "name": "Rayee"
+    },
+    {
+      "slug": "red-gram",
+      "name": "Red Gram"
+    },
+    {
+      "slug": "red-gram-splitarhar-daltur-dal",
+      "name": "Red gram split/Arhar dal/Tur dal"
+    },
+    {
+      "slug": "red-gramarhartur-whole",
+      "name": "Red gram/Arhar/Tur(whole)"
+    },
+    {
+      "slug": "resinwood",
+      "name": "Resinwood"
+    },
+    {
+      "slug": "rice",
+      "name": "Rice"
+    },
+    {
+      "slug": "ridge-gourd-permalhybrid-gourd",
+      "name": "Ridge Gourd(Permal/Hybrid Gourd)"
+    },
+    {
+      "slug": "ridge-gourd-tori",
+      "name": "Ridge gourd(Tori)"
+    },
+    {
+      "slug": "ridgeguard-tori",
+      "name": "Ridgeguard(Tori)"
+    },
+    {
+      "slug": "rose-local",
+      "name": "Rose(Local)"
+    },
+    {
+      "slug": "rose-loose",
+      "name": "Rose(Loose)"
+    },
+    {
+      "slug": "rose-loose",
+      "name": "Rose(Loose))"
+    },
+    {
+      "slug": "round-gourd",
+      "name": "Round gourd"
+    },
+    {
+      "slug": "rubber",
+      "name": "Rubber"
+    },
+    {
+      "slug": "sabu-dan",
+      "name": "Sabu Dan"
+    },
+    {
+      "slug": "sabu-dana",
+      "name": "Sabu Dana"
+    },
+    {
+      "slug": "safflower",
+      "name": "Safflower"
+    },
+    {
+      "slug": "saffron",
+      "name": "Saffron"
+    },
+    {
+      "slug": "sahjan-leaf",
+      "name": "Sahjan Leaf"
+    },
+    {
+      "slug": "sajje",
+      "name": "Sajje"
+    },
+    {
+      "slug": "samesavi",
+      "name": "Same/Savi"
+    },
+    {
+      "slug": "sanaisunhemp",
+      "name": "Sanai/Sunhemp"
+    },
+    {
+      "slug": "sanay",
+      "name": "sanay"
+    },
+    {
+      "slug": "sarphoka",
+      "name": "Sarphoka"
+    },
+    {
+      "slug": "season-leaves",
+      "name": "Season Leaves"
+    },
+    {
+      "slug": "seemebadnekai",
+      "name": "Seemebadnekai"
+    },
+    {
+      "slug": "seetafal",
+      "name": "Seetafal"
+    },
+    {
+      "slug": "seetapal",
+      "name": "Seetapal"
+    },
+    {
+      "slug": "sehuwan-seed",
+      "name": "Sehuwan (Seed)"
+    },
+    {
+      "slug": "sem",
+      "name": "Sem"
+    },
+    {
+      "slug": "sesamum-sesamegingellytil",
+      "name": "Sesamum(Sesame,Gingelly,Til)"
+    },
+    {
+      "slug": "she-buffalo",
+      "name": "She Buffalo"
+    },
+    {
+      "slug": "she-goat",
+      "name": "She Goat"
+    },
+    {
+      "slug": "sheep",
+      "name": "Sheep"
+    },
+    {
+      "slug": "silk-cocoonbh-double-hybr",
+      "name": "Silk Cocoon(Bh) _double Hybr"
+    },
+    {
+      "slug": "snake-gourd",
+      "name": "Snake gourd"
+    },
+    {
+      "slug": "snakeguard",
+      "name": "Snakeguard"
+    },
+    {
+      "slug": "snow-mountain-garlic",
+      "name": "Snow Mountain Garlic"
+    },
+    {
+      "slug": "soanf",
+      "name": "Soanf"
+    },
+    {
+      "slug": "soapnut-antawalaretha",
+      "name": "Soapnut(Antawala/Retha)"
+    },
+    {
+      "slug": "soha",
+      "name": "Soha"
+    },
+    {
+      "slug": "soji",
+      "name": "Soji"
+    },
+    {
+      "slug": "sompu",
+      "name": "Sompu"
+    },
+    {
+      "slug": "soyabean",
+      "name": "Soyabean"
+    },
+    {
+      "slug": "spikenard",
+      "name": "spikenard"
+    },
+    {
+      "slug": "spinach",
+      "name": "Spinach"
+    },
+    {
+      "slug": "spiny-gourd-kartali-kantola",
+      "name": "Spiny Gourd / Kartali(Kantola)"
+    },
+    {
+      "slug": "sponge-gourd",
+      "name": "Sponge gourd"
+    },
+    {
+      "slug": "spring-onion",
+      "name": "Spring Onion"
+    },
+    {
+      "slug": "squash",
+      "name": "Squash"
+    },
+    {
+      "slug": "squash-chappal-kadoo",
+      "name": "Squash(Chappal Kadoo)"
+    },
+    {
+      "slug": "stevia",
+      "name": "stevia"
+    },
+    {
+      "slug": "stone-pulverizer",
+      "name": "stone pulverizer"
+    },
+    {
+      "slug": "strawberry",
+      "name": "Strawberry"
+    },
+    {
+      "slug": "sugar",
+      "name": "Sugar"
+    },
+    {
+      "slug": "sugarcane",
+      "name": "Sugarcane"
+    },
+    {
+      "slug": "sunflower",
+      "name": "Sunflower"
+    },
+    {
+      "slug": "sunflower-seed",
+      "name": "Sunflower Seed"
+    },
+    {
+      "slug": "sunflowersunflower-seed",
+      "name": "Sunflower/Sunflower Seed"
+    },
+    {
+      "slug": "sunhemp",
+      "name": "Sunhemp"
+    },
+    {
+      "slug": "suram",
+      "name": "Suram"
+    },
+    {
+      "slug": "surat-beans-papadi",
+      "name": "Surat Beans (Papadi)"
+    },
+    {
+      "slug": "surat-beans-papadi",
+      "name": "Surat Beans(Papadi)"
+    },
+    {
+      "slug": "suva-dill-seed",
+      "name": "Suva (Dill Seed)"
+    },
+    {
+      "slug": "suva-dill-seed",
+      "name": "Suva(Dill Seed)"
+    },
+    {
+      "slug": "suvarna-gadde",
+      "name": "Suvarna Gadde"
+    },
+    {
+      "slug": "swan-phali-flat-bean",
+      "name": "Swan Phali(Flat Bean)"
+    },
+    {
+      "slug": "sweet-corn",
+      "name": "Sweet Corn"
+    },
+    {
+      "slug": "sweet-potato",
+      "name": "Sweet Potato"
+    },
+    {
+      "slug": "sweet-pumpkin",
+      "name": "Sweet Pumpkin"
+    },
+    {
+      "slug": "sweet-saag",
+      "name": "Sweet Saag"
+    },
+    {
+      "slug": "tv-cumbu",
+      "name": "T.V. Cumbu"
+    },
+    {
+      "slug": "tamarind-flower",
+      "name": "Tamarind Flower"
+    },
+    {
+      "slug": "tamarind-fruit",
+      "name": "Tamarind Fruit"
+    },
+    {
+      "slug": "tamarind-seed",
+      "name": "Tamarind Seed"
+    },
+    {
+      "slug": "tapioca",
+      "name": "Tapioca"
+    },
+    {
+      "slug": "taramira",
+      "name": "Taramira"
+    },
+    {
+      "slug": "taro-arvi-leaves",
+      "name": "Taro (Arvi) Leaves"
+    },
+    {
+      "slug": "taro-arvi-stem",
+      "name": "Taro (Arvi) Stem"
+    },
+    {
+      "slug": "tender-coconut",
+      "name": "Tender Coconut"
+    },
+    {
+      "slug": "tendu-leaveskendu-leavesbidi-leaves",
+      "name": "Tendu Leaves/Kendu leaves/Bidi Leaves"
+    },
+    {
+      "slug": "tesu-flower",
+      "name": "Tesu Flower"
+    },
+    {
+      "slug": "tevada",
+      "name": "Tevada"
+    },
+    {
+      "slug": "thinai-italian-millet",
+      "name": "Thinai (Italian Millet)"
+    },
+    {
+      "slug": "thinai-italian-millet",
+      "name": "Thinai(Italian Millet)"
+    },
+    {
+      "slug": "thogrikai",
+      "name": "Thogrikai"
+    },
+    {
+      "slug": "thondekai",
+      "name": "Thondekai"
+    },
+    {
+      "slug": "tinda",
+      "name": "Tinda"
+    },
+    {
+      "slug": "tobacco",
+      "name": "Tobacco"
+    },
+    {
+      "slug": "tomato",
+      "name": "Tomato"
+    },
+    {
+      "slug": "torchwood",
+      "name": "Torchwood"
+    },
+    {
+      "slug": "toria",
+      "name": "Toria"
+    },
+    {
+      "slug": "tube-flower",
+      "name": "Tube Flower"
+    },
+    {
+      "slug": "tube-rose-double",
+      "name": "Tube Rose(Double)"
+    },
+    {
+      "slug": "tube-rose-loose",
+      "name": "Tube Rose(Loose)"
+    },
+    {
+      "slug": "tube-rose-single",
+      "name": "Tube Rose(Single)"
+    },
+    {
+      "slug": "tulip",
+      "name": "tulip"
+    },
+    {
+      "slug": "tulip",
+      "name": "Tulip"
+    },
+    {
+      "slug": "turmeric",
+      "name": "Turmeric"
+    },
+    {
+      "slug": "turmeric-raw",
+      "name": "Turmeric (raw)"
+    },
+    {
+      "slug": "turmeric-raw",
+      "name": "Turmeric(raw)"
+    },
+    {
+      "slug": "turnip",
+      "name": "Turnip"
+    },
+    {
+      "slug": "vadang",
+      "name": "vadang"
+    },
+    {
+      "slug": "walnut",
+      "name": "Walnut"
+    },
+    {
+      "slug": "water-chestnut",
+      "name": "Water chestnut"
+    },
+    {
+      "slug": "water-melon",
+      "name": "Water Melon"
+    },
+    {
+      "slug": "wheat",
+      "name": "Wheat"
+    },
+    {
+      "slug": "wheat-atta",
+      "name": "Wheat Atta"
+    },
+    {
+      "slug": "white-muesli",
+      "name": "White Muesli"
+    },
+    {
+      "slug": "white-peas",
+      "name": "White Peas"
+    },
+    {
+      "slug": "white-pumpkin",
+      "name": "White Pumpkin"
+    },
+    {
+      "slug": "wild-cucumber",
+      "name": "Wild Cucumber"
+    },
+    {
+      "slug": "wood",
+      "name": "Wood"
+    },
+    {
+      "slug": "wool",
+      "name": "Wool"
+    },
+    {
+      "slug": "yam",
+      "name": "Yam"
+    },
+    {
+      "slug": "yam-ratalu",
+      "name": "Yam (Ratalu)"
+    },
+    {
+      "slug": "yam-ratalu",
+      "name": "Yam(Ratalu)"
+    }
+  ],
+  "sampleLiveRecords": [
+    {
+      "commodity": "Paddy(Common)",
+      "arrivalDate": "17/09/2026",
+      "variety": "1001",
+      "state": "Andhra Pradesh",
+      "district": "Srikakulam",
+      "market": "Kanchili",
+      "minPrice": "Rs 2400 / Quintal",
+      "maxPrice": "Rs 2400 / Quintal",
+      "modalPrice": "Rs 2400 / Quintal"
+    },
+    {
+      "commodity": "Bengal Gram(Gram)(Whole)",
+      "arrivalDate": "17/09/2026",
+      "variety": "Gulabi",
+      "state": "Andhra Pradesh",
+      "district": "Prakasam",
+      "market": "Maddipadu",
+      "minPrice": "Rs 6000 / Quintal",
+      "maxPrice": "Rs 6000 / Quintal",
+      "modalPrice": "Rs 6000 / Quintal"
+    },
+    {
+      "commodity": "Cotton",
+      "arrivalDate": "17/09/2026",
+      "variety": "Cotton (Unginned)",
+      "state": "Andhra Pradesh",
+      "district": "Palnadu",
+      "market": "Ipur",
+      "minPrice": "Rs 7000 / Quintal",
+      "maxPrice": "Rs 8000 / Quintal",
+      "modalPrice": "Rs 7400 / Quintal"
+    },
+    {
+      "commodity": "Onion",
+      "arrivalDate": "17/09/2026",
+      "variety": "Other",
+      "state": "Punjab",
+      "district": "Bhatinda",
+      "market": "Rampuraphul(Nabha Mandi)",
+      "minPrice": "Rs 3000 / Quintal",
+      "maxPrice": "Rs 4000 / Quintal",
+      "modalPrice": "Rs 3500 / Quintal"
+    },
+    {
+      "commodity": "Onion",
+      "arrivalDate": "17/09/2026",
+      "variety": "Onion",
+      "state": "Punjab",
+      "district": "Hoshiarpur",
+      "market": "Mukerian(Talwara)",
+      "minPrice": "Rs 4000 / Quintal",
+      "maxPrice": "Rs 5000 / Quintal",
+      "modalPrice": "Rs 4500 / Quintal"
+    },
+    {
+      "commodity": "Potato",
+      "arrivalDate": "17/09/2026",
+      "variety": "Other",
+      "state": "Punjab",
+      "district": "Bhatinda",
+      "market": "Rampuraphul(Nabha Mandi)",
+      "minPrice": "Rs 550 / Quintal",
+      "maxPrice": "Rs 650 / Quintal",
+      "modalPrice": "Rs 600 / Quintal"
+    },
+    {
+      "commodity": "Potato",
+      "arrivalDate": "17/09/2026",
+      "variety": "Potato",
+      "state": "Punjab",
+      "district": "Hoshiarpur",
+      "market": "Mukerian(Talwara)",
+      "minPrice": "Rs 800 / Quintal",
+      "maxPrice": "Rs 1600 / Quintal",
+      "modalPrice": "Rs 1200 / Quintal"
+    },
+    {
+      "commodity": "Cauliflower",
+      "arrivalDate": "17/09/2026",
+      "variety": "Cauliflower",
+      "state": "Punjab",
+      "district": "Ludhiana",
+      "market": "Sahnewal",
+      "minPrice": "Rs 3500 / Quintal",
+      "maxPrice": "Rs 3500 / Quintal",
+      "modalPrice": "Rs 3500 / Quintal"
+    },
+    {
+      "commodity": "Cauliflower",
+      "arrivalDate": "17/09/2026",
+      "variety": "Cauliflower",
+      "state": "Punjab",
+      "district": "Bhatinda",
+      "market": "Rampuraphul(Nabha Mandi)",
+      "minPrice": "Rs 3000 / Quintal",
+      "maxPrice": "Rs 4000 / Quintal",
+      "modalPrice": "Rs 3500 / Quintal"
+    },
+    {
+      "commodity": "Brinjal",
+      "arrivalDate": "17/09/2026",
+      "variety": "Brinjal",
+      "state": "Punjab",
+      "district": "Ludhiana",
+      "market": "Sahnewal",
+      "minPrice": "Rs 2500 / Quintal",
+      "maxPrice": "Rs 2500 / Quintal",
+      "modalPrice": "Rs 2500 / Quintal"
+    }
+  ]
+}
