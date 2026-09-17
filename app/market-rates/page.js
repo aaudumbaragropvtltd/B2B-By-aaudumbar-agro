@@ -1,7 +1,8 @@
 // ============================================================================
 // LIVE COMMODITY MARKET INTELLIGENCE TERMINAL — ALL MARKETS
 // ============================================================================
-// Real-time APMC Mandi commodity rates across India, powered by Gemini 3.6 Flash.
+// Real-time APMC Mandi commodity rates across India.
+// Sourced from CommodityOnline, APMC Agmarknet, and Gemini AI Analysis.
 // ============================================================================
 
 "use client";
@@ -28,7 +29,7 @@ export default function MarketRatesPage() {
   const [selectedState, setSelectedState] = useState('All States');
   const [searchQuery, setSearchQuery] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [sourceInfo, setSourceInfo] = useState('gemini-3.6-flash');
+  const [expandedCardId, setExpandedCardId] = useState(null);
 
   const fetchRates = async (isManual = false) => {
     try {
@@ -40,7 +41,6 @@ export default function MarketRatesPage() {
         if (data.commodities && Array.isArray(data.commodities)) {
           setCommodities(data.commodities);
           setLastUpdated(new Date(data.lastUpdated || Date.now()));
-          setSourceInfo(data.source || 'gemini-3.6-flash');
         }
       }
     } catch (err) {
@@ -79,6 +79,10 @@ export default function MarketRatesPage() {
   const gainers = commodities.filter((c) => c.trend === 'up').length;
   const losers = commodities.filter((c) => c.trend === 'down').length;
 
+  const toggleExpand = (id) => {
+    setExpandedCardId(expandedCardId === id ? null : id);
+  };
+
   return (
     <>
       <Navbar />
@@ -90,20 +94,26 @@ export default function MarketRatesPage() {
             <div className="absolute top-0 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
                   <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     Live Mandi Feed
                   </span>
-                  <span className="px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold">
-                    🤖 Gemini 3.6 Flash Intelligence
-                  </span>
+                  <a
+                    href="https://www.commodityonline.com/mandiprices/turmeric"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold hover:bg-indigo-500/30 transition-colors flex items-center gap-1"
+                  >
+                    <span>Source: CommodityOnline &amp; APMC Network</span>
+                    <span className="text-[10px]">↗</span>
+                  </a>
                 </div>
                 <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
                   India APMC Commodity Rates Terminal
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-                  Real-time wholesale modal pricing, arrivals, and 24h market trends aggregated from major agricultural APMC Mandis across India.
+                <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl leading-relaxed">
+                  Real-time wholesale modal pricing, daily arrivals, and 24h market trends aggregated from <strong>CommodityOnline</strong> and agricultural APMC Mandis across India.
                 </p>
               </div>
 
@@ -114,7 +124,7 @@ export default function MarketRatesPage() {
                   className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <span className={refreshing ? 'animate-spin' : ''}>🔄</span>
-                  <span>{refreshing ? 'Analyzing Mandis...' : 'Refresh Live Rates'}</span>
+                  <span>{refreshing ? 'Updating Mandis...' : 'Refresh Live Rates'}</span>
                 </button>
 
                 <Link
@@ -130,8 +140,8 @@ export default function MarketRatesPage() {
             {/* Live Stats Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-slate-800 text-xs">
               <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                <span className="text-slate-400 block text-[11px]">Tracked Mandis & APMCs</span>
-                <strong className="text-white text-base font-mono">{commodities.length} Major Hubs</strong>
+                <span className="text-slate-400 block text-[11px]">Tracked Commodities</span>
+                <strong className="text-white text-base font-mono">{commodities.length} Agricultural Staples</strong>
               </div>
               <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
                 <span className="text-slate-400 block text-[11px]">Bullish Trends</span>
@@ -142,7 +152,7 @@ export default function MarketRatesPage() {
                 <strong className="text-rose-400 text-base font-mono">▼ {losers} Commodities</strong>
               </div>
               <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                <span className="text-slate-400 block text-[11px]">Terminal Timestamp</span>
+                <span className="text-slate-400 block text-[11px]">Feed Timestamp</span>
                 <span className="text-slate-200 text-xs font-mono font-bold block truncate" suppressHydrationWarning>
                   {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Synchronizing...'}
                 </span>
@@ -174,7 +184,7 @@ export default function MarketRatesPage() {
               <div className="sm:col-span-8 relative">
                 <input
                   type="text"
-                  placeholder="Search commodity (e.g. Soyabean, Nashik, Turmeric, Cumin, Wheat)..."
+                  placeholder="Search commodity (e.g. Turmeric, Chilli, Soyabean, Nizamabad, Jeera, Wheat)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-brand-500 outline-none pl-10"
@@ -210,7 +220,7 @@ export default function MarketRatesPage() {
           {loading ? (
             <div className="p-16 text-center text-slate-400 space-y-3">
               <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <div className="font-bold text-sm">Loading Live Indian Mandi Rates...</div>
+              <div className="font-bold text-sm">Loading Live CommodityOnline Mandi Rates...</div>
             </div>
           ) : filteredCommodities.length === 0 ? (
             <div className="p-12 text-center bg-slate-900/60 rounded-3xl border border-slate-800 text-slate-400 space-y-3">
@@ -232,6 +242,9 @@ export default function MarketRatesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredCommodities.map((item) => {
                 const isUp = item.trend === 'up';
+                const isExpanded = expandedCardId === item.id;
+                const mandisList = item.mandis || [];
+
                 return (
                   <motion.div
                     key={item.id || item.name}
@@ -286,6 +299,13 @@ export default function MarketRatesPage() {
                           </div>
                         </div>
 
+                        {item.pricePerKg && (
+                          <div className="flex justify-between items-center text-xs text-emerald-400 font-mono font-bold">
+                            <span>Per Kg Equivalent:</span>
+                            <span>₹{Number(item.pricePerKg).toFixed(2)}/kg</span>
+                          </div>
+                        )}
+
                         {item.minPrice && item.maxPrice && (
                           <div className="flex justify-between items-center text-[11px] text-slate-500 pt-1 border-t border-slate-900 font-mono">
                             <span>Trading Range:</span>
@@ -300,17 +320,70 @@ export default function MarketRatesPage() {
                           </div>
                         )}
                       </div>
+
+                      {/* Regional Mandi Breakdown Accordion */}
+                      {mandisList.length > 0 && (
+                        <div className="mt-3">
+                          <button
+                            type="button"
+                            onClick={() => toggleExpand(item.id)}
+                            className="w-full py-1.5 px-3 bg-slate-950/60 hover:bg-slate-950 rounded-xl text-[11px] font-bold text-slate-300 border border-slate-800/80 flex items-center justify-between transition-colors cursor-pointer"
+                          >
+                            <span>APMC Mandi Breakdown ({mandisList.length})</span>
+                            <span className="text-brand-400">{isExpanded ? '▲ Hide' : '▼ View Mandis'}</span>
+                          </button>
+
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-2 space-y-1.5 overflow-hidden"
+                              >
+                                {mandisList.map((m, mIdx) => (
+                                  <div
+                                    key={mIdx}
+                                    className="p-2.5 bg-slate-950 rounded-xl border border-slate-800/60 flex items-center justify-between text-[11px]"
+                                  >
+                                    <div>
+                                      <div className="font-bold text-white">{m.market} ({m.state})</div>
+                                      <div className="text-[10px] text-slate-400">{m.variety}</div>
+                                    </div>
+                                    <div className="text-right font-mono">
+                                      <div className="font-extrabold text-white">₹{m.modalPrice.toLocaleString('en-IN')}/qtl</div>
+                                      <div className="text-[10px] text-emerald-400">₹{m.pricePerKg.toFixed(2)}/kg</div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Action Button */}
-                    <div className="pt-2">
+                    {/* Action Buttons */}
+                    <div className="pt-2 flex items-center gap-2">
                       <Link
                         href={`/directory?search=${encodeURIComponent(item.name.split(' ')[0])}`}
-                        className="w-full py-2.5 px-4 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 hover:border-emerald-500 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all text-center cursor-pointer shadow-sm"
+                        className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all text-center cursor-pointer shadow-md shadow-emerald-600/20"
                       >
-                        <span>🔒 Lock Escrow Deal</span>
+                        <span>Buy Wholesale</span>
                         <span>→</span>
                       </Link>
+
+                      {item.sourceUrl && (
+                        <a
+                          href={item.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors"
+                          title="View on CommodityOnline"
+                        >
+                          Source ↗
+                        </a>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -324,7 +397,7 @@ export default function MarketRatesPage() {
               <span>🛡️</span> How B2B India Commodity Price Locking Works
             </div>
             <p className="leading-relaxed text-slate-300">
-              Mandi prices fluctuate daily across state APMCs. With B2B India, buyers can lock current wholesale rates for 72 hours with an Escrow Advance booking. In case of grade disparity or mandi failure, your escrow advance is 100% protected and fully refundable.
+              Mandi prices fluctuate daily across state APMCs. With B2B India, buyers can lock wholesale rates directly with certified agro manufacturers and suppliers. Pay a 10% advance deposit to secure contract pricing and vehicle dispatch allocation, with the remaining 90% payable at truck loading at our central godowns.
             </p>
           </div>
         </div>

@@ -19,6 +19,7 @@ import Footer from '@/components/Footer';
 import CommodityImage from '@/components/CommodityImage';
 import ProductImageGallery from '@/components/ProductImageGallery';
 import QuotationDock from './QuotationDock';
+import MandiBenchmarkCard from '@/components/MandiBenchmarkCard';
 import ProductViewTracker from '@/components/ProductViewTracker';
 import FavoriteButton from '@/components/FavoriteButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -345,6 +346,11 @@ export default async function ProductDetailPage({ params }) {
             {/* Right: Quotation & Checkout Dock */}
             <div className="order-2 lg:order-none lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:row-span-6 h-full">
               <QuotationDock product={{ ...product, shippingEstimate, distanceKm }} />
+            </div>
+
+            {/* Live APMC Mandi Benchmark Rates (CommodityOnline Integration) */}
+            <div className="lg:col-span-2 order-3">
+              <MandiBenchmarkCard product={product} />
             </div>
 
             {/* Logistics Calculator */}

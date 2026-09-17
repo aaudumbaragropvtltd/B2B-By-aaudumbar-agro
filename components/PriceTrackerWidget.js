@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 const INITIAL_COMMODITIES = [
-  { id: '1', name: 'Onions (Nashik Red)', market: 'Nashik APMC', price: 2450, unit: 'per Quintal', change: 2.5, trend: 'up' },
-  { id: '2', name: 'Basmati Rice (1121)', market: 'Taraori Mandi', price: 9200, unit: 'per Quintal', change: -1.2, trend: 'down' },
-  { id: '3', name: 'Black Pepper', market: 'Kochi Terminal', price: 610, unit: 'per Kg', change: 4.1, trend: 'up' },
-  { id: '4', name: 'Turmeric (Erode)', market: 'Erode Mandi', price: 14500, unit: 'per Quintal', change: 0.8, trend: 'up' },
+  { id: 'turmeric', name: 'Turmeric (Haldi)', market: 'Nizamabad APMC', price: 14650, unit: 'per Quintal', change: 1.8, trend: 'up' },
+  { id: 'red-chilli', name: 'Red Chilli (Teja)', market: 'Guntur APMC', price: 18400, unit: 'per Quintal', change: 2.4, trend: 'up' },
+  { id: 'cumin-seeds', name: 'Cumin Seeds (Jeera)', market: 'Unjha APMC', price: 28600, unit: 'per Quintal', change: 3.2, trend: 'up' },
+  { id: 'soyabean', name: 'Soyabean (Yellow)', market: 'Indore Mandi', price: 4720, unit: 'per Quintal', change: -0.6, trend: 'down' },
 ];
 
 export default function PriceTrackerWidget() {
@@ -51,15 +51,15 @@ export default function PriceTrackerWidget() {
           <div className="flex items-center gap-2">
             <span className="text-xl">📈</span>
             <h2 className="text-lg font-black text-gray-900 tracking-tight">
-              Live Commodity Trends
+              Live Mandi Commodity Rates
             </h2>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black uppercase tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Gemini AI
+              CommodityOnline APMC
             </span>
           </div>
           <p className="text-xs text-gray-500 mt-1" suppressHydrationWarning>
-            Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Just now'}
+            Source: CommodityOnline • Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Just now'}
           </p>
         </div>
       </div>
