@@ -355,7 +355,7 @@ export async function POST(request, { params }) {
                   </div>
 
                   <p style="margin: 0; font-size: 12px; color: #94a3b8; text-align: center;">
-                    B2B India Trust Core: 100% Escrow Protected • Mediation Monitored
+                    B2B India Trust Core: 10% Advance Escrow Protected • Mediation Monitored
                   </p>
                 </div>
               </div>

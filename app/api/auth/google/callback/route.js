@@ -87,7 +87,13 @@ export async function GET(request) {
 
     if (signInError) throw signInError;
 
-    // ── Step 4: Check onboarding status (same logic as existing callback) ──
+    // ── Step 4: Check onboarding status or redirect target ──
+    const state = searchParams.get('state');
+    if (state && (state.startsWith('/') || state.startsWith('http'))) {
+      const destination = state.startsWith('/') ? `${origin}${state}` : state;
+      return NextResponse.redirect(destination);
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user) {

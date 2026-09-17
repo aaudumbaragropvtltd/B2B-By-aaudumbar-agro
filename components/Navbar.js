@@ -128,9 +128,8 @@ export default function Navbar() {
   } else {
     navLinks = [
       { href: '/directory', label: 'Trade Directory' },
-      { href: '/orders', label: 'My Orders' },
+      { href: '/market-rates', label: 'Mandi Rates' },
       { href: '/support', label: 'Support Desk' },
-      { href: '/login', label: 'Partner Login' },
     ];
   }
 
@@ -390,12 +389,27 @@ export default function Navbar() {
                     </div>
                   </div>
                 ) : (
-                  <Link
-                    href="/login"
-                    className="ml-2 px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-colors shadow-lg"
-                  >
-                    Sign In
-                  </Link>
+                  <div className="flex items-center gap-2 ml-2">
+                    <Link
+                      href="/login"
+                      className={`px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        isDark
+                          ? 'text-slate-300 hover:text-white hover:bg-slate-800'
+                          : isHeroTransparent
+                          ? 'text-white/90 hover:text-white hover:bg-white/10'
+                          : 'text-gray-700 hover:text-brand-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/login?mode=signup"
+                      className="px-4 py-2 rounded-xl text-sm font-extrabold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 shadow-md shadow-emerald-900/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 flex-shrink-0"
+                    >
+                      <span>Sign Up Free</span>
+                      <span className="text-xs">→</span>
+                    </Link>
+                  </div>
                 )}
               </>
             )}
@@ -500,13 +514,22 @@ export default function Navbar() {
                     </button>
                   </>
                 ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-4 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-brand-600 to-brand-700 text-center mt-2"
-                  >
-                    Get Started →
-                  </Link>
+                  <div className="space-y-2 pt-3 border-t border-gray-200 mt-2">
+                    <Link
+                      href="/login?mode=signup"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 text-center shadow-md shadow-emerald-900/10 transition-all active:scale-95"
+                    >
+                      ✨ Sign Up as Buyer / Supplier →
+                    </Link>
+                    <Link
+                      href="/login"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 text-center transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
                 )}
               </div>
             </motion.div>

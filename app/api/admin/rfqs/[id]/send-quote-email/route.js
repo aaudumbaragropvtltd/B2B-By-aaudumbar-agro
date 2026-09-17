@@ -187,7 +187,7 @@ export async function POST(request, { params }) {
                     <!-- Escrow Guarantee -->
                     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 20px;margin-bottom:28px;text-align:center;">
                       <p style="margin:0 0 6px;font-size:14px;color:#1e40af;font-weight:bold;">
-                        🛡️ 100% Escrow Protection: Lock Deal with 10% Advance (₹${advance10.toLocaleString('en-IN')})
+                        🛡️ 10% Advance Escrow Protection: Lock Deal with 10% Advance (₹${advance10.toLocaleString('en-IN')})
                       </p>
                       <p style="margin:0;font-size:12px;color:#3b82f6;">
                         Remaining 90% balance (₹${remaining90.toLocaleString('en-IN')}) is released only after physical warehouse dock inspection.

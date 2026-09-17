@@ -697,7 +697,7 @@ export default function AdminCatalog() {
                         </strong>
                       </div>
                       <div className="text-emerald-400 font-medium text-[11px] flex items-center gap-1">
-                        <span>✓ 100% Escrow Protected Trade</span>
+                        <span>✓ 10% Advance Escrow Protected Trade</span>
                       </div>
                     </div>
                   </div>

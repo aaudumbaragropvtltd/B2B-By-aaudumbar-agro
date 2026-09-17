@@ -745,7 +745,7 @@ export default function BannerManager() {
                       type="text"
                       value={formData.badge_text}
                       onChange={(e) => setFormData({ ...formData, badge_text: e.target.value })}
-                      placeholder="e.g. 100% Escrow Protected"
+                      placeholder="e.g. 10% Advance Escrow Protected"
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs font-medium text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
                     />
                   </div>

@@ -13,7 +13,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Script from 'next/script';
 import Link from 'next/link';
@@ -31,6 +31,7 @@ function CheckoutContent() {
   const initialQuoteId = searchParams.get('quoteId') || '';
   const initialRfqId = searchParams.get('rfqId') || '';
 
+  const router = useRouter();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(initialQty);
@@ -42,8 +43,10 @@ function CheckoutContent() {
   const [errorMsg, setErrorMsg] = useState(null);
   const [activeOrderId, setActiveOrderId] = useState(initialOrderId);
   const [paymentSuccessData, setPaymentSuccessData] = useState(null);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // Load authenticated user profile for company name
+  // Load authenticated user profile for company name & payment authorization
   useEffect(() => {
     async function loadUser() {
       try {
@@ -51,13 +54,20 @@ function CheckoutContent() {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          setUser(user);
           if (!buyerEmail && user.email) setBuyerEmail(user.email);
           const { data: profile } = await supabase.from('users').select('company_name, full_name').eq('id', user.id).maybeSingle();
           if (profile?.company_name) {
             setBuyerCompany(profile.company_name);
           }
+        } else {
+          setUser(null);
         }
-      } catch (e) {}
+      } catch (e) {
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
     }
     loadUser();
   }, [buyerEmail]);
@@ -164,6 +174,15 @@ function CheckoutContent() {
   // ── Razorpay Payment Trigger ──
   const handlePayRazorpay = async () => {
     setErrorMsg(null);
+
+    // Enforce mandatory authentication: Anonymous users cannot pay
+    if (!user) {
+      setErrorMsg('Authentication Required: Please sign in or register before completing payment.');
+      const currentUrl = typeof window !== 'undefined' ? (window.location.pathname + window.location.search) : '/checkout';
+      router.push(`/login?redirect=${encodeURIComponent(currentUrl)}&reason=checkout`);
+      return;
+    }
+
     setIsProcessingRazorpay(true);
 
     try {
@@ -384,7 +403,7 @@ function CheckoutContent() {
             </Link>
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-950/80 px-3 py-1.5 rounded-full border border-emerald-500/30">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              100% Escrow Protected by Razorpay
+              10% Advance Escrow Protected by Razorpay
             </div>
           </div>
 
@@ -446,9 +465,24 @@ function CheckoutContent() {
 
                 {/* Buyer Details Form */}
                 <div suppressHydrationWarning className="space-y-3 pt-2">
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
-                    Delivery Destination & Contact
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                      Delivery Destination & Contact
+                    </label>
+                    {user ? (
+                      <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                        ✓ Verified Account
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? (window.location.pathname + window.location.search) : '/checkout')}&reason=checkout`}
+                        className="text-[11px] text-amber-400 hover:text-amber-300 font-bold underline flex items-center gap-1"
+                      >
+                        <span>Sign in first</span>
+                        <span>→</span>
+                      </Link>
+                    )}
+                  </div>
                   <input
                     type="email"
                     placeholder="Enter business email for official GST invoice"
@@ -654,7 +688,7 @@ function CheckoutContent() {
                   <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
                     <div>
                       <span className="text-xs text-slate-400 font-bold block">Total Amount Payable Now:</span>
-                      <span className="text-[10px] text-emerald-400 font-medium">Includes 100% Escrow Price Protection</span>
+                      <span className="text-[10px] text-emerald-400 font-medium">Includes 10% Advance Escrow Protection</span>
                     </div>
                     <strong className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
                       ₹{totalPayableNow.toLocaleString('en-IN')}
@@ -662,26 +696,80 @@ function CheckoutContent() {
                   </div>
                 </div>
 
-                {/* Primary Razorpay Action Button */}
-                <button
-                  type="button"
-                  onClick={handlePayRazorpay}
-                  disabled={isProcessingRazorpay}
-                  suppressHydrationWarning
-                  className="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm sm:text-base rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer disabled:opacity-50"
-                >
-                  {isProcessingRazorpay ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Connecting to Razorpay Secure Gateway...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>🔒</span>
-                      <span>Pay ₹{totalPayableNow.toLocaleString('en-IN')} with Razorpay</span>
-                    </>
-                  )}
-                </button>
+                {/* Authentication Gate or Primary Razorpay Action Button */}
+                {authLoading ? (
+                  <div className="w-full py-4 px-6 bg-slate-800/80 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-slate-400 animate-pulse border border-slate-700">
+                    <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                    <span>Checking account authorization...</span>
+                  </div>
+                ) : !user ? (
+                  <div className="w-full p-5 sm:p-6 bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-950 border-2 border-amber-500/50 rounded-2xl space-y-4 shadow-2xl">
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-xl flex-shrink-0">
+                        🔐
+                      </div>
+                      <div>
+                        <h4 className="text-sm sm:text-base font-extrabold text-white">
+                          Sign In Required to Complete Payment
+                        </h4>
+                        <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                          Wholesale escrow deals require an active buyer account to lock the 10% advance protection deposit, generate your GST proforma invoice, and track warehouse dispatch.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                      <Link
+                        href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? (window.location.pathname + window.location.search) : '/checkout')}&reason=checkout`}
+                        className="flex-1 py-3.5 px-5 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 text-center"
+                      >
+                        <span>Sign In to Pay Now</span>
+                        <span>→</span>
+                      </Link>
+                      <Link
+                        href={`/login?mode=signup&redirect=${encodeURIComponent(typeof window !== 'undefined' ? (window.location.pathname + window.location.search) : '/checkout')}&reason=checkout`}
+                        className="flex-1 py-3.5 px-5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 transition-all text-center"
+                      >
+                        <span>Register Free Account</span>
+                      </Link>
+                    </div>
+
+                    <div className="text-[11px] text-slate-400 flex items-center justify-between pt-2 border-t border-slate-800">
+                      <span>Order configured: {Number(quantity).toLocaleString('en-IN')} {unitLabel}</span>
+                      <span className="text-emerald-400 font-mono font-bold">₹{totalPayableNow.toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="mb-3 px-3 py-1.5 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center justify-between text-[11px] text-emerald-300">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>Authenticated as <strong className="text-white">{user.email}</strong></span>
+                      </div>
+                      <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400">Escrow Authorized</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handlePayRazorpay}
+                      disabled={isProcessingRazorpay}
+                      suppressHydrationWarning
+                      className="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm sm:text-base rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer disabled:opacity-50"
+                    >
+                      {isProcessingRazorpay ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Connecting to Razorpay Secure Gateway...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🔒</span>
+                          <span>Pay ₹{totalPayableNow.toLocaleString('en-IN')} with Razorpay</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
 
                 {/* Trust Badges Footer */}
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-400 border-t border-slate-800">

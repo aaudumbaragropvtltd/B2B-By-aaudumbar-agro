@@ -103,6 +103,22 @@ export default function DualPaymentModal({
   // -------------------------------------------------------------
   const handlePayRazorpay = async () => {
     setErrorMsg(null);
+
+    // Authentication Guard
+    try {
+      const { createClient } = await import('@/services/supabase');
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setErrorMsg('Authentication Required: Please sign in or register before completing wholesale payment.');
+        if (typeof window !== 'undefined') {
+          const currentUrl = window.location.pathname + window.location.search;
+          window.location.href = `/login?redirect=${encodeURIComponent(currentUrl)}&reason=checkout`;
+        }
+        return;
+      }
+    } catch (e) {}
+
     setIsProcessingRazorpay(true);
 
     try {
@@ -309,7 +325,7 @@ export default function DualPaymentModal({
             </div>
             <div>
               <h3 className="font-extrabold text-white text-base sm:text-lg">
-                100% Escrow Price Protection
+                10% Advance Escrow Price Protection
               </h3>
               <p className="text-xs text-slate-400">
                 {productTitle} • {Number(quantity).toLocaleString('en-IN')} {unit}

@@ -36,13 +36,36 @@ export default function QuotationDock({ product }) {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentData, setPaymentData] = useState(null); // Payment result
   const [paymentOrderId, setPaymentOrderId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+
+  // Check auth session on mount
+  React.useEffect(() => {
+    async function checkUserAuth() {
+      try {
+        const { createClient } = await import('@/services/supabase');
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setCurrentUser(user);
+          if (!buyerEmail && user.email) {
+            setBuyerEmail(user.email);
+          }
+        }
+      } catch (e) {}
+    }
+    checkUserAuth();
+  }, []);
 
   // Ensure body scroll is always restored when mounting or closing modals
   React.useEffect(() => {
     if (typeof document !== 'undefined') {
-      if (!showDualPaymentModal && !showPaymentModal) {
+      if (!showDualPaymentModal && !showPaymentModal && !showAuthModal) {
         document.body.style.overflow = 'auto';
         document.documentElement.style.overflow = 'auto';
+      } else {
+        document.body.style.overflow = 'hidden';
       }
     }
     return () => {
@@ -51,7 +74,7 @@ export default function QuotationDock({ product }) {
         document.documentElement.style.overflow = 'auto';
       }
     };
-  }, [showDualPaymentModal, showPaymentModal]);
+  }, [showDualPaymentModal, showPaymentModal, showAuthModal]);
 
   // Extract custom GST and Location from enriched specifications
   let specs = {};
@@ -159,10 +182,28 @@ export default function QuotationDock({ product }) {
     }
   };
 
-  const handleBuyNowClick = () => {
+  const handleBuyNowClick = async () => {
     if (!validateOrderQuantity()) return;
     setError(null);
+
+    setIsCheckingAuth(true);
+    let user = currentUser;
+    try {
+      const { createClient } = await import('@/services/supabase');
+      const supabase = createClient();
+      const { data: { user: freshUser } } = await supabase.auth.getUser();
+      user = freshUser;
+      setCurrentUser(user);
+    } catch (e) {}
+    setIsCheckingAuth(false);
+
     const checkoutUrl = `/checkout?productId=${encodeURIComponent(product.id || product.slug)}&quantity=${encodeURIComponent(numQuantity)}${buyerEmail ? `&email=${encodeURIComponent(buyerEmail)}` : ''}`;
+
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
     router.push(checkoutUrl);
   };
 
@@ -502,13 +543,13 @@ export default function QuotationDock({ product }) {
             </motion.button>
             <motion.button
               suppressHydrationWarning
-              whileHover={!paymentProcessing ? { scale: 1.02 } : {}}
-              whileTap={!paymentProcessing ? { scale: 0.98 } : {}}
+              whileHover={!paymentProcessing && !isCheckingAuth ? { scale: 1.02 } : {}}
+              whileTap={!paymentProcessing && !isCheckingAuth ? { scale: 0.98 } : {}}
               onClick={handleBuyNowClick}
-              disabled={paymentProcessing}
-              className={`flex-[1.5] py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all text-sm flex justify-center items-center gap-2 btn-premium ${paymentProcessing ? 'opacity-70 cursor-wait' : ''}`}
+              disabled={paymentProcessing || isCheckingAuth}
+              className={`flex-[1.5] py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all text-sm flex justify-center items-center gap-2 btn-premium ${paymentProcessing || isCheckingAuth ? 'opacity-70 cursor-wait' : ''}`}
             >
-              {paymentProcessing ? (
+              {paymentProcessing || isCheckingAuth ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Processing...
@@ -522,6 +563,12 @@ export default function QuotationDock({ product }) {
                 </>
               )}
             </motion.button>
+          </div>
+        )}
+        {!currentUser && (
+          <div className="text-center mt-2 text-[11px] text-amber-700 font-medium flex items-center justify-center gap-1">
+            <span>🔒</span>
+            <span>Sign in required before wholesale escrow checkout</span>
           </div>
         )}
         <div className="text-center mt-3 text-xs text-gray-600 bg-gray-100 p-2 rounded-lg">
@@ -654,6 +701,112 @@ export default function QuotationDock({ product }) {
                   setPaymentOrderId(null);
                 }} 
               />
+            </motion.div>
+          </div>,
+          document.body
+        )
+      )}
+
+      {/* Mandatory Auth Modal for Buy Now */}
+      {showAuthModal && typeof document !== 'undefined' && (
+        require('react-dom').createPortal(
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAuthModal(false)}
+              className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 z-10 space-y-5"
+            >
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-2xl flex-shrink-0 text-amber-600 shadow-inner">
+                  🔐
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 leading-tight">
+                    Sign In Required to Buy Now
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Wholesale Escrow &amp; Factory Allocation
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Wholesale transactions require an authenticated buyer account to lock the 10% advance protection deposit, generate official GST proforma invoices, and track warehouse dispatch.
+              </p>
+
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span>Product:</span>
+                  <span className="font-bold text-slate-800 text-right max-w-[200px] truncate">{product.title}</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-500">
+                  <span>Quantity:</span>
+                  <span className="font-mono font-bold text-slate-900">{numQuantity.toLocaleString('en-IN')} {unitLabel}</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-500 pt-1.5 border-t border-slate-200">
+                  <span className="font-semibold text-slate-700">10% Advance Deposit:</span>
+                  <span className="font-mono font-extrabold text-emerald-600 text-sm">₹{Math.round(total * 0.1).toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-emerald-50/70 border border-emerald-100 text-emerald-800 font-medium">
+                  <span>🛡️</span>
+                  <span>10% Advance Escrow</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-blue-50/70 border border-blue-100 text-blue-800 font-medium">
+                  <span>🧾</span>
+                  <span>Official GST Invoice</span>
+                </div>
+              </div>
+
+              <div className="space-y-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const checkoutUrl = `/checkout?productId=${encodeURIComponent(product.id || product.slug)}&quantity=${encodeURIComponent(numQuantity)}${buyerEmail ? `&email=${encodeURIComponent(buyerEmail)}` : ''}`;
+                    router.push(`/login?redirect=${encodeURIComponent(checkoutUrl)}&reason=buy_now`);
+                  }}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white font-black text-sm shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <span>Sign In &amp; Proceed to Checkout</span>
+                  <span>→</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const checkoutUrl = `/checkout?productId=${encodeURIComponent(product.id || product.slug)}&quantity=${encodeURIComponent(numQuantity)}${buyerEmail ? `&email=${encodeURIComponent(buyerEmail)}` : ''}`;
+                    router.push(`/login?mode=signup&redirect=${encodeURIComponent(checkoutUrl)}&reason=buy_now`);
+                  }}
+                  className="w-full py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <span>New Buyer? Create Free Account</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] text-slate-400 text-center">
+                Your selected quantity ({numQuantity.toLocaleString('en-IN')} {unitLabel}) will be preserved after signing in.
+              </p>
             </motion.div>
           </div>,
           document.body

@@ -48,12 +48,30 @@ export default function LoginPage() {
   const [otpError, setOtpError] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
+  const [returnUrl, setReturnUrl] = useState('');
+  const [authReason, setAuthReason] = useState('');
 
   // Detect verification callback query params and reset recovery requests
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const hash = window.location.hash || '';
+
+      const mode = (params.get('mode') || params.get('tab') || params.get('action') || '').toLowerCase();
+      if (mode === 'signup' || mode === 'register' || mode === 'join') {
+        setIsLogin(false);
+      } else if (mode === 'login' || mode === 'signin') {
+        setIsLogin(true);
+      }
+
+      const redirectParam = params.get('redirect') || params.get('returnUrl') || params.get('next') || '';
+      if (redirectParam) {
+        setReturnUrl(redirectParam);
+      }
+      const reasonParam = params.get('reason') || '';
+      if (reasonParam) {
+        setAuthReason(reasonParam);
+      }
 
       if (params.get('verified') === 'true') {
         setSuccess('🎉 Your email has been verified successfully! Please sign in to access your dashboard.');
@@ -114,8 +132,9 @@ export default function LoginPage() {
           throw signInError;
         }
 
-        // Redirect to dashboard
-        router.push('/dashboard');
+        // Redirect to requested return URL or dashboard
+        const destination = returnUrl || '/dashboard';
+        router.push(destination);
         router.refresh();
       } else {
         // ── Sign Up with Email/Password via Backend Dispatch Engine ──
@@ -208,7 +227,8 @@ export default function LoginPage() {
 
       setSuccess('🎉 Account verified successfully! Redirecting...');
       setTimeout(() => {
-        router.push('/onboarding');
+        const destination = returnUrl || '/onboarding';
+        router.push(destination);
         router.refresh();
       }, 800);
     } catch (err) {
@@ -223,7 +243,8 @@ export default function LoginPage() {
     setError('');
     try {
       // Redirect to our custom Google OAuth endpoint
-      window.location.href = '/api/auth/google';
+      const googleUrl = returnUrl ? `/api/auth/google?redirect=${encodeURIComponent(returnUrl)}` : '/api/auth/google';
+      window.location.href = googleUrl;
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -331,7 +352,8 @@ export default function LoginPage() {
         setSuccess('🎉 Password reset successfully! Please log in with your new password.');
         setFormData(prev => ({ ...prev, email: emailTrimmed, password: '' }));
       } else {
-        router.push('/dashboard');
+        const destination = returnUrl || '/dashboard';
+        router.push(destination);
         router.refresh();
       }
     } catch (err) {
@@ -352,7 +374,8 @@ export default function LoginPage() {
         password: 'password123',
       });
       if (signInError) throw signInError;
-      router.push('/dashboard');
+      const destination = returnUrl || '/dashboard';
+      router.push(destination);
       router.refresh();
     } catch (err) {
       setError(err.message || 'Demo login failed');
@@ -419,21 +442,44 @@ export default function LoginPage() {
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
             {isLogin ? 'Welcome back' : 'Create your account'}
           </h2>
-          <p className="text-gray-500 mb-8">
+          <p className="text-gray-500 mb-6">
             {isLogin
               ? 'Sign in to access your trade dashboard'
-              : 'Register to start trading on B2B India'}
+              : 'Sign up to start trading on B2B India'}
           </p>
+
+          {/* Context Banner if redirected from Buy Now or Checkout */}
+          {returnUrl && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 text-xs text-emerald-950 flex items-start gap-3 shadow-sm"
+            >
+              <div className="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 font-bold text-sm flex-shrink-0">
+                🔒
+              </div>
+              <div className="space-y-0.5">
+                <div className="font-extrabold text-emerald-900 text-sm">
+                  {authReason === 'checkout' || authReason === 'buy_now'
+                    ? 'Authentication Required to Complete Order'
+                    : 'Sign In to Continue'}
+                </div>
+                <p className="text-emerald-700 text-xs leading-relaxed">
+                  Please {isLogin ? 'sign in' : 'register'} to lock factory pricing and escrow protection. You will be redirected straight to your checkout after authentication.
+                </p>
+              </div>
+            </motion.div>
+          )}
 
           {/* Toggle */}
           <div className="flex rounded-xl bg-white border border-border-subtle p-1 mb-8" suppressHydrationWarning>
-            {['Login', 'Register'].map((tab) => (
+            {['Sign In', 'Sign Up'].map((tab) => (
               <button
                 key={tab}
                 type="button"
                 suppressHydrationWarning
                 onClick={() => {
-                  const isLog = tab === 'Login';
+                  const isLog = tab === 'Sign In';
                   setIsLogin(isLog);
                   setError('');
                   setSuccess('');
@@ -443,7 +489,7 @@ export default function LoginPage() {
                   setForgotStep(1);
                 }}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                  (tab === 'Login') === isLogin
+                  (tab === 'Sign In') === isLogin
                     ? 'bg-brand-600 text-white shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
@@ -865,7 +911,7 @@ export default function LoginPage() {
               ) : isLogin ? (
                 'Sign In to Dashboard'
               ) : (
-                'Create Account →'
+                'Sign Up Free →'
               )}
             </button>
 

@@ -617,7 +617,7 @@ export default function AddProductForm({ onClose, productToEdit = null }) {
                           </strong>
                         </div>
                         <div className="text-emerald-400 font-semibold flex items-center gap-1 text-[11px]">
-                          <span>🛡️</span> 100% Escrow & Dock Inspection Guaranteed
+                          <span>🛡️</span> 10% Advance Escrow & Dock Inspection Guaranteed
                         </div>
                       </div>
                     </div>

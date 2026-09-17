@@ -4,7 +4,7 @@
 
 ## Core Capabilities
 - **Direct Factory Procurement**: Connect verified institutional buyers with primary manufacturers, mills, and fabricators across India.
-- **100% Escrow Protection**: Milestone-based fund release ensuring zero default risk for buyers and instant settlement for suppliers upon warehouse dock clearance.
+- **10% Advance Escrow Protection**: Milestone-based fund release ensuring 10% advance is securely locked until warehouse dispatch, with 90% balance on delivery.
 - **Live RFQ Reverse Auction**: Buyers post volume specifications, receiving competitive factory bids within 4 hours.
 - **Transparent Wholesale Pricing**: Multi-tier quantity discount slabs (Pilot, Commercial Distribution, Full Truckload/FTL).
 - **Compliance & Credentialing**: Strict verification of GSTIN, MSME Udyam, BIS, ISO, FSSAI, and WHO-GMP certifications.

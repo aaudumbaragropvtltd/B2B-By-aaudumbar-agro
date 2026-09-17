@@ -55,8 +55,8 @@ INSERT INTO platform_banners (title, subtitle, badge_text, hero_image_url, cta_t
 VALUES
     (
         'India’s Verified B2B Wholesale Marketplace',
-        'Direct ex-factory bulk procurement with 100% Escrow Price Protection, dock inspections, and automated GST billing.',
-        '100% Escrow Price Protected',
+        'Direct ex-factory bulk procurement with 10% Advance Escrow Protection, dock inspections, and automated GST billing.',
+        '10% Advance Escrow Protected',
         'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=2000&q=80',
         'Explore 38+ Wholesale Sectors',
         '/directory',

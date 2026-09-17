@@ -19,7 +19,7 @@ export const metadata = {
     template: "%s | B2B India",
   },
   description:
-    "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 100% escrow protection, verified GST suppliers & bulk freight.",
+    "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 10% advance escrow protection, verified GST suppliers & bulk freight.",
   keywords: [
     "B2B",
     "B2B India",
@@ -60,7 +60,7 @@ export const metadata = {
   openGraph: {
     title: "B2B India — Verified Wholesale Marketplace in India",
     description:
-      "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 100% escrow protection, verified GST suppliers & bulk freight.",
+      "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 10% advance escrow protection, verified GST suppliers & bulk freight.",
     url: baseUrl,
     siteName: "B2B India | b2bindia.site",
     images: [
@@ -83,7 +83,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "B2B India — Verified Wholesale Marketplace in India",
-    description: "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 100% escrow protection, verified GST suppliers & bulk freight.",
+    description: "India's verified B2B wholesale marketplace. Direct procurement across 38 sectors with 10% advance escrow protection, verified GST suppliers & bulk freight.",
     images: [`${baseUrl}/logo.png`, `${baseUrl}/og-image.png`],
   },
   robots: {

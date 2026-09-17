@@ -602,7 +602,7 @@ export default function AdminDashboardPage() {
               ₹{(dashboardMetrics?.totalGMV || 45000000).toLocaleString('en-IN')}
             </div>
             <div className="text-[11px] text-blue-400 font-bold mt-1">
-              100% Escrow Protected Trades
+              10% Advance Escrow Protected Trades
             </div>
           </div>
         </div>

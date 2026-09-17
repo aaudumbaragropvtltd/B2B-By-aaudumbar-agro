@@ -268,7 +268,7 @@ export default function SalesOutreachModal({ isOpen, onClose, user, product, sea
                 className="w-full text-sm font-semibold text-slate-900 px-3 py-2 bg-white border border-slate-300 rounded-xl shadow-sm focus:ring-2 focus:ring-brand-500"
               >
                 <option value="10% Escrow Advance + 90% at Dock">10% Advance + 90% at Dock (Escrow Safe)</option>
-                <option value="100% Escrow Protected (Funds held until delivery)">100% Escrow Protected</option>
+                <option value="10% Advance Escrow Protected (Funds held until delivery)">10% Advance Escrow Protected</option>
                 <option value="Letter of Credit (LC) / Bank Guarantee">Letter of Credit (LC) / Bank Guarantee</option>
                 <option value="Net 15 Days Credit for Verified Buyers">Net 15 Days Credit (Verified)</option>
                 <option value="Immediate 100% Advance with 2% Extra Cash Discount">100% Advance (2% Extra Cash Discount)</option>

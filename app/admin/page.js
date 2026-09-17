@@ -427,7 +427,7 @@ export default function AdminDashboard() {
               {formatCurrency(metrics.totalGMV)}
             </div>
             <div className="flex items-center justify-between text-xs text-slate-500 font-medium mt-1.5">
-              <span className="text-blue-700 font-bold">100% Escrow Protected</span>
+              <span className="text-blue-700 font-bold">10% Advance Escrow Protected</span>
               <span>38 wholesale sectors</span>
             </div>
           </div>

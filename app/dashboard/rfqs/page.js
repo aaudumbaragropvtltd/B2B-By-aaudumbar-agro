@@ -580,7 +580,7 @@ export default function RFQDashboard() {
                 <div className="flex justify-between items-start">
                   <div>
                     <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold rounded-full uppercase tracking-wider">
-                      🛡️ 100% Escrow Protected Trade
+                      🛡️ 10% Advance Escrow Protected Trade
                     </span>
                     <h3 className="text-xl font-extrabold text-white mt-2">Instant Order Checkout</h3>
                     <p className="text-xs text-slate-300">Lock the trade contract with 10% advance deposit.</p>

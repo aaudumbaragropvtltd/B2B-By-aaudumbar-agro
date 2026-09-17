@@ -356,7 +356,7 @@ export default function OnboardingPage() {
                         <span className="text-emerald-500 font-bold">✓</span> Broadcast Smart RFQs to 10,000+ verified suppliers
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-emerald-500 font-bold">✓</span> 100% Escrow protected trade payments
+                        <span className="text-emerald-500 font-bold">✓</span> 10% Advance Escrow protected trade payments
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="text-emerald-500 font-bold">✓</span> Dockside cargo inspection & real-time logistics

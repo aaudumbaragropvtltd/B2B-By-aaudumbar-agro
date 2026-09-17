@@ -18,7 +18,7 @@ export { slugify, getProductSlug, getProductUrl };
 export const DEMO_FALLBACK_PRODUCTS = [
   {
     id: 'demo-1',
-    title: 'Drip Irrigation System Kit (1 Hectare)',
+    title: 'Jalgaon Drip Irrigation System Kit (1 Hectare) Wholesale Manufacturer',
     description: 'Complete drip irrigation system for 1 hectare coverage with inline drippers, main lines, sub-mains, laterals, and filtration unit. High durability UV-treated LLDPE pipes with sand and disc filtration.',
     base_price_per_unit: 46818,
     unit_label: 'kit',
@@ -47,7 +47,7 @@ export const DEMO_FALLBACK_PRODUCTS = [
   },
   {
     id: 'demo-2',
-    title: 'Three-Phase Electric Motor 5HP',
+    title: 'Pune 5HP Three Phase Induction Electric Motor Industrial Manufacturer',
     description: 'Industrial grade 5HP three-phase electric induction motor suitable for heavy continuous machinery, submersible pumps, conveyors, and industrial compressors.',
     base_price_per_unit: 13388,
     unit_label: 'piece',
@@ -68,7 +68,7 @@ export const DEMO_FALLBACK_PRODUCTS = [
   },
   {
     id: 'p2',
-    title: 'Agricultural Submersible Pumping Kit (5HP)',
+    title: 'Rajkot 5HP Agricultural Submersible Pumping Kit Wholesale Manufacturer',
     description: 'High-efficiency submersible pump designed for deep borewells, agricultural irrigation, and industrial dewatering.',
     base_price_per_unit: 40055,
     unit_label: 'unit',
@@ -88,7 +88,7 @@ export const DEMO_FALLBACK_PRODUCTS = [
   },
   {
     id: 'p3',
-    title: 'High-Yield Hybrid Tomato Seeds (Arka Rakshak)',
+    title: 'Karnal High-Yield Hybrid Tomato Seeds Wholesale Supplier',
     description: 'Triple disease resistant hybrid tomato seeds, suitable for long-distance transport with firm fruit firmness and high yield.',
     base_price_per_unit: 1248,
     unit_label: 'packet',
@@ -108,7 +108,7 @@ export const DEMO_FALLBACK_PRODUCTS = [
   },
   {
     id: 'p4',
-    title: 'Premium Selvedge Denim Fabric (12oz Indigo)',
+    title: 'Ahmedabad 12oz Indigo Selvedge Denim Fabric Wholesale Manufacturer',
     description: 'Authentic ring-spun selvedge denim fabric, perfect for premium jeans and fashion apparel.',
     base_price_per_unit: 928,
     unit_label: 'meter',
@@ -128,7 +128,7 @@ export const DEMO_FALLBACK_PRODUCTS = [
   },
   {
     id: 'p7',
-    title: 'High-Tensile Hex Bolt Set (Grade 10.9, M10)',
+    title: 'Chennai Grade 10.9 High-Tensile Hex Bolt Set Wholesale Manufacturer',
     description: 'Heavy-duty hex bolts for automotive and industrial machinery with corrosion-resistant zinc trivalent plating.',
     base_price_per_unit: 155,
     unit_label: 'kg',

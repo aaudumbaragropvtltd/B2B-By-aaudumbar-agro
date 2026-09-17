@@ -300,7 +300,7 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
           <div className="flex items-center gap-6 flex-wrap">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <strong>100% Escrow Protection:</strong> 10% Advance locked until warehouse dispatch
+              <strong>10% Advance Escrow:</strong> Locked safely until warehouse dispatch
             </span>
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-400" />

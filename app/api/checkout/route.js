@@ -29,24 +29,23 @@ export async function POST(request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    const { resolveAuthenticatedUser } = require('@/utils/userResolver');
-    if (user) {
-      profile = await resolveAuthenticatedUser(supabaseAdmin, user, 'buyer');
+    // 1. Mandatory Authentication Check
+    if (!user) {
+      return NextResponse.json({
+        error: 'Authentication required. Please sign in or register before completing your wholesale purchase.',
+        requiresAuth: true
+      }, { status: 401 });
     }
 
-    if (!profile) {
-      const { data: firstBuyer } = await supabaseAdmin
-        .from('users')
-        .select('id, role, registered_email, company_name, corporate_phone')
-        .limit(1)
-        .maybeSingle();
+    const { resolveAuthenticatedUser } = require('@/utils/userResolver');
+    profile = await resolveAuthenticatedUser(supabaseAdmin, user, 'buyer');
 
-      profile = firstBuyer || {
-        id: '289357d9-4214-4aca-8452-5b578a812397',
-        company_name: 'Verified Enterprise Buyer',
-        registered_email: 'buyer@b2bindia.site',
-        corporate_phone: '+91 9226497450',
-        role: 'both',
+    if (!profile) {
+      profile = {
+        id: user.id,
+        registered_email: user.email,
+        company_name: 'Wholesale Buyer',
+        role: 'buyer',
       };
     }
 

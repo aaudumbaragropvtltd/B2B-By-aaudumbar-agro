@@ -251,7 +251,7 @@ export const CATEGORIES = [
 export const PRODUCTS = [
   {
     id: "bc-1",
-    name: "TMT Steel Bars Fe500D (8mm-32mm)",
+    name: "Jamshedpur Fe500D TMT Steel Bars Wholesale Manufacturer",
     category: "building-construction",
     price: 58500,
     unit: "Metric Ton",
@@ -261,7 +261,7 @@ export const PRODUCTS = [
   },
   {
     id: "bc-2",
-    name: "OPC 53 Grade Cement (50kg Bags)",
+    name: "Mumbai OPC 53 Grade Cement (50kg Bags) Wholesale Supplier",
     category: "building-construction",
     price: 380,
     unit: "Bag",
@@ -271,7 +271,7 @@ export const PRODUCTS = [
   },
   {
     id: "bc-3",
-    name: "AAC Blocks (600x200x150mm)",
+    name: "Mumbai AAC Blocks (600x200x150mm) Wholesale Manufacturer",
     category: "building-construction",
     price: 3800,
     unit: "Cubic Meter",
@@ -280,7 +280,7 @@ export const PRODUCTS = [
   },
   {
     id: "bc-4",
-    name: "Vitrified Floor Tiles (600x600mm)",
+    name: "Morbi Vitrified Floor Tiles (600x600mm) Wholesale Manufacturer",
     category: "building-construction",
     price: 42,
     unit: "Sq Ft",
@@ -289,7 +289,7 @@ export const PRODUCTS = [
   },
   {
     id: "bc-5",
-    name: "River Sand (Construction Grade)",
+    name: "Mumbai River Sand (Construction Grade) Wholesale Supplier",
     category: "building-construction",
     price: 2200,
     unit: "Cubic Meter",
@@ -298,7 +298,7 @@ export const PRODUCTS = [
   },
   {
     id: "bc-6",
-    name: "Red Clay Bricks (Standard Size)",
+    name: "Mumbai Red Clay Bricks (Standard Size) Wholesale Supplier",
     category: "building-construction",
     price: 8,
     unit: "Piece",
@@ -307,7 +307,7 @@ export const PRODUCTS = [
   },
   {
     id: "bc-7",
-    name: "Ready Mix Concrete M25 Grade",
+    name: "Mumbai Ready Mix Concrete M25 Grade Wholesale Supplier",
     category: "building-construction",
     price: 5500,
     unit: "Cubic Meter",
@@ -317,7 +317,7 @@ export const PRODUCTS = [
   },
   {
     id: "bc-8",
-    name: "GI Roofing Sheets (0.45mm Thick)",
+    name: "Mumbai GI Roofing Sheets (0.45mm Thick) Wholesale Supplier",
     category: "building-construction",
     price: 320,
     unit: "Sq Meter",
@@ -326,7 +326,7 @@ export const PRODUCTS = [
   },
   {
     id: "ee-1",
-    name: "LED Bulb 9W (Cool White, Pack of 100)",
+    name: "Mumbai LED Bulb 9W (Cool White, Pack of 100) Wholesale Supplier",
     category: "electronics-electrical",
     price: 55,
     unit: "Piece",
@@ -336,7 +336,7 @@ export const PRODUCTS = [
   },
   {
     id: "ee-2",
-    name: "Armoured Power Cable 4C x 240 Sq mm",
+    name: "Mumbai Armoured Power Cable 4C x 240 Sq mm Wholesale Manufacturer",
     category: "electronics-electrical",
     price: 4800,
     unit: "Meter",
@@ -346,7 +346,7 @@ export const PRODUCTS = [
   },
   {
     id: "ee-3",
-    name: "MCB Distribution Board 8-Way",
+    name: "Mumbai MCB Distribution Board 8-Way Wholesale Supplier",
     category: "electronics-electrical",
     price: 850,
     unit: "Piece",
@@ -355,7 +355,7 @@ export const PRODUCTS = [
   },
   {
     id: "ee-4",
-    name: "CCTV Camera 5MP IP Bullet (PoE)",
+    name: "Noida CCTV Camera 5MP IP Bullet (PoE) Wholesale Supplier",
     category: "electronics-electrical",
     price: 2200,
     unit: "Piece",
@@ -365,7 +365,7 @@ export const PRODUCTS = [
   },
   {
     id: "ee-5",
-    name: "Electric Wire 2.5 Sq mm (90m Coil)",
+    name: "Mumbai Electric Wire 2.5 Sq mm (90m Coil) Wholesale Supplier",
     category: "electronics-electrical",
     price: 1650,
     unit: "Coil",
@@ -374,7 +374,7 @@ export const PRODUCTS = [
   },
   {
     id: "ee-6",
-    name: "Modular Switches & Sockets Set",
+    name: "Mumbai Modular Switches & Sockets Set Wholesale Supplier",
     category: "electronics-electrical",
     price: 180,
     unit: "Set",
@@ -383,7 +383,7 @@ export const PRODUCTS = [
   },
   {
     id: "ee-7",
-    name: "Three Phase Transformer 100 KVA",
+    name: "Mumbai Three Phase Transformer 100 KVA Wholesale Manufacturer",
     category: "electronics-electrical",
     price: 285000,
     unit: "Unit",
@@ -392,7 +392,7 @@ export const PRODUCTS = [
   },
   {
     id: "im-1",
-    name: "CNC Lathe Machine (Heavy Duty)",
+    name: "Rajkot CNC Lathe Machine (Heavy Duty) Wholesale Manufacturer",
     category: "industrial-machinery",
     price: 1250000,
     unit: "Unit",
@@ -402,7 +402,7 @@ export const PRODUCTS = [
   },
   {
     id: "im-2",
-    name: "Air Compressor 5HP (Tank Mounted)",
+    name: "Mumbai Air Compressor 5HP (Tank Mounted) Wholesale Manufacturer",
     category: "industrial-machinery",
     price: 45000,
     unit: "Unit",
@@ -411,7 +411,7 @@ export const PRODUCTS = [
   },
   {
     id: "im-3",
-    name: "Hydraulic Press 100 Ton",
+    name: "Mumbai Hydraulic Press 100 Ton Wholesale Supplier",
     category: "industrial-machinery",
     price: 650000,
     unit: "Unit",
@@ -421,7 +421,7 @@ export const PRODUCTS = [
   },
   {
     id: "im-4",
-    name: "Arc Welding Machine 400A",
+    name: "Rajkot Arc Welding Machine 400A Wholesale Manufacturer",
     category: "industrial-machinery",
     price: 28000,
     unit: "Unit",
@@ -430,7 +430,7 @@ export const PRODUCTS = [
   },
   {
     id: "im-5",
-    name: "Milling Machine (Vertical, BFW)",
+    name: "Rajkot Milling Machine (Vertical, BFW) Wholesale Manufacturer",
     category: "industrial-machinery",
     price: 780000,
     unit: "Unit",
@@ -439,7 +439,7 @@ export const PRODUCTS = [
   },
   {
     id: "im-6",
-    name: "Surface Grinding Machine",
+    name: "Rajkot Surface Grinding Machine Wholesale Manufacturer",
     category: "industrial-machinery",
     price: 350000,
     unit: "Unit",
@@ -448,7 +448,7 @@ export const PRODUCTS = [
   },
   {
     id: "im-7",
-    name: "Industrial Electric Motor 10HP",
+    name: "Mumbai Industrial Electric Motor 10HP Wholesale Supplier",
     category: "industrial-machinery",
     price: 18500,
     unit: "Unit",
@@ -458,7 +458,7 @@ export const PRODUCTS = [
   },
   {
     id: "ag-1",
-    name: "Men's Cotton Round Neck T-Shirt (Bulk)",
+    name: "Tirupur Men's Cotton Round Neck T-Shirt Wholesale Manufacturer Supplier",
     category: "apparel-garments",
     price: 120,
     unit: "Piece",
@@ -468,7 +468,7 @@ export const PRODUCTS = [
   },
   {
     id: "ag-2",
-    name: "Polyester Saree (Printed, 6.3m)",
+    name: "Surat Polyester Saree (Printed, 6.3m) Wholesale Manufacturer Supplier",
     category: "apparel-garments",
     price: 250,
     unit: "Piece",
@@ -477,7 +477,7 @@ export const PRODUCTS = [
   },
   {
     id: "ag-3",
-    name: "Industrial Uniform Set (Shirt+Trouser)",
+    name: "Mumbai Industrial Uniform Set (Shirt+Trouser) Wholesale Manufacturer Supplier",
     category: "apparel-garments",
     price: 450,
     unit: "Set",
@@ -487,7 +487,7 @@ export const PRODUCTS = [
   },
   {
     id: "ag-4",
-    name: "Rayon Kurti (Printed, All Sizes)",
+    name: "Surat Rayon Kurti (Printed, All Sizes) Wholesale Manufacturer Supplier",
     category: "apparel-garments",
     price: 180,
     unit: "Piece",
@@ -496,7 +496,7 @@ export const PRODUCTS = [
   },
   {
     id: "ag-5",
-    name: "Cotton Bed Sheet Set (Double, 90x100)",
+    name: "Surat Cotton Bed Sheet Set (Double, 90x100) Wholesale Supplier",
     category: "apparel-garments",
     price: 350,
     unit: "Set",
@@ -505,7 +505,7 @@ export const PRODUCTS = [
   },
   {
     id: "ag-6",
-    name: "Kids School Uniform (White Shirt)",
+    name: "Mumbai Kids School Uniform (White Shirt) Wholesale Manufacturer Supplier",
     category: "apparel-garments",
     price: 150,
     unit: "Piece",
@@ -514,7 +514,7 @@ export const PRODUCTS = [
   },
   {
     id: "ag-7",
-    name: "Ladies Formal Cotton Trousers",
+    name: "Mumbai Ladies Formal Cotton Trousers Wholesale Supplier",
     category: "apparel-garments",
     price: 380,
     unit: "Piece",
@@ -523,7 +523,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-1",
-    name: "Premium Basmati Rice 1121 (Aged 2yr)",
+    name: "Karnal 1121 Steam Basmati Rice Wholesale Supplier",
     category: "food-agriculture",
     price: 95,
     unit: "Kg",
@@ -533,7 +533,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-2",
-    name: "Organic Turmeric Powder (Export Grade)",
+    name: "Salem Organic Turmeric Powder (Export Grade) Wholesale Supplier",
     category: "food-agriculture",
     price: 180,
     unit: "Kg",
@@ -543,7 +543,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-3",
-    name: "Black Pepper Malabar (Grade A)",
+    name: "Wayanad Malabar Grade A Black Pepper Wholesale Supplier",
     category: "food-agriculture",
     price: 620,
     unit: "Kg",
@@ -552,7 +552,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-4",
-    name: "Cashew Nuts W240 (Premium)",
+    name: "Kollam Cashew Nuts W240 (Premium) Wholesale Supplier",
     category: "food-agriculture",
     price: 850,
     unit: "Kg",
@@ -562,7 +562,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-5",
-    name: "Cold Pressed Groundnut Oil",
+    name: "Rajkot Cold Pressed Groundnut Oil Wholesale Manufacturer",
     category: "food-agriculture",
     price: 175,
     unit: "Litre",
@@ -571,7 +571,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-6",
-    name: "Organic Jaggery Blocks",
+    name: "Kolhapur Organic Pure Jaggery Blocks Wholesale Supplier",
     category: "food-agriculture",
     price: 48,
     unit: "Kg",
@@ -580,7 +580,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-7",
-    name: "Fresh Alphonso Mango (Export)",
+    name: "Ratnagiri Fresh Export Alphonso Mango Wholesale Supplier",
     category: "food-agriculture",
     price: 350,
     unit: "Dozen",
@@ -590,7 +590,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-8",
-    name: "Wheat Flour Atta (10kg Pack)",
+    name: "Karnal Wheat Flour Atta (10kg Pack) Wholesale Supplier",
     category: "food-agriculture",
     price: 320,
     unit: "Pack",
@@ -599,7 +599,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-9",
-    name: "Red Chilli Powder (Guntur, Teja)",
+    name: "Guntur Teja Chilli Powder Wholesale Supplier",
     category: "food-agriculture",
     price: 220,
     unit: "Kg",
@@ -608,7 +608,7 @@ export const PRODUCTS = [
   },
   {
     id: "fa-10",
-    name: "Drip Irrigation System Kit (1 Hectare)",
+    name: "Jalgaon Drip Irrigation System Kit (1 Hectare) Wholesale Supplier",
     category: "food-agriculture",
     price: 45000,
     unit: "Kit",
@@ -617,7 +617,7 @@ export const PRODUCTS = [
   },
   {
     id: "cd-1",
-    name: "Caustic Soda Flakes (NaOH 99%)",
+    name: "Mumbai Caustic Soda Flakes (NaOH 99%) Wholesale Supplier",
     category: "chemicals-dyes",
     price: 42,
     unit: "Kg",
@@ -626,7 +626,7 @@ export const PRODUCTS = [
   },
   {
     id: "cd-2",
-    name: "Industrial Epoxy Resin (25kg Drum)",
+    name: "Mumbai Industrial Epoxy Resin (25kg Drum) Wholesale Manufacturer",
     category: "chemicals-dyes",
     price: 380,
     unit: "Kg",
@@ -636,7 +636,7 @@ export const PRODUCTS = [
   },
   {
     id: "cd-3",
-    name: "Reactive Dyes (Assorted Colors)",
+    name: "Mumbai Reactive Dyes (Assorted Colors) Wholesale Supplier",
     category: "chemicals-dyes",
     price: 650,
     unit: "Kg",
@@ -645,7 +645,7 @@ export const PRODUCTS = [
   },
   {
     id: "cd-4",
-    name: "Isopropyl Alcohol (IPA 99.5%)",
+    name: "Mumbai Isopropyl Alcohol (IPA 99.5%) Wholesale Supplier",
     category: "chemicals-dyes",
     price: 120,
     unit: "Litre",
@@ -654,7 +654,7 @@ export const PRODUCTS = [
   },
   {
     id: "cd-5",
-    name: "Acetic Acid Glacial (CH3COOH)",
+    name: "Mumbai Acetic Acid Glacial (CH3COOH) Wholesale Supplier",
     category: "chemicals-dyes",
     price: 55,
     unit: "Kg",
@@ -663,7 +663,7 @@ export const PRODUCTS = [
   },
   {
     id: "cd-6",
-    name: "Titanium Dioxide (Rutile Grade)",
+    name: "Mumbai Titanium Dioxide (Rutile Grade) Wholesale Manufacturer",
     category: "chemicals-dyes",
     price: 280,
     unit: "Kg",
@@ -673,7 +673,7 @@ export const PRODUCTS = [
   },
   {
     id: "mh-1",
-    name: "Nitrile Examination Gloves (Box of 100)",
+    name: "Faridabad Nitrile Examination Gloves (Box of 100) Wholesale Manufacturer",
     category: "medical-healthcare",
     price: 350,
     unit: "Box",
@@ -683,7 +683,7 @@ export const PRODUCTS = [
   },
   {
     id: "mh-2",
-    name: "3-Ply Surgical Face Mask (50 Pcs)",
+    name: "Faridabad 3-Ply Surgical Face Mask (50 Pcs) Wholesale Supplier",
     category: "medical-healthcare",
     price: 80,
     unit: "Pack",
@@ -692,7 +692,7 @@ export const PRODUCTS = [
   },
   {
     id: "mh-3",
-    name: "Digital Pulse Oximeter",
+    name: "Faridabad Digital Pulse Oximeter Wholesale Supplier",
     category: "medical-healthcare",
     price: 450,
     unit: "Piece",
@@ -701,7 +701,7 @@ export const PRODUCTS = [
   },
   {
     id: "mh-4",
-    name: "Hospital Bed (Semi-Fowler, Manual)",
+    name: "Faridabad Hospital Bed (Semi-Fowler, Manual) Wholesale Supplier",
     category: "medical-healthcare",
     price: 18500,
     unit: "Unit",
@@ -711,7 +711,7 @@ export const PRODUCTS = [
   },
   {
     id: "mh-5",
-    name: "Digital Blood Pressure Monitor",
+    name: "Mumbai Digital Blood Pressure Monitor Wholesale Supplier",
     category: "medical-healthcare",
     price: 1200,
     unit: "Piece",
@@ -720,7 +720,7 @@ export const PRODUCTS = [
   },
   {
     id: "mh-6",
-    name: "Disposable Syringe 5ml (Box of 100)",
+    name: "Faridabad Disposable Syringe 5ml (Box of 100) Wholesale Manufacturer",
     category: "medical-healthcare",
     price: 120,
     unit: "Box",
@@ -729,7 +729,7 @@ export const PRODUCTS = [
   },
   {
     id: "fi-1",
-    name: "Executive Office Chair (Mesh Back)",
+    name: "Mumbai Executive Office Chair (Mesh Back) Wholesale Supplier",
     category: "furniture-interiors",
     price: 4500,
     unit: "Piece",
@@ -739,7 +739,7 @@ export const PRODUCTS = [
   },
   {
     id: "fi-2",
-    name: "Modular Kitchen Cabinet Set",
+    name: "Mumbai Modular Kitchen Cabinet Set Wholesale Supplier",
     category: "furniture-interiors",
     price: 85000,
     unit: "Set",
@@ -748,7 +748,7 @@ export const PRODUCTS = [
   },
   {
     id: "fi-3",
-    name: "Wooden Dining Table 6-Seater (Sheesham)",
+    name: "Mumbai Wooden Dining Table 6-Seater (Sheesham) Wholesale Supplier",
     category: "furniture-interiors",
     price: 22000,
     unit: "Piece",
@@ -757,7 +757,7 @@ export const PRODUCTS = [
   },
   {
     id: "fi-4",
-    name: "L-Shape Sofa Set (Fabric, 7-Seater)",
+    name: "Mumbai L-Shape Sofa Set (Fabric, 7-Seater) Wholesale Manufacturer",
     category: "furniture-interiors",
     price: 35000,
     unit: "Set",
@@ -767,7 +767,7 @@ export const PRODUCTS = [
   },
   {
     id: "fi-5",
-    name: "Steel Almirah (4-Door, 6ft)",
+    name: "Mumbai Steel Almirah (4-Door, 6ft) Wholesale Supplier",
     category: "furniture-interiors",
     price: 12000,
     unit: "Piece",
@@ -776,7 +776,7 @@ export const PRODUCTS = [
   },
   {
     id: "fi-6",
-    name: "Workstation Desk with Partition",
+    name: "Mumbai Workstation Desk with Partition Wholesale Manufacturer",
     category: "furniture-interiors",
     price: 8500,
     unit: "Piece",
@@ -785,7 +785,7 @@ export const PRODUCTS = [
   },
   {
     id: "pp-1",
-    name: "Corrugated Carton Box (3-Ply)",
+    name: "Mumbai Corrugated Carton Box (3-Ply) Wholesale Manufacturer",
     category: "packaging-paper",
     price: 18,
     unit: "Piece",
@@ -795,7 +795,7 @@ export const PRODUCTS = [
   },
   {
     id: "pp-2",
-    name: "BOPP Tape (48mm x 65m, Pack of 72)",
+    name: "Mumbai BOPP Tape (48mm x 65m, Pack of 72) Wholesale Supplier",
     category: "packaging-paper",
     price: 22,
     unit: "Roll",
@@ -804,7 +804,7 @@ export const PRODUCTS = [
   },
   {
     id: "pp-3",
-    name: "Stretch Wrap Film (23 Micron, 450mm)",
+    name: "Mumbai Stretch Wrap Film (23 Micron, 450mm) Wholesale Supplier",
     category: "packaging-paper",
     price: 450,
     unit: "Roll",
@@ -813,7 +813,7 @@ export const PRODUCTS = [
   },
   {
     id: "pp-4",
-    name: "Paper Cups (250ml, Printed)",
+    name: "Mumbai Paper Cups (250ml, Printed) Wholesale Supplier",
     category: "packaging-paper",
     price: 1.2,
     unit: "Piece",
@@ -822,7 +822,7 @@ export const PRODUCTS = [
   },
   {
     id: "pp-5",
-    name: "LDPE Plastic Bags (Transparent)",
+    name: "Mumbai LDPE Plastic Bags (Transparent) Wholesale Supplier",
     category: "packaging-paper",
     price: 85,
     unit: "Kg",
@@ -831,7 +831,7 @@ export const PRODUCTS = [
   },
   {
     id: "pp-6",
-    name: "Bubble Wrap Roll (1m x 100m)",
+    name: "Mumbai Bubble Wrap Roll (1m x 100m) Wholesale Supplier",
     category: "packaging-paper",
     price: 750,
     unit: "Roll",
@@ -841,7 +841,7 @@ export const PRODUCTS = [
   },
   {
     id: "ap-1",
-    name: "Disc Brake Pads (Front, Set of 4)",
+    name: "Chennai Disc Brake Pads (Front, Set of 4) Wholesale Supplier",
     category: "automobile-parts",
     price: 650,
     unit: "Set",
@@ -851,7 +851,7 @@ export const PRODUCTS = [
   },
   {
     id: "ap-2",
-    name: "Engine Oil 15W40 (5L Pack)",
+    name: "Mumbai Engine Oil 15W40 (5L Pack) Wholesale Supplier",
     category: "automobile-parts",
     price: 420,
     unit: "Pack",
@@ -860,7 +860,7 @@ export const PRODUCTS = [
   },
   {
     id: "ap-3",
-    name: "Car Battery 65Ah (12V, Maintenance Free)",
+    name: "Chennai Car Battery 65Ah (12V, Maintenance Free) Wholesale Supplier",
     category: "automobile-parts",
     price: 4200,
     unit: "Piece",
@@ -870,7 +870,7 @@ export const PRODUCTS = [
   },
   {
     id: "ap-4",
-    name: "Tubeless Tyre 185/65 R15 (Car)",
+    name: "Chennai Tubeless Tyre 185/65 R15 (Car) Wholesale Supplier",
     category: "automobile-parts",
     price: 3500,
     unit: "Piece",
@@ -879,7 +879,7 @@ export const PRODUCTS = [
   },
   {
     id: "ap-5",
-    name: "Oil Filter (Multi-Brand Compatible)",
+    name: "Mumbai Oil Filter (Multi-Brand Compatible) Wholesale Supplier",
     category: "automobile-parts",
     price: 120,
     unit: "Piece",
@@ -888,7 +888,7 @@ export const PRODUCTS = [
   },
   {
     id: "ap-6",
-    name: "LED Headlight Bulb H4 (6000K)",
+    name: "Mumbai LED Headlight Bulb H4 (6000K) Wholesale Supplier",
     category: "automobile-parts",
     price: 850,
     unit: "Set",
@@ -897,7 +897,7 @@ export const PRODUCTS = [
   },
   {
     id: "sr-1",
-    name: "Solar Panel 545W Mono PERC (Tier-1)",
+    name: "Mumbai Solar Panel 545W Mono PERC (Tier-1) Wholesale Supplier",
     category: "solar-renewable",
     price: 15500,
     unit: "Panel",
@@ -907,7 +907,7 @@ export const PRODUCTS = [
   },
   {
     id: "sr-2",
-    name: "Solar Inverter 5KW (On-Grid)",
+    name: "Mumbai Solar Inverter 5KW (On-Grid) Wholesale Supplier",
     category: "solar-renewable",
     price: 42000,
     unit: "Unit",
@@ -917,7 +917,7 @@ export const PRODUCTS = [
   },
   {
     id: "sr-3",
-    name: "Lithium Battery Pack 48V 100Ah",
+    name: "Chennai Lithium Battery Pack 48V 100Ah Wholesale Supplier",
     category: "solar-renewable",
     price: 65000,
     unit: "Unit",
@@ -926,7 +926,7 @@ export const PRODUCTS = [
   },
   {
     id: "sr-4",
-    name: "Solar Street Light (40W, All-in-One)",
+    name: "Mumbai Solar Street Light (40W, All-in-One) Wholesale Supplier",
     category: "solar-renewable",
     price: 5500,
     unit: "Piece",
@@ -935,7 +935,7 @@ export const PRODUCTS = [
   },
   {
     id: "sr-5",
-    name: "Solar Water Heater 200 LPD",
+    name: "Mumbai Solar Water Heater 200 LPD Wholesale Supplier",
     category: "solar-renewable",
     price: 22000,
     unit: "Unit",
@@ -944,7 +944,7 @@ export const PRODUCTS = [
   },
   {
     id: "sr-6",
-    name: "Solar Submersible Pump 5HP",
+    name: "Mumbai Solar Submersible Pump 5HP Wholesale Supplier",
     category: "solar-renewable",
     price: 85000,
     unit: "Unit",
@@ -954,7 +954,7 @@ export const PRODUCTS = [
   },
   {
     id: "pv-1",
-    name: "PVC Pipe 4\" (Class II, 6m)",
+    name: "Jalgaon PVC Pipe 4\" (Class II, 6m) Wholesale Manufacturer",
     category: "pipes-fittings",
     price: 680,
     unit: "Piece",
@@ -964,7 +964,7 @@ export const PRODUCTS = [
   },
   {
     id: "pv-2",
-    name: "CPVC Pipe 1\" (Hot Water Grade)",
+    name: "Jalgaon CPVC Pipe 1\" (Hot Water Grade) Wholesale Manufacturer",
     category: "pipes-fittings",
     price: 180,
     unit: "Meter",
@@ -973,7 +973,7 @@ export const PRODUCTS = [
   },
   {
     id: "pv-3",
-    name: "GI Pipe 2\" (Medium Class, 6m)",
+    name: "Jalgaon GI Pipe 2\" (Medium Class, 6m) Wholesale Manufacturer",
     category: "pipes-fittings",
     price: 1200,
     unit: "Piece",
@@ -982,7 +982,7 @@ export const PRODUCTS = [
   },
   {
     id: "pv-4",
-    name: "Ball Valve (Brass, 1\")",
+    name: "Moradabad Ball Valve (Brass, 1\") Wholesale Supplier",
     category: "pipes-fittings",
     price: 280,
     unit: "Piece",
@@ -991,7 +991,7 @@ export const PRODUCTS = [
   },
   {
     id: "pv-5",
-    name: "HDPE Pipe 63mm (PE100, PN10)",
+    name: "Jalgaon HDPE Pipe 63mm (PE100, PN10) Wholesale Manufacturer",
     category: "pipes-fittings",
     price: 120,
     unit: "Meter",
@@ -1001,7 +1001,7 @@ export const PRODUCTS = [
   },
   {
     id: "ss-1",
-    name: "Safety Helmet (ISI Marked, ABS)",
+    name: "Chennai Safety Helmet (ISI Marked, ABS) Wholesale Manufacturer",
     category: "safety-security",
     price: 150,
     unit: "Piece",
@@ -1011,7 +1011,7 @@ export const PRODUCTS = [
   },
   {
     id: "ss-2",
-    name: "Safety Shoes (Steel Toe, PU Sole)",
+    name: "Mumbai Safety Shoes (Steel Toe, PU Sole) Wholesale Supplier",
     category: "safety-security",
     price: 650,
     unit: "Pair",
@@ -1020,7 +1020,7 @@ export const PRODUCTS = [
   },
   {
     id: "ss-3",
-    name: "Fire Extinguisher (ABC, 4kg)",
+    name: "Chennai Fire Extinguisher (ABC, 4kg) Wholesale Supplier",
     category: "safety-security",
     price: 1800,
     unit: "Piece",
@@ -1030,7 +1030,7 @@ export const PRODUCTS = [
   },
   {
     id: "ss-4",
-    name: "Reflective Safety Jacket (High Viz)",
+    name: "Mumbai Reflective Safety Jacket (High Viz) Wholesale Supplier",
     category: "safety-security",
     price: 180,
     unit: "Piece",
@@ -1039,7 +1039,7 @@ export const PRODUCTS = [
   },
   {
     id: "ss-5",
-    name: "Boom Barrier Gate (Automatic)",
+    name: "Mumbai Boom Barrier Gate (Automatic) Wholesale Supplier",
     category: "safety-security",
     price: 35000,
     unit: "Unit",
@@ -1049,7 +1049,7 @@ export const PRODUCTS = [
   },
   {
     id: "tf-1",
-    name: "Combed Cotton Yarn 40s (Ring Spun)",
+    name: "Surat Combed Cotton Yarn 40s (Ring Spun) Wholesale Supplier",
     category: "textiles-fabrics",
     price: 285,
     unit: "Kg",
@@ -1059,7 +1059,7 @@ export const PRODUCTS = [
   },
   {
     id: "tf-2",
-    name: "Polyester Fabric (150 GSM, 44\")",
+    name: "Mumbai Polyester Fabric (150 GSM, 44\") Wholesale Manufacturer",
     category: "textiles-fabrics",
     price: 55,
     unit: "Meter",
@@ -1068,7 +1068,7 @@ export const PRODUCTS = [
   },
   {
     id: "tf-3",
-    name: "Denim Fabric (12oz, Indigo)",
+    name: "Ahmedabad Denim Fabric (12oz, Indigo) Wholesale Manufacturer",
     category: "textiles-fabrics",
     price: 120,
     unit: "Meter",
@@ -1077,7 +1077,7 @@ export const PRODUCTS = [
   },
   {
     id: "tf-4",
-    name: "Non-Woven Fabric (60 GSM, PP)",
+    name: "Mumbai Non-Woven Fabric (60 GSM, PP) Wholesale Manufacturer",
     category: "textiles-fabrics",
     price: 38,
     unit: "Meter",
@@ -1087,7 +1087,7 @@ export const PRODUCTS = [
   },
   {
     id: "tf-5",
-    name: "Raw Silk Yarn (Mulberry, Grade A)",
+    name: "Kolkata Raw Silk Yarn (Mulberry, Grade A) Wholesale Supplier",
     category: "textiles-fabrics",
     price: 4200,
     unit: "Kg",
@@ -1096,7 +1096,7 @@ export const PRODUCTS = [
   },
   {
     id: "ph-1",
-    name: "Paracetamol IP 500mg Tablets (Strip)",
+    name: "Faridabad Paracetamol IP 500mg Tablets (Strip) Wholesale Supplier",
     category: "pharma-drugs",
     price: 12,
     unit: "Strip",
@@ -1105,7 +1105,7 @@ export const PRODUCTS = [
   },
   {
     id: "ph-2",
-    name: "Omeprazole Capsules 20mg",
+    name: "Mumbai Omeprazole Capsules 20mg Wholesale Supplier",
     category: "pharma-drugs",
     price: 25,
     unit: "Strip",
@@ -1114,7 +1114,7 @@ export const PRODUCTS = [
   },
   {
     id: "ph-3",
-    name: "Surgical Spirit (500ml Bottle)",
+    name: "Mumbai Surgical Spirit (500ml Bottle) Wholesale Supplier",
     category: "pharma-drugs",
     price: 45,
     unit: "Bottle",
@@ -1124,7 +1124,7 @@ export const PRODUCTS = [
   },
   {
     id: "ph-4",
-    name: "Vitamin C Tablets 500mg (Chewable)",
+    name: "Mumbai Vitamin C Tablets 500mg (Chewable) Wholesale Supplier",
     category: "pharma-drugs",
     price: 85,
     unit: "Bottle",
@@ -1133,7 +1133,7 @@ export const PRODUCTS = [
   },
   {
     id: "rp-1",
-    name: "Natural Rubber RSS Grade 4",
+    name: "Mumbai Natural Rubber RSS Grade 4 Wholesale Supplier",
     category: "rubber-products",
     price: 165,
     unit: "Kg",
@@ -1142,7 +1142,7 @@ export const PRODUCTS = [
   },
   {
     id: "rp-2",
-    name: "Rubber Sheet (3mm, Industrial)",
+    name: "Mumbai Rubber Sheet (3mm, Industrial) Wholesale Supplier",
     category: "rubber-products",
     price: 120,
     unit: "Kg",
@@ -1152,7 +1152,7 @@ export const PRODUCTS = [
   },
   {
     id: "rp-3",
-    name: "Silicone Rubber Tube (10mm OD)",
+    name: "Mumbai Silicone Rubber Tube (10mm OD) Wholesale Supplier",
     category: "rubber-products",
     price: 85,
     unit: "Meter",
@@ -1161,7 +1161,7 @@ export const PRODUCTS = [
   },
   {
     id: "rp-4",
-    name: "EPDM Rubber Gasket (Custom)",
+    name: "Mumbai EPDM Rubber Gasket (Custom) Wholesale Manufacturer",
     category: "rubber-products",
     price: 15,
     unit: "Piece",
@@ -1170,7 +1170,7 @@ export const PRODUCTS = [
   },
   {
     id: "pm-1",
-    name: "Plastic Crate (Heavy Duty, 64L)",
+    name: "Mumbai Plastic Crate (Heavy Duty, 64L) Wholesale Supplier",
     category: "plastic-products",
     price: 350,
     unit: "Piece",
@@ -1180,7 +1180,7 @@ export const PRODUCTS = [
   },
   {
     id: "pm-2",
-    name: "PET Bottle Preform (28mm, 25g)",
+    name: "Mumbai PET Bottle Preform (28mm, 25g) Wholesale Manufacturer",
     category: "plastic-products",
     price: 2.5,
     unit: "Piece",
@@ -1189,7 +1189,7 @@ export const PRODUCTS = [
   },
   {
     id: "pm-3",
-    name: "PP Granules (Homopolymer)",
+    name: "Mumbai PP Granules (Homopolymer) Wholesale Supplier",
     category: "plastic-products",
     price: 105,
     unit: "Kg",
@@ -1198,7 +1198,7 @@ export const PRODUCTS = [
   },
   {
     id: "pm-4",
-    name: "Plastic Water Tank 1000L",
+    name: "Mumbai Plastic Water Tank 1000L Wholesale Manufacturer",
     category: "plastic-products",
     price: 6500,
     unit: "Piece",
@@ -1208,7 +1208,7 @@ export const PRODUCTS = [
   },
   {
     id: "gj-1",
-    name: "Artificial Jewellery Set (Kundan Style)",
+    name: "Mumbai Artificial Jewellery Set (Kundan Style) Wholesale Supplier",
     category: "gems-jewellery",
     price: 450,
     unit: "Set",
@@ -1218,7 +1218,7 @@ export const PRODUCTS = [
   },
   {
     id: "gj-2",
-    name: "Sterling Silver Chain (925, 20\")",
+    name: "Mumbai Sterling Silver Chain (925, 20\") Wholesale Supplier",
     category: "gems-jewellery",
     price: 850,
     unit: "Piece",
@@ -1227,7 +1227,7 @@ export const PRODUCTS = [
   },
   {
     id: "gj-3",
-    name: "Brass Bangles Set (Gold Plated)",
+    name: "Moradabad Brass Bangles Set (Gold Plated) Wholesale Supplier",
     category: "gems-jewellery",
     price: 120,
     unit: "Set",
@@ -1236,7 +1236,7 @@ export const PRODUCTS = [
   },
   {
     id: "ps-1",
-    name: "A4 Copier Paper (75 GSM, 500 Sheets)",
+    name: "Mumbai A4 Copier Paper (75 GSM, 500 Sheets) Wholesale Supplier",
     category: "printing-stationery",
     price: 280,
     unit: "Ream",
@@ -1246,7 +1246,7 @@ export const PRODUCTS = [
   },
   {
     id: "ps-2",
-    name: "Thermal Billing Roll (79mm x 50m)",
+    name: "Mumbai Thermal Billing Roll (79mm x 50m) Wholesale Supplier",
     category: "printing-stationery",
     price: 32,
     unit: "Roll",
@@ -1255,7 +1255,7 @@ export const PRODUCTS = [
   },
   {
     id: "ps-3",
-    name: "Inkjet Printer (A4, WiFi Enabled)",
+    name: "Noida Inkjet Printer (A4, WiFi Enabled) Wholesale Supplier",
     category: "printing-stationery",
     price: 8500,
     unit: "Unit",
@@ -1264,7 +1264,7 @@ export const PRODUCTS = [
   },
   {
     id: "og-1",
-    name: "Industrial Lubricant Oil (20L Can)",
+    name: "Mumbai Industrial Lubricant Oil (20L Can) Wholesale Supplier",
     category: "oil-gas",
     price: 2200,
     unit: "Can",
@@ -1273,7 +1273,7 @@ export const PRODUCTS = [
   },
   {
     id: "og-2",
-    name: "Bitumen VG30 (Packed, 180kg Drum)",
+    name: "Mumbai Bitumen VG30 (Packed, 180kg Drum) Wholesale Manufacturer",
     category: "oil-gas",
     price: 8500,
     unit: "Drum",
@@ -1283,7 +1283,7 @@ export const PRODUCTS = [
   },
   {
     id: "og-3",
-    name: "LPG Gas Cylinder 19kg (Commercial)",
+    name: "Mumbai LPG Gas Cylinder 19kg (Commercial) Wholesale Supplier",
     category: "oil-gas",
     price: 1800,
     unit: "Cylinder",
@@ -1292,7 +1292,7 @@ export const PRODUCTS = [
   },
   {
     id: "ms-1",
-    name: "MS Angle (50x50x5mm, 6m Length)",
+    name: "Jamshedpur MS Angle (50x50x5mm, 6m Length) Wholesale Supplier",
     category: "metals-steel",
     price: 3200,
     unit: "Piece",
@@ -1302,7 +1302,7 @@ export const PRODUCTS = [
   },
   {
     id: "ms-2",
-    name: "Stainless Steel Sheet (304, 1mm)",
+    name: "Jamshedpur Stainless Steel Sheet (304, 1mm) Wholesale Supplier",
     category: "metals-steel",
     price: 250,
     unit: "Kg",
@@ -1311,7 +1311,7 @@ export const PRODUCTS = [
   },
   {
     id: "ms-3",
-    name: "Aluminium Ingots (99.7% Purity)",
+    name: "Mumbai Aluminium Ingots (99.7% Purity) Wholesale Supplier",
     category: "metals-steel",
     price: 220,
     unit: "Kg",
@@ -1320,7 +1320,7 @@ export const PRODUCTS = [
   },
   {
     id: "ms-4",
-    name: "GI Wire (12 Gauge, 25kg Coil)",
+    name: "Jamshedpur GI Wire (12 Gauge, 25kg Coil) Wholesale Supplier",
     category: "metals-steel",
     price: 95,
     unit: "Kg",
@@ -1329,7 +1329,7 @@ export const PRODUCTS = [
   },
   {
     id: "wt-1",
-    name: "RO Water Purifier (25 LPH, Commercial)",
+    name: "Mumbai RO Water Purifier (25 LPH, Commercial) Wholesale Supplier",
     category: "water-treatment",
     price: 25000,
     unit: "Unit",
@@ -1339,7 +1339,7 @@ export const PRODUCTS = [
   },
   {
     id: "wt-2",
-    name: "Water Softener Plant (1000 LPH)",
+    name: "Mumbai Water Softener Plant (1000 LPH) Wholesale Supplier",
     category: "water-treatment",
     price: 85000,
     unit: "Unit",
@@ -1348,7 +1348,7 @@ export const PRODUCTS = [
   },
   {
     id: "wt-3",
-    name: "Sewage Treatment Plant (10 KLD)",
+    name: "Mumbai Sewage Treatment Plant (10 KLD) Wholesale Supplier",
     category: "water-treatment",
     price: 350000,
     unit: "Unit",
@@ -1358,7 +1358,7 @@ export const PRODUCTS = [
   },
   {
     id: "hv-1",
-    name: "Split AC 1.5 Ton (5-Star Inverter)",
+    name: "Mumbai Split AC 1.5 Ton (5-Star Inverter) Wholesale Supplier",
     category: "hvac-refrigeration",
     price: 38000,
     unit: "Unit",
@@ -1368,7 +1368,7 @@ export const PRODUCTS = [
   },
   {
     id: "hv-2",
-    name: "Cold Storage Room (Walk-In, 10 MT)",
+    name: "Mumbai Cold Storage Room (Walk-In, 10 MT) Wholesale Supplier",
     category: "hvac-refrigeration",
     price: 650000,
     unit: "Unit",
@@ -1377,7 +1377,7 @@ export const PRODUCTS = [
   },
   {
     id: "hv-3",
-    name: "Industrial Exhaust Fan (24\", Heavy)",
+    name: "Rajkot Industrial Exhaust Fan (24\", Heavy) Wholesale Supplier",
     category: "hvac-refrigeration",
     price: 3500,
     unit: "Piece",
@@ -1386,7 +1386,7 @@ export const PRODUCTS = [
   },
   {
     id: "li-1",
-    name: "Digital Weighing Scale (0.01g-300g)",
+    name: "Noida Digital Weighing Scale (0.01g-300g) Wholesale Supplier",
     category: "lab-instruments",
     price: 8500,
     unit: "Unit",
@@ -1396,7 +1396,7 @@ export const PRODUCTS = [
   },
   {
     id: "li-2",
-    name: "Laboratory Microscope (Binocular)",
+    name: "Mumbai Laboratory Microscope (Binocular) Wholesale Supplier",
     category: "lab-instruments",
     price: 15000,
     unit: "Unit",
@@ -1405,7 +1405,7 @@ export const PRODUCTS = [
   },
   {
     id: "li-3",
-    name: "pH Meter (Digital, Portable)",
+    name: "Noida pH Meter (Digital, Portable) Wholesale Supplier",
     category: "lab-instruments",
     price: 4500,
     unit: "Unit",
@@ -1414,7 +1414,7 @@ export const PRODUCTS = [
   },
   {
     id: "lp-1",
-    name: "Genuine Leather Wallet (Men's)",
+    name: "Kanpur Genuine Leather Wallet (Men's) Wholesale Supplier",
     category: "leather-products",
     price: 250,
     unit: "Piece",
@@ -1424,7 +1424,7 @@ export const PRODUCTS = [
   },
   {
     id: "lp-2",
-    name: "Leather Office Bag (Laptop, 15\")",
+    name: "Kanpur Leather Office Bag (Laptop, 15\") Wholesale Supplier",
     category: "leather-products",
     price: 1200,
     unit: "Piece",
@@ -1433,7 +1433,7 @@ export const PRODUCTS = [
   },
   {
     id: "lp-3",
-    name: "Leather Belt (Men's, Formal)",
+    name: "Kanpur Leather Belt (Men's, Formal) Wholesale Supplier",
     category: "leather-products",
     price: 180,
     unit: "Piece",
@@ -1442,7 +1442,7 @@ export const PRODUCTS = [
   },
   {
     id: "sf-1",
-    name: "Cricket Bat (English Willow, Grade A)",
+    name: "Meerut Cricket Bat (English Willow, Grade A) Wholesale Supplier",
     category: "sports-fitness",
     price: 3500,
     unit: "Piece",
@@ -1452,7 +1452,7 @@ export const PRODUCTS = [
   },
   {
     id: "sf-2",
-    name: "Gym Equipment Set (Multi-Station)",
+    name: "Meerut Gym Equipment Set (Multi-Station) Wholesale Supplier",
     category: "sports-fitness",
     price: 85000,
     unit: "Set",
@@ -1461,7 +1461,7 @@ export const PRODUCTS = [
   },
   {
     id: "sf-3",
-    name: "Football (PU, Size 5, Match Ball)",
+    name: "Meerut Football (PU, Size 5, Match Ball) Wholesale Supplier",
     category: "sports-fitness",
     price: 450,
     unit: "Piece",
@@ -1470,7 +1470,7 @@ export const PRODUCTS = [
   },
   {
     id: "gh-1",
-    name: "Corporate Gift Set (Pen + Diary + Mug)",
+    name: "Mumbai Corporate Gift Set (Pen + Diary + Mug) Wholesale Supplier",
     category: "gifts-handicrafts",
     price: 350,
     unit: "Set",
@@ -1480,7 +1480,7 @@ export const PRODUCTS = [
   },
   {
     id: "gh-2",
-    name: "Brass Handicraft Figurine",
+    name: "Moradabad Brass Handicraft Figurine Wholesale Supplier",
     category: "gifts-handicrafts",
     price: 800,
     unit: "Piece",
@@ -1489,7 +1489,7 @@ export const PRODUCTS = [
   },
   {
     id: "gh-3",
-    name: "Wooden Photo Frame (8x10, Engraved)",
+    name: "Mumbai Wooden Photo Frame (8x10, Engraved) Wholesale Supplier",
     category: "gifts-handicrafts",
     price: 180,
     unit: "Piece",
@@ -1498,7 +1498,7 @@ export const PRODUCTS = [
   },
   {
     id: "tc-1",
-    name: "Fiber Optic Cable (6 Core, SM)",
+    name: "Mumbai Fiber Optic Cable (6 Core, SM) Wholesale Manufacturer",
     category: "telecom-equipment",
     price: 18,
     unit: "Meter",
@@ -1507,7 +1507,7 @@ export const PRODUCTS = [
   },
   {
     id: "tc-2",
-    name: "Network Switch (24 Port, Managed)",
+    name: "Noida Network Switch (24 Port, Managed) Wholesale Supplier",
     category: "telecom-equipment",
     price: 12000,
     unit: "Unit",
@@ -1517,7 +1517,7 @@ export const PRODUCTS = [
   },
   {
     id: "tc-3",
-    name: "EPABX System (8 Port)",
+    name: "Noida EPABX System (8 Port) Wholesale Supplier",
     category: "telecom-equipment",
     price: 8500,
     unit: "Unit",
@@ -1526,7 +1526,7 @@ export const PRODUCTS = [
   },
   {
     id: "mm-1",
-    name: "Silica Sand (Quartz, 99% Pure)",
+    name: "Mumbai Silica Sand (Quartz, 99% Pure) Wholesale Supplier",
     category: "mining-minerals",
     price: 3500,
     unit: "Metric Ton",
@@ -1536,7 +1536,7 @@ export const PRODUCTS = [
   },
   {
     id: "mm-2",
-    name: "Calcium Carbonate Powder (Micronized)",
+    name: "Mumbai Calcium Carbonate Powder (Micronized) Wholesale Supplier",
     category: "mining-minerals",
     price: 8,
     unit: "Kg",
@@ -1545,7 +1545,7 @@ export const PRODUCTS = [
   },
   {
     id: "mm-3",
-    name: "Bentonite Powder (API Grade)",
+    name: "Mumbai Bentonite Powder (API Grade) Wholesale Supplier",
     category: "mining-minerals",
     price: 12,
     unit: "Kg",
@@ -1554,7 +1554,7 @@ export const PRODUCTS = [
   },
   {
     id: "tw-1",
-    name: "Plywood Sheet 19mm (BWR Grade)",
+    name: "Mumbai Plywood Sheet 19mm (BWR Grade) Wholesale Supplier",
     category: "timber-wood",
     price: 85,
     unit: "Sq Ft",
@@ -1564,7 +1564,7 @@ export const PRODUCTS = [
   },
   {
     id: "tw-2",
-    name: "Teak Wood Plank (Seasoned, Per CFt)",
+    name: "Mumbai Teak Wood Plank (Seasoned, Per CFt) Wholesale Supplier",
     category: "timber-wood",
     price: 3200,
     unit: "CFt",
@@ -1573,7 +1573,7 @@ export const PRODUCTS = [
   },
   {
     id: "tw-3",
-    name: "MDF Board (18mm, Plain)",
+    name: "Mumbai MDF Board (18mm, Plain) Wholesale Supplier",
     category: "timber-wood",
     price: 42,
     unit: "Sq Ft",
@@ -1582,7 +1582,7 @@ export const PRODUCTS = [
   },
   {
     id: "pg-1",
-    name: "Diesel Generator 125 KVA (Silent)",
+    name: "Rajkot Diesel Generator 125 KVA (Silent) Wholesale Manufacturer",
     category: "power-generation",
     price: 650000,
     unit: "Unit",
@@ -1592,7 +1592,7 @@ export const PRODUCTS = [
   },
   {
     id: "pg-2",
-    name: "UPS System 10 KVA (Online)",
+    name: "Noida UPS System 10 KVA (Online) Wholesale Supplier",
     category: "power-generation",
     price: 125000,
     unit: "Unit",
@@ -1601,7 +1601,7 @@ export const PRODUCTS = [
   },
   {
     id: "pg-3",
-    name: "Power Distribution Panel Board",
+    name: "Mumbai Power Distribution Panel Board Wholesale Supplier",
     category: "power-generation",
     price: 45000,
     unit: "Unit",
@@ -1610,7 +1610,7 @@ export const PRODUCTS = [
   },
   {
     id: "ah-1",
-    name: "Ashwagandha Powder (Organic, 1kg)",
+    name: "Ghaziabad Ashwagandha Powder (Organic, 1kg) Wholesale Supplier",
     category: "ayurvedic-herbal",
     price: 650,
     unit: "Kg",
@@ -1620,7 +1620,7 @@ export const PRODUCTS = [
   },
   {
     id: "ah-2",
-    name: "Neem Oil (Cold Pressed, 5L)",
+    name: "Mumbai Neem Oil (Cold Pressed, 5L) Wholesale Supplier",
     category: "ayurvedic-herbal",
     price: 450,
     unit: "Can",
@@ -1629,7 +1629,7 @@ export const PRODUCTS = [
   },
   {
     id: "ah-3",
-    name: "Aloe Vera Gel (Pure, 1kg Pack)",
+    name: "Ghaziabad Aloe Vera Gel (Pure, 1kg Pack) Wholesale Supplier",
     category: "ayurvedic-herbal",
     price: 250,
     unit: "Kg",
@@ -1638,7 +1638,7 @@ export const PRODUCTS = [
   },
   {
     id: "ah-4",
-    name: "Tulsi Extract Capsules (500mg, 60 Cap)",
+    name: "Ghaziabad Tulsi Extract Capsules (500mg, 60 Cap) Wholesale Supplier",
     category: "ayurvedic-herbal",
     price: 180,
     unit: "Bottle",
@@ -1648,7 +1648,7 @@ export const PRODUCTS = [
   },
   {
     id: "gc-1",
-    name: "Toughened Glass Sheet (10mm, Clear)",
+    name: "Mumbai Toughened Glass Sheet (10mm, Clear) Wholesale Supplier",
     category: "glass-ceramics",
     price: 250,
     unit: "Sq Ft",
@@ -1657,7 +1657,7 @@ export const PRODUCTS = [
   },
   {
     id: "gc-2",
-    name: "Ceramic Wash Basin (Counter Top)",
+    name: "Morbi Ceramic Wash Basin (Counter Top) Wholesale Supplier",
     category: "glass-ceramics",
     price: 2200,
     unit: "Piece",
@@ -1667,7 +1667,7 @@ export const PRODUCTS = [
   },
   {
     id: "gc-3",
-    name: "Glass Water Bottle (1L, Borosilicate)",
+    name: "Mumbai Glass Water Bottle (1L, Borosilicate) Wholesale Supplier",
     category: "glass-ceramics",
     price: 120,
     unit: "Piece",
@@ -1676,7 +1676,7 @@ export const PRODUCTS = [
   },
   {
     id: "lh-1",
-    name: "Hand Pallet Truck (3 Ton)",
+    name: "Rajkot Hand Pallet Truck (3 Ton) Wholesale Supplier",
     category: "logistics-handling",
     price: 18000,
     unit: "Unit",
@@ -1686,7 +1686,7 @@ export const PRODUCTS = [
   },
   {
     id: "lh-2",
-    name: "Industrial Rack (Heavy Duty, 5 Shelf)",
+    name: "Mumbai Industrial Rack (Heavy Duty, 5 Shelf) Wholesale Supplier",
     category: "logistics-handling",
     price: 12000,
     unit: "Unit",
@@ -1695,7 +1695,7 @@ export const PRODUCTS = [
   },
   {
     id: "lh-3",
-    name: "Conveyor Belt System (Modular)",
+    name: "Rajkot Conveyor Belt System (Modular) Wholesale Supplier",
     category: "logistics-handling",
     price: 150000,
     unit: "Unit",
@@ -1705,7 +1705,7 @@ export const PRODUCTS = [
   },
   {
     id: "me-1",
-    name: "Marine Navigation Light (LED)",
+    name: "Mumbai Marine Navigation Light (LED) Wholesale Supplier",
     category: "marine-ship",
     price: 3500,
     unit: "Piece",
@@ -1714,7 +1714,7 @@ export const PRODUCTS = [
   },
   {
     id: "me-2",
-    name: "Life Jacket (SOLAS Approved)",
+    name: "Chennai Life Jacket (SOLAS Approved) Wholesale Supplier",
     category: "marine-ship",
     price: 850,
     unit: "Piece",
@@ -1724,7 +1724,7 @@ export const PRODUCTS = [
   },
   {
     id: "wr-1",
-    name: "Dustbin (120L, Wheeled, HDPE)",
+    name: "Jalgaon Dustbin (120L, Wheeled, HDPE) Wholesale Supplier",
     category: "waste-recycling",
     price: 1800,
     unit: "Piece",
@@ -1734,7 +1734,7 @@ export const PRODUCTS = [
   },
   {
     id: "wr-2",
-    name: "Plastic Shredder Machine (200 Kg/Hr)",
+    name: "Mumbai Plastic Shredder Machine (200 Kg/Hr) Wholesale Manufacturer",
     category: "waste-recycling",
     price: 250000,
     unit: "Unit",
@@ -1743,7 +1743,7 @@ export const PRODUCTS = [
   },
   {
     id: "cp-1",
-    name: "Hand Sanitizer Gel (500ml Pump)",
+    name: "Faridabad Hand Sanitizer Gel (500ml Pump) Wholesale Supplier",
     category: "cosmetics-personal",
     price: 65,
     unit: "Bottle",
@@ -1753,7 +1753,7 @@ export const PRODUCTS = [
   },
   {
     id: "cp-2",
-    name: "Coconut Hair Oil (200ml, Cold Pressed)",
+    name: "Mumbai Coconut Hair Oil (200ml, Cold Pressed) Wholesale Supplier",
     category: "cosmetics-personal",
     price: 85,
     unit: "Bottle",
@@ -1762,7 +1762,7 @@ export const PRODUCTS = [
   },
   {
     id: "cp-3",
-    name: "Herbal Face Wash (100ml Tube)",
+    name: "Ghaziabad Herbal Face Wash (100ml Tube) Wholesale Supplier",
     category: "cosmetics-personal",
     price: 75,
     unit: "Tube",
@@ -1771,7 +1771,7 @@ export const PRODUCTS = [
   },
   {
     id: "et-1",
-    name: "School Desk & Bench Set (Dual)",
+    name: "Mumbai School Desk & Bench Set (Dual) Wholesale Manufacturer",
     category: "education-training",
     price: 3500,
     unit: "Set",
@@ -1781,7 +1781,7 @@ export const PRODUCTS = [
   },
   {
     id: "et-2",
-    name: "Interactive Whiteboard (75\", Smart)",
+    name: "Mumbai Interactive Whiteboard (75\", Smart) Wholesale Supplier",
     category: "education-training",
     price: 45000,
     unit: "Unit",
@@ -1790,7 +1790,7 @@ export const PRODUCTS = [
   },
   {
     id: "et-3",
-    name: "Science Lab Kit (Physics, Class 10)",
+    name: "Mumbai Science Lab Kit (Physics, Class 10) Wholesale Supplier",
     category: "education-training",
     price: 2500,
     unit: "Kit",

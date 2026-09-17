@@ -9,8 +9,8 @@ const FALLBACK_BANNERS = [
   {
     id: "banner-1",
     title: "India’s Verified B2B Wholesale Marketplace",
-    subtitle: "Direct ex-factory bulk procurement with 100% Escrow Price Protection, dock inspections, and automated GST billing.",
-    badge_text: "100% Escrow Protected",
+    subtitle: "Direct ex-factory bulk procurement with 10% Advance Escrow Protection, dock inspections, and automated GST billing.",
+    badge_text: "10% Advance Escrow",
     hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg",
     cta_text: "Explore 38+ Wholesale Sectors",
     cta_link: "/directory",
@@ -236,7 +236,7 @@ export default function EcommerceHero({ initialBanners = [] }) {
           className="w-full flex flex-col items-center"
         >
           <span className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 mb-2.5 sm:mb-4 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-emerald-300 text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-md">
-            {activeBanner.badge_text || '100% Escrow Protected'}
+            {activeBanner.badge_text || '10% Advance Escrow'}
           </span>
 
           <h1 className="text-2xl sm:text-4xl md:text-6xl font-black text-white tracking-tight mb-2.5 sm:mb-4 leading-[1.2] drop-shadow-xl max-w-3xl">

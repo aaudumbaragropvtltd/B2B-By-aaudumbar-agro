@@ -9,6 +9,7 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Missing GOOGLE_CLIENT_ID in environment variables' }, { status: 500 });
   }
 
+  const redirect = request.nextUrl.searchParams.get('redirect');
   const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   url.searchParams.set('client_id', clientId);
   url.searchParams.set('redirect_uri', redirectUri);
@@ -16,6 +17,9 @@ export async function GET(request) {
   url.searchParams.set('scope', 'openid email profile');
   url.searchParams.set('access_type', 'online');
   url.searchParams.set('prompt', 'select_account');
+  if (redirect) {
+    url.searchParams.set('state', redirect);
+  }
 
   return NextResponse.redirect(url.toString());
 }

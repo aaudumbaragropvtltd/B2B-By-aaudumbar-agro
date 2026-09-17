@@ -229,8 +229,10 @@ export function generateProductMetadata(product) {
     : [primaryImage];
 
   // High-CTR, Intent-Matched SEO Title Formula for Google Top Ranking (~55 chars)
-  const metaTitle = `Buy ${title} Wholesale at ₹${price}/${unit} | b2bindia.site`;
-  const metaDescription = `Buy ${title} in bulk at verified wholesale price ₹${price}/${unit} online on b2bindia.site from ${supplierName} in ${location}. Minimum Order: ${moq} ${unit}. 100% GST tax invoice, verified escrow payment protection, and pan-India logistics dispatch on b2bindia.site.`;
+  const metaTitle = title.toLowerCase().includes('wholesale')
+    ? `${title} at ₹${price}/${unit} | b2bindia.site`
+    : `Buy ${title} Wholesale at ₹${price}/${unit} | b2bindia.site`;
+  const metaDescription = `Buy ${title} in bulk at verified price ₹${price}/${unit} online on b2bindia.site from ${supplierName} in ${location}. Minimum Order: ${moq} ${unit}. 100% GST tax invoice, verified escrow payment protection, and pan-India logistics dispatch on b2bindia.site.`;
 
   const productSlug = getProductSlug(product);
   const canonicalUrl = `${currentSiteUrl}/directory/product/${productSlug}`;
