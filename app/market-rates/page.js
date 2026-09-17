@@ -213,24 +213,15 @@ export default function MarketRatesPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Live Mandi Engine
+                    Live Mandi Feed
                   </span>
-                  <a
-                    href={sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 hover:text-indigo-800 border border-indigo-200 text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center gap-1"
-                  >
-                    <span>Source: CommodityOnline Mandi Prices</span>
-                    <span className="text-[10px]">↗</span>
-                  </a>
                 </div>
 
                 <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
                   India APMC Mandi Rates &amp; Market Intelligence
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-                  Direct live rates aggregated from <strong>CommodityOnline</strong> and APMC Mandis across all 28 states, covering <strong>{allCommodities.length || 498} agricultural commodities</strong>, districts, and village markets.
+                  Real-time wholesale modal pricing, daily arrivals, and market trends aggregated from agricultural APMC Mandis across all 28 states, covering <strong>{allCommodities.length || 498} agricultural commodities</strong>, districts, and village markets.
                 </p>
               </div>
 
@@ -242,7 +233,7 @@ export default function MarketRatesPage() {
                   className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer min-h-[42px]"
                 >
                   <span className={refreshing ? 'animate-spin' : ''}>🔄</span>
-                  <span>{refreshing ? 'Fetching from CommodityOnline...' : 'Refresh Live Rates'}</span>
+                  <span>{refreshing ? 'Fetching Live Rates...' : 'Refresh Live Rates'}</span>
                 </button>
 
                 <Link
