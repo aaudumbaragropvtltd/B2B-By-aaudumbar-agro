@@ -27,6 +27,7 @@ function ProductCard({ product, index }) {
   const imageSrc = (product.image && typeof product.image === 'string' && product.image.trim() !== '') 
     ? product.image 
     : (product.hero_image_url || fallbackImg);
+  const displayName = product.name || product.title || 'Verified Wholesale Product';
 
   return (
     <motion.div
@@ -34,45 +35,51 @@ function ProductCard({ product, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
-      className="flex-shrink-0 w-56 sm:w-64"
+      className="flex-shrink-0 w-52 sm:w-64"
     >
       <Link href={getProductUrl(product)}>
         <motion.div
-          whileHover={{ y: -8 }}
+          whileHover={{ y: -6 }}
           whileTap={{ scale: 0.98 }}
-          className="bg-white rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-sm hover-lift card-glow relative"
+          className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-xs hover:shadow-md transition-all duration-300 relative flex flex-col"
         >
           {/* Image Area */}
-          <div className="h-44 bg-gray-50 relative overflow-hidden rounded-t-3xl">
+          <div className="h-36 sm:h-44 bg-gray-50 relative overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
             <img
               src={imageSrc}
-              alt={product.name || 'B2B Product'}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+              alt={displayName}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               loading="lazy"
             />
             {/* Badge */}
             {product.badge && (
-              <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-xl text-[10px] font-extrabold uppercase tracking-widest shadow-md ${BADGE_STYLES[product.badge]} badgePulse`}>
+              <div className={`absolute top-2.5 right-2.5 sm:top-3 sm:right-3 px-2 sm:px-2.5 py-1 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest shadow-md ${BADGE_STYLES[product.badge] || 'bg-brand-600 text-white'}`}>
                 {product.badge}
               </div>
             )}
           </div>
 
           {/* Content */}
-          <div className="p-4 relative z-10 bg-white">
-            <h3 className="text-sm font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-brand-600 transition-colors min-h-[2.5rem]">
-              {product.name}
-            </h3>
-            <div className="mt-2.5 flex items-baseline gap-1">
-              <span className="text-xl font-extrabold text-gray-900">{formatPrice(product.price)}</span>
-              <span className="text-xs text-gray-400 font-medium">/{product.unit}</span>
+          <div className="p-3.5 sm:p-4 relative z-10 bg-white flex flex-col justify-between flex-1">
+            <div>
+              <h3 
+                title={displayName}
+                className="text-xs sm:text-sm font-bold text-gray-900 leading-snug line-clamp-3 sm:line-clamp-2 group-hover:text-brand-600 transition-colors min-h-[3rem] sm:min-h-[2.5rem] break-words"
+              >
+                {displayName}
+              </h3>
+              <div className="mt-2 flex items-baseline gap-1">
+                <span className="text-base sm:text-xl font-extrabold text-gray-900 font-mono">{formatPrice(product.price)}</span>
+                <span className="text-[10px] sm:text-xs text-gray-400 font-medium">/{product.unit || 'Unit'}</span>
+              </div>
+              <div className="mt-1 text-[10px] sm:text-xs text-gray-500 font-medium">
+                MOQ: {product.moq || '1 Unit'}
+              </div>
             </div>
-            <div className="mt-1 text-xs text-gray-500 font-medium">
-              MOQ: {product.moq}
-            </div>
-            <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0 shadow-[0_0_4px_rgba(34,197,94,0.5)]"></span>
-              <span className="text-xs text-gray-600 font-medium truncate">{product.supplierName || 'Verified Supplier'}</span>
+
+            <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-gray-50 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 flex-shrink-0" />
+              <span className="text-[10px] sm:text-xs text-gray-600 font-medium truncate">{product.supplierName || 'Verified Supplier'}</span>
             </div>
           </div>
         </motion.div>

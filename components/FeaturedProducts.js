@@ -20,11 +20,11 @@ const BADGE_STYLES = {
 };
 
 function ProductCard({ product, index }) {
-  const category = getCategoryById(product.category);
   const fallbackImg = 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80';
   const imageSrc = (product.image && typeof product.image === 'string' && product.image.trim() !== '') 
     ? product.image 
     : (product.hero_image_url || fallbackImg);
+  const displayName = product.name || product.title || 'Verified Wholesale Product';
 
   return (
     <motion.div
@@ -35,26 +35,26 @@ function ProductCard({ product, index }) {
     >
       <Link href={getProductUrl(product)}>
         <motion.div
-          whileHover={{ y: -6 }}
+          whileHover={{ y: -4 }}
           whileTap={{ scale: 0.98 }}
-          className="bg-white rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-sm transition-all duration-500 hover-lift card-glow relative"
+          className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-xs hover:shadow-md transition-all duration-300 relative flex flex-col"
         >
           {/* Image Area */}
-          <div className="relative h-48 sm:h-56 bg-gray-50 overflow-hidden rounded-t-3xl">
+          <div className="relative h-36 sm:h-48 md:h-56 bg-gray-50 overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
             <img
               src={imageSrc}
-              alt={product.name || 'B2B Product'}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+              alt={displayName}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               loading="lazy"
             />
             {/* Badge */}
             {product.badge && (
-              <div className={`absolute top-3 left-3 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest shadow-lg ${BADGE_STYLES[product.badge]} badgePulse`}>
+              <div className={`absolute top-2 left-2 sm:top-3 sm:left-3 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest shadow-md ${BADGE_STYLES[product.badge] || 'bg-brand-600 text-white'}`}>
                 {product.badge}
               </div>
             )}
-            {/* Quick View Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+            {/* Quick View Overlay (Desktop only) */}
+            <div className="hidden sm:flex absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-4">
               <span className="px-5 py-2 rounded-xl bg-white/95 text-xs font-bold text-gray-900 backdrop-blur-md shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                 View Details →
               </span>
@@ -62,35 +62,40 @@ function ProductCard({ product, index }) {
           </div>
 
           {/* Content */}
-          <div className="p-4 sm:p-5 relative z-10 bg-white">
-            <h3 className="text-sm font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-brand-600 transition-colors min-h-[2.5rem]">
-              {product.name}
-            </h3>
+          <div className="p-3 sm:p-5 relative z-10 bg-white flex flex-col justify-between flex-1">
+            <div>
+              <h3 
+                title={displayName}
+                className="text-xs sm:text-sm font-bold text-gray-900 leading-snug line-clamp-3 sm:line-clamp-2 group-hover:text-brand-600 transition-colors min-h-[3rem] sm:min-h-[2.5rem] break-words"
+              >
+                {displayName}
+              </h3>
 
-            {/* Price Row */}
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900">
-                {formatPrice(product.price)}
-              </span>
-              <span className="text-[11px] text-gray-400 font-medium">
-                / {product.unit}
-              </span>
-            </div>
+              {/* Price Row */}
+              <div className="mt-2 flex items-baseline gap-1 sm:gap-1.5 flex-wrap">
+                <span className="text-base sm:text-xl font-extrabold text-gray-900 font-mono">
+                  {formatPrice(product.price)}
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium">
+                  / {product.unit || 'Unit'}
+                </span>
+              </div>
 
-            {/* MOQ */}
-            <div className="mt-1 text-[11px] text-gray-500 font-medium">
-              MOQ: {product.moq}
+              {/* MOQ */}
+              <div className="mt-1 text-[10px] sm:text-[11px] text-gray-500 font-medium">
+                MOQ: {product.moq || '1 Unit'}
+              </div>
             </div>
 
             {/* Supplier Info */}
-            <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-2">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0 shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
-                <span className="text-[11px] text-gray-600 font-medium truncate">
+            <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-gray-50 flex items-center justify-between gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 flex-shrink-0" />
+                <span className="text-[10px] sm:text-[11px] text-gray-600 font-medium truncate">
                   {product.supplierName || 'Verified Supplier'}
                 </span>
               </div>
-              <span className="flex-shrink-0 px-1.5 py-0.5 rounded bg-emerald-50 text-[9px] font-bold text-emerald-700 uppercase">
+              <span className="flex-shrink-0 px-1.5 py-0.5 rounded bg-emerald-50 text-[8px] sm:text-[9px] font-bold text-emerald-700 uppercase">
                 ✓ Verified
               </span>
             </div>
