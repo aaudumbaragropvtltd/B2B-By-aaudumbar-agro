@@ -1,4 +1,4 @@
-import { getSiteUrl } from '@/utils/seoUtils';
+import { getSiteUrl, generateMarketRatesJsonLd } from '@/utils/seoUtils';
 
 const baseUrl = getSiteUrl();
 
@@ -37,5 +37,16 @@ export const metadata = {
 };
 
 export default function MarketRatesLayout({ children }) {
-  return children;
+  const jsonLd = generateMarketRatesJsonLd();
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {children}
+    </>
+  );
 }
+

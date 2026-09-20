@@ -7,6 +7,9 @@ import DirectorySearchBar from '@/components/DirectorySearchBar';
 import FavoriteButton from '@/components/FavoriteButton';
 import { createClient, createAdminClient } from '@/services/supabaseServer';
 import { getProductUrl } from '@/utils/catalogResolver';
+import { getSiteUrl, generateBreadcrumbJsonLd } from '@/utils/seoUtils';
+
+const siteUrl = getSiteUrl();
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -27,12 +30,12 @@ export const metadata = {
     "factory direct wholesale price",
   ],
   alternates: {
-    canonical: "https://www.b2bindia.site/directory",
+    canonical: `${siteUrl}/directory`,
   },
   openGraph: {
     title: "India B2B Trade Directory — Verified Manufacturers & Wholesale Suppliers | b2bindia.site",
     description: "Browse 38 sectors, compare wholesale prices, and trade directly with verified Indian manufacturers on b2bindia.site.",
-    url: "https://www.b2bindia.site/directory",
+    url: `${siteUrl}/directory`,
     siteName: "b2bindia.site | B2B India",
     locale: "en_IN",
     type: "website",
@@ -417,8 +420,40 @@ export default async function DirectoryPage({ searchParams }) {
     await logSearchEvent(query, sectorSlug, products.length);
   }
 
+  const breadcrumbsJson = generateBreadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: 'Directory', url: '/directory' },
+  ]);
+
+  const directoryJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': `${siteUrl}/directory#collection`,
+        url: `${siteUrl}/directory`,
+        name: 'India B2B Wholesale Trade Directory',
+        description: 'Comprehensive directory of verified manufacturers, wholesale commodities, and primary suppliers in India.',
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: products.slice(0, 30).map((prod, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            url: `${siteUrl}${getProductUrl(prod)}`,
+            name: prod.title,
+          })),
+        },
+      },
+      breadcrumbsJson,
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(directoryJsonLd) }}
+      />
       <Navbar />
       <main className="flex-1 pt-24 pb-16 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">

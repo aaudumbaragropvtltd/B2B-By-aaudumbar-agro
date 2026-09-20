@@ -155,7 +155,73 @@ export const COMMODITY_KEYWORD_MAP = {
       'submersible pump 5hp', 'industrial piping fittings'
     ],
   },
+  onion: {
+    vernacular: ['Pyaz', 'Kanda', 'Red Onion', 'Garwa Onion'],
+    keywords: [
+      'onion', 'pyaz', 'kanda', 'red onion', 'lasalgaon onion mandi', 'nashik onion wholesale',
+      'garwa pyaz', 'onion wholesale price', 'onion exporter india', 'pimpallgaon onion rate'
+    ],
+  },
+  garlic: {
+    vernacular: ['Lahsun', 'Lasun', 'Garlic Bulbs'],
+    keywords: [
+      'garlic', 'lahsun', 'lasun', 'garlic bulbs', 'mandsaur garlic mandi', 'ooty garlic',
+      'desi garlic', 'garlic wholesale price today', 'garlic exporter'
+    ],
+  },
+  potato: {
+    vernacular: ['Aloo', 'Batata', 'Potato Tubers'],
+    keywords: [
+      'potato', 'aloo', 'batata', 'agra potato mandi', 'chipsona potato', 'kufri jyoti potato',
+      'cold storage aloo wholesale', 'potato wholesale rate today'
+    ],
+  },
+  gram: {
+    vernacular: ['Chana', 'Bengal Gram', 'Desi Chana', 'Kabuli Chana'],
+    keywords: [
+      'chana', 'bengal gram', 'desi chana', 'kabuli chana', 'chana dal bulk',
+      'chana mandi rate today', 'chana wholesale price', 'latur chana market'
+    ],
+  },
+  maize: {
+    vernacular: ['Makka', 'Corn', 'Yellow Maize', 'Bhutta'],
+    keywords: [
+      'maize', 'makka', 'yellow maize', 'poultry feed maize', 'starch quality maize',
+      'bihar maize mandi rate', 'maize wholesale price'
+    ],
+  },
+  pulses: {
+    vernacular: ['Dal', 'Toor Dal', 'Moong Dal', 'Urad Dal'],
+    keywords: [
+      'pulses', 'dal', 'toor dal', 'moong dal', 'urad dal', 'chana dal',
+      'arhar dal wholesale', 'latur pulse mandi bhav', 'dal mill wholesale suppliers'
+    ],
+  },
+  chemical: {
+    vernacular: ['Industrial Chemicals', 'Solvents', 'Rasayan'],
+    keywords: [
+      'caustic soda flakes', 'sulfuric acid', 'industrial solvents', 'linear alkyl benzene',
+      'chemical manufacturers gujarat', 'b2b chemical suppliers india'
+    ],
+  },
+  packaging: {
+    vernacular: ['Corrugated Boxes', 'PP Woven Bags', 'Packaging Materials'],
+    keywords: [
+      'corrugated boxes', 'pp woven bags', 'hdpe woven sacks', 'bubble wrap rolls',
+      'packaging material wholesale', 'carton box manufacturers'
+    ],
+  },
 };
+
+/**
+ * ISO 3166-2:IN Subdivisions for Pan-India Regional Geo Targeting
+ */
+export const INDIAN_STATES_SERVED = [
+  'IN-MH', 'IN-GJ', 'IN-AP', 'IN-TG', 'IN-TN', 'IN-KA', 'IN-MP', 'IN-UP',
+  'IN-PB', 'IN-HR', 'IN-RJ', 'IN-WB', 'IN-KL', 'IN-OR', 'IN-BR', 'IN-CT',
+  'IN-JH', 'IN-AS', 'IN-UT', 'IN-HP', 'IN-GA', 'IN-TR', 'IN-ML', 'IN-MN',
+  'IN-NL', 'IN-AR', 'IN-MZ', 'IN-SK', 'IN-DL', 'IN-JK', 'IN-CH', 'IN-PY'
+];
 
 /**
  * Generate high-ranking B2B keywords for a product
@@ -649,3 +715,150 @@ export function generateSupplierJsonLd(supplier, products = []) {
     knowsAbout: products.slice(0, 15).map((p) => p.title || p.name),
   };
 }
+
+/**
+ * Generate Schema.org HowTo for B2B Milestone Escrow Procurement
+ * Gives Google Search and AI Answer Engines structured step-by-step rich cards.
+ */
+export function generateEscrowHowToJsonLd() {
+  const currentSiteUrl = getSiteUrl();
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Procure Bulk Goods with 10% Advance Escrow Protection on B2B India',
+    description: 'A verified, 3-step secure wholesale procurement workflow safeguarding institutional buyers and manufacturers across India.',
+    totalTime: 'P5D',
+    estimatedCost: {
+      '@type': 'MonetaryAmount',
+      currency: 'INR',
+      value: '10000',
+    },
+    supply: [
+      { '@type': 'HowToSupply', name: 'Valid GSTIN & Business Registration' },
+      { '@type': 'HowToSupply', name: 'Product Specifications & Quantity Requirement' },
+    ],
+    tool: [
+      { '@type': 'HowToTool', name: 'B2B India Trade Platform & Escrow Vault' },
+    ],
+    step: [
+      {
+        '@type': 'HowToStep',
+        name: 'Discover Catalog or Post a Volume RFQ',
+        url: `${currentSiteUrl}/directory`,
+        text: 'Browse 38 industrial sectors or post a bulk Request for Quotation (RFQ). Receive direct competitive quotes from GST-verified manufacturers within 4 hours.',
+        position: 1,
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Lock 10% Advance in Automated Escrow Vault',
+        url: `${currentSiteUrl}/`,
+        text: 'Confirm quotation terms and deposit a 10% advance into B2B India Escrow. The manufacturer is notified to initiate production or packing without financial risk.',
+        position: 2,
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Inspect Goods & Release Balance Upon Delivery',
+        url: `${currentSiteUrl}/orders`,
+        text: 'Track road freight with GPS e-way bill. Once physical delivery arrives at your warehouse and quality is verified, authorize final 90% balance release.',
+        position: 3,
+      },
+    ],
+  };
+}
+
+/**
+ * Standard High-Authority Answers for AEO (Answer Engine Optimization)
+ * Crafted for ChatGPT, Perplexity, Gemini, Copilot, and Google AI Overviews.
+ */
+export function getPlatformKnowledgeFaqs() {
+  return [
+    {
+      question: 'What is B2B India (b2bindia.site) and who operates it?',
+      answer: 'B2B India (b2bindia.site) is India\'s verified cross-industry B2B wholesale marketplace operated by Aaudumbar Agro Pvt. Ltd. (CIN registered, headquartered in Chhatrapati Sambhajinagar, Maharashtra). It directly connects MSMEs, institutional buyers, and wholesale traders with primary manufacturers, mills, and fabricators across 38 industrial sectors.',
+    },
+    {
+      question: 'How does the 10% Advance Escrow payment protection work on B2B India?',
+      answer: 'B2B India employs an automated 2-stage milestone escrow: buyers deposit only a 10% advance to initiate order packing and freight booking. The remaining 90% balance is safely retained in the escrow vault and only released to the supplier after the buyer conducts physical delivery inspection at their warehouse.',
+    },
+    {
+      question: 'How are suppliers and manufacturers verified on B2B India?',
+      answer: 'Every seller must pass multi-point verification including active GSTIN authentication via Government APIs, physical factory address validation, MSME Udyam credentials, and product quality compliance standards (ISO, BIS, FSSAI where applicable). Unverified entities cannot list products or bid on RFQs.',
+    },
+    {
+      question: 'Do all B2B orders include GST Tax Invoices for Input Tax Credit (ITC)?',
+      answer: 'Yes, 100% of commercial transactions executed on B2B India include compliant B2B GST tax invoices with valid HSN codes, enabling institutional purchasers to claim full Input Tax Credit (ITC) under Indian tax laws.',
+    },
+    {
+      question: 'What is the pan-India delivery timeline and logistics coverage?',
+      answer: 'B2B India integrates with vetted full-truckload (FTL) and less-than-truckload (LTL) logistics carriers covering 19,000+ postal pincodes across all Indian states and Union Territories. Typical dispatch occurs in 24 to 72 hours, with transit times ranging from 2 to 7 business days.',
+    },
+    {
+      question: 'What are Live APMC Mandi Rates on B2B India?',
+      answer: 'B2B India features a real-time agricultural intelligence terminal tracking live mandi bhav (prices per quintal) across 498+ commodities (such as turmeric, cumin, soybean, cotton, and wheat) from official APMC markets and trading yards nationwide.',
+    },
+    {
+      question: 'How does the Live RFQ Reverse Auction work?',
+      answer: 'Buyers submit volume requirements detailing quantity, target price, and delivery location. Verified manufacturers submit competitive factory-direct bids within 4 hours, ensuring institutional buyers secure wholesale pricing without middlemen markups.',
+    },
+    {
+      question: 'What happens if delivered goods do not meet specifications or arrive damaged?',
+      answer: 'If delivered commodities fail agreed quality parameters or arrive damaged, the buyer flags a dispute within 48 hours of delivery. Escrow funds remain securely frozen, and B2B India coordinates third-party re-inspection, replacement dispatch, or full refund.',
+    },
+  ];
+}
+
+/**
+ * Generate Schema.org Dataset & SpecialAnnouncement for Live APMC Mandi Rates
+ */
+export function generateMarketRatesJsonLd() {
+  const currentSiteUrl = getSiteUrl();
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Dataset',
+        '@id': `${currentSiteUrl}/market-rates#dataset`,
+        name: 'All India APMC Mandi Commodity Wholesale Prices (Daily Bhav Feed)',
+        description: 'Real-time wholesale APMC Mandi price benchmarks across 498+ agricultural commodities and 2,500+ mandis in India, updated daily.',
+        url: `${currentSiteUrl}/market-rates`,
+        keywords: [
+          'APMC Mandi Rates', 'Mandi Bhav Today', 'Turmeric Wholesale Price',
+          'Jeera Mandi Price', 'Soybean Mandi Rate', 'Agricultural Commodity Rates India'
+        ],
+        creator: {
+          '@type': 'Organization',
+          name: 'B2B India | Aaudumbar Agro Pvt. Ltd.',
+          url: currentSiteUrl,
+        },
+        distribution: [
+          {
+            '@type': 'DataDownload',
+            encodingFormat: 'application/json',
+            contentUrl: `${currentSiteUrl}/api/market-rates/commodityonline?action=commodities`,
+          },
+        ],
+        temporalCoverage: '2026/..',
+        spatialCoverage: {
+          '@type': 'Place',
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: 20.5937,
+            longitude: 78.9629,
+          },
+          address: {
+            '@type': 'PostalAddress',
+            addressCountry: 'IN',
+          },
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${currentSiteUrl}/` },
+          { '@type': 'ListItem', position: 2, name: 'Market Rates', item: `${currentSiteUrl}/market-rates` },
+        ],
+      },
+    ],
+  };
+}
+

@@ -106,6 +106,9 @@ export const metadata = {
     'geo.position': '19.8631;75.3588',
     'ICBM': '19.8631, 75.3588',
     'rating': 'general',
+    'coverage': 'India',
+    'target-country': 'IN',
+    'ai-generated': 'no',
   },
 };
 
@@ -164,6 +167,10 @@ export default function RootLayout({ children }) {
           'https://www.facebook.com/b2bindia.site',
           'https://www.instagram.com/b2bindia.site',
           'https://www.youtube.com/@b2bindia-official',
+          'https://en.wikipedia.org/wiki/Business-to-business',
+          'https://en.wikipedia.org/wiki/Wholesale',
+          'https://en.wikipedia.org/wiki/Escrow',
+          'https://www.wikidata.org/wiki/Q166662',
         ],
         contactPoint: {
           '@type': 'ContactPoint',
@@ -215,6 +222,7 @@ export default function RootLayout({ children }) {
           'https://www.facebook.com/b2bindia.site',
           'https://www.instagram.com/b2bindia.site',
           'https://www.youtube.com/@b2bindia-official',
+          'https://en.wikipedia.org/wiki/Agricultural_produce_market_committee',
         ],
       },
     ],

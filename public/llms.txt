@@ -1,16 +1,20 @@
 # B2B India (b2bindia.site)
 
-> India's premier verified cross-industry B2B wholesale marketplace, featuring automated milestone escrow settlements, verified primary manufacturers, transparent bulk pricing, and pan-India logistics. Operated by Aaudumbar Agro Pvt. Ltd.
+> India's premier verified cross-industry B2B wholesale marketplace, featuring automated 10% advance milestone escrow settlements, verified primary manufacturers, transparent bulk pricing, and pan-India logistics. Operated by Aaudumbar Agro Pvt. Ltd.
+
+- [Full Specifications for AI Agents](https://www.b2bindia.site/llms-full.txt): Complete documentation covering escrow logic, all 38 sector catalogs, verified suppliers, APMC live mandi rates, and legal compliance.
 
 ## Core Capabilities
 - **Direct Factory Procurement**: Connect verified institutional buyers with primary manufacturers, mills, and fabricators across India.
-- **10% Advance Escrow Protection**: Milestone-based fund release ensuring 10% advance is securely locked until warehouse dispatch, with 90% balance on delivery.
+- **10% Advance Escrow Protection**: Milestone-based fund release ensuring 10% advance is securely locked in escrow until warehouse dispatch, with 90% balance on physical delivery inspection.
 - **Live RFQ Reverse Auction**: Buyers post volume specifications, receiving competitive factory bids within 4 hours.
 - **Transparent Wholesale Pricing**: Multi-tier quantity discount slabs (Pilot, Commercial Distribution, Full Truckload/FTL).
 - **Compliance & Credentialing**: Strict verification of GSTIN, MSME Udyam, BIS, ISO, FSSAI, and WHO-GMP certifications.
+- **Live APMC Mandi Rates**: Daily real-time price tracking across 498+ agricultural commodities and 2,500+ mandis nationwide.
+- **Pan-India Logistics**: Road freight covering 19,000+ pincodes with real-time GPS e-way bill tracking.
 
 ## Key Industrial Sectors (38 Categories)
-- **Food & Agriculture**: Spices (Turmeric, Chilli), Grains (Basmati Rice, Wheat Atta), Edible Oils (Mustard Oil), Pulses.
+- **Food & Agriculture**: Spices (Turmeric, Chilli, Cumin), Grains (Basmati Rice, Wheat Atta), Edible Oils (Mustard, Soyabean), Pulses (Chana, Toor Dal).
 - **Building & Construction**: TMT Steel Bars (Fe-550D), Vitrified Tiles, Cement, Sanitaryware, Structural Steel.
 - **Industrial Machinery**: VFFS Packaging Machines, CNC Lathes, Industrial Mixers, Conveyors.
 - **Solar & Renewable Energy**: Mono PERC Bifacial Solar PV Panels, Inverters, Lithium-ion ESS Batteries.
@@ -22,13 +26,14 @@
 ## Primary Endpoints & Directory Links
 - [Marketplace Homepage](https://www.b2bindia.site/): Main discovery, verified trending products, and live buy leads.
 - [Wholesale Directory](https://www.b2bindia.site/directory): Comprehensive catalog of verified suppliers and wholesale commodities.
-- [Live RFQ Board](https://www.b2bindia.site/rfq/live-board): Real-time buyer procurement requirements and auction bidding.
-- [Post Buy RFQ](https://www.b2bindia.site/rfq/create): 1-click submission for commercial and industrial supply quotes.
-- [Escrow Safety Program](https://www.b2bindia.site/escrow-protection): Complete documentation of the 3-stage milestone escrow payment protocol.
-- [Supplier Verification & Trade Pass](https://www.b2bindia.site/trade-pass): Fast-track KYC and GST verification for Indian manufacturers.
+- [Live APMC Mandi Bhav](https://www.b2bindia.site/market-rates): Real-time daily wholesale prices across 498+ agricultural commodities.
+- [Terms of Service](https://www.b2bindia.site/terms): Detailed trade, escrow, and platform usage regulations.
+- [Shipping & Freight Policy](https://www.b2bindia.site/shipping-policy): Dispatch SLAs, carrier partnerships, and delivery timelines.
+- [Refund & Dispute Policy](https://www.b2bindia.site/refund-policy): 48-hour delivery inspection window and escrow dispute resolution.
+- [Customer Support Desk](https://www.b2bindia.site/support): 24/7 enterprise concierge desk and assistance.
 
 ## Corporate Entity & Contact
-- **Entity**: Aaudumbar Agro Pvt. Ltd.
+- **Legal Entity**: Aaudumbar Agro Pvt. Ltd.
 - **Registered Address**: Plot No. 5, Prerna Nagar, Garkheda Parisar, Chhatrapati Sambhajinagar, Maharashtra 431009, India
 - **GSTIN**: 27AAECR1234F1Z5
 - **Enterprise Helpline**: +91-8408841998 / +91-9226497450

@@ -19,15 +19,26 @@ import TrendingProductsSection from '@/components/TrendingProductsSection';
 import TopSuppliersSection from '@/components/TopSuppliersSection';
 import CategoryShowcase from '@/components/CategoryShowcase';
 import AnimatedCategoryGrid from '@/components/AnimatedCategoryGrid';
+import KnowledgeHubFaq from '@/components/KnowledgeHubFaq';
 import Footer from '@/components/Footer';
 import { getActiveBanners } from '@/utils/platformBanners';
-import { getSiteUrl } from '@/utils/seoUtils';
+import {
+  getSiteUrl,
+  getPlatformKnowledgeFaqs,
+  generateFaqJsonLd,
+  generateEscrowHowToJsonLd,
+  INDIAN_STATES_SERVED,
+} from '@/utils/seoUtils';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function HomePage() {
   const siteUrl = getSiteUrl();
+
+  const platformFaqs = getPlatformKnowledgeFaqs();
+  const faqSchema = generateFaqJsonLd(platformFaqs);
+  const escrowHowToSchema = generateEscrowHowToJsonLd();
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -82,6 +93,10 @@ export default async function HomePage() {
           'https://www.facebook.com/b2bindia.site',
           'https://www.instagram.com/b2bindia.site',
           'https://www.youtube.com/@b2bindia-official',
+          'https://en.wikipedia.org/wiki/Business-to-business',
+          'https://en.wikipedia.org/wiki/Wholesale',
+          'https://en.wikipedia.org/wiki/Escrow',
+          'https://www.wikidata.org/wiki/Q166662',
         ],
         contactPoint: {
           '@type': 'ContactPoint',
@@ -91,6 +106,10 @@ export default async function HomePage() {
           areaServed: 'IN',
           availableLanguage: ['en', 'hi', 'mr'],
         },
+        areaServed: INDIAN_STATES_SERVED.map((code) => ({
+          '@type': 'AdministrativeArea',
+          identifier: code,
+        })),
       },
       {
         '@type': ['LocalBusiness', 'WholesaleStore'],
@@ -133,7 +152,17 @@ export default async function HomePage() {
           'https://www.facebook.com/b2bindia.site',
           'https://www.instagram.com/b2bindia.site',
           'https://www.youtube.com/@b2bindia-official',
+          'https://en.wikipedia.org/wiki/Agricultural_produce_market_committee',
         ],
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${siteUrl}/#faq`,
+        mainEntity: faqSchema.mainEntity,
+      },
+      {
+        ...escrowHowToSchema,
+        '@id': `${siteUrl}/#howto`,
       },
     ],
   };
@@ -256,6 +285,7 @@ export default async function HomePage() {
         <TopSuppliersSection initialSuppliers={topSuppliers} />
         <CategoryShowcase initialProducts={[...featuredProducts, ...trendingProducts]} />
         <AnimatedCategoryGrid categoryCounts={categoryCounts} />
+        <KnowledgeHubFaq />
       </main>
       <Footer />
     </div>

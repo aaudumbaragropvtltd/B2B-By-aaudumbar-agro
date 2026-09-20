@@ -1,8 +1,9 @@
 // ============================================================================
-// B2B INDIA — ROBOTS.TXT CRAWLER DIRECTIVES
+// B2B INDIA — ROBOTS.TXT CRAWLER & AI ANSWER ENGINE DIRECTIVES
 // ============================================================================
-// Instructions for search engine crawlers (Googlebot, Bingbot, etc.) to index
-// all public products, sectors, and directories with 0 blockage.
+// Instructions for Search Engines (Google, Bing) and AI Answer Engines
+// (ChatGPT, Perplexity, Claude, Google-Extended) to index public B2B catalog,
+// live mandi rates, and llms.txt specifications with 0 blockage.
 // ============================================================================
 
 import { getSiteUrl } from '../utils/seoUtils.js';
@@ -10,53 +11,89 @@ import { getSiteUrl } from '../utils/seoUtils.js';
 export default function robots() {
   const baseUrl = getSiteUrl();
 
+  const publicAllowedPaths = [
+    '/',
+    '/directory',
+    '/directory/*',
+    '/directory/product/*',
+    '/directory/supplier/*',
+    '/market-rates',
+    '/market-rates/*',
+    '/support',
+    '/terms',
+    '/privacy',
+    '/shipping-policy',
+    '/refund-policy',
+    '/llms.txt',
+    '/llms-full.txt',
+    '/public/*',
+    '/sitemap.xml',
+    '/api/sitemap.xml',
+  ];
+
+  const privateDisallowedPaths = [
+    '/api/',
+    '/_next/',
+    '/dashboard/',
+    '/admin/',
+    '/test-flow/',
+    '/test-razorpay/',
+    '/cookie/',
+  ];
+
   return {
     rules: [
       {
         userAgent: '*',
-        allow: [
-          '/',
-          '/directory/',
-          '/directory/*',
-          '/directory/product/*',
-          '/directory/supplier/*',
-          '/market-rates/',
-          '/terms',
-          '/privacy',
-          '/shipping-policy',
-          '/refund-policy',
-          '/public/*',
-          '/sitemap.xml',
-          '/api/sitemap.xml',
-        ],
+        allow: publicAllowedPaths,
+        disallow: privateDisallowedPaths,
+      },
+      {
+        userAgent: 'Googlebot',
+        allow: publicAllowedPaths,
         disallow: [
           '/api/',
           '/_next/',
           '/dashboard/',
           '/admin/',
           '/test-flow/',
-          '/cookie/',
         ],
       },
       {
-        userAgent: 'Googlebot',
-        allow: [
-          '/',
-          '/directory/',
-          '/directory/*',
-          '/directory/product/*',
-          '/directory/supplier/*',
-          '/market-rates/',
-          '/public/*',
-          '/sitemap.xml',
-          '/api/sitemap.xml',
-        ],
-        disallow: [
-          '/api/',
-          '/_next/',
-          '/dashboard/',
-          '/admin/',
-        ],
+        // OpenAI ChatGPT, SearchGPT, and GPTBot
+        userAgent: ['GPTBot', 'ChatGPT-User', 'OAI-SearchBot'],
+        allow: publicAllowedPaths,
+        disallow: privateDisallowedPaths,
+      },
+      {
+        // Perplexity AI Search Engine
+        userAgent: 'PerplexityBot',
+        allow: publicAllowedPaths,
+        disallow: privateDisallowedPaths,
+      },
+      {
+        // Anthropic Claude
+        userAgent: ['ClaudeBot', 'anthropic-ai'],
+        allow: publicAllowedPaths,
+        disallow: privateDisallowedPaths,
+      },
+      {
+        // Google Gemini & Extended AI Crawler
+        userAgent: 'Google-Extended',
+        allow: publicAllowedPaths,
+        disallow: privateDisallowedPaths,
+      },
+      {
+        // Apple Intelligence
+        userAgent: ['Applebot', 'Applebot-Extended'],
+        allow: publicAllowedPaths,
+        disallow: privateDisallowedPaths,
+      },
+      {
+        // Cohere AI
+        userAgent: 'cohere-ai',
+        allow: publicAllowedPaths,
+        disallow: privateDisallowedPaths,
       },
     ],
     sitemap: [
@@ -66,3 +103,4 @@ export default function robots() {
     host: baseUrl,
   };
 }
+
