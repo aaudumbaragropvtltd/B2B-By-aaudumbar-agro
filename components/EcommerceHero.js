@@ -273,11 +273,11 @@ export default function EcommerceHero({ initialBanners = [] }) {
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.25 }}
-          className="w-full max-w-2xl relative z-40"
+          className="w-full max-w-2xl relative z-50"
         >
-          <form onSubmit={handleHeroSearch} suppressHydrationWarning className="relative group">
+          <form onSubmit={handleHeroSearch} suppressHydrationWarning className="relative z-50 group">
             <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 via-emerald-400 to-amber-400 rounded-3xl blur-md opacity-30 group-hover:opacity-75 group-focus-within:opacity-85 transition-opacity duration-700 halo-glow" />
-            <div className="relative flex items-center bg-slate-900/70 sm:bg-white/15 backdrop-blur-xl border border-white/30 rounded-2xl p-1.5 sm:p-2 shadow-2xl transition-all duration-300 group-focus-within:border-white/60">
+            <div className="relative z-50 flex items-center bg-slate-900/70 sm:bg-white/15 backdrop-blur-xl border border-white/30 rounded-2xl p-1.5 sm:p-2 shadow-2xl transition-all duration-300 group-focus-within:border-white/60">
               <svg className="w-5 h-5 text-white/70 ml-2.5 sm:ml-3 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               <SearchAutocomplete
                 searchQuery={heroQuery}
@@ -300,12 +300,14 @@ export default function EcommerceHero({ initialBanners = [] }) {
             </div>
           </form>
 
-          {/* Floating Live Marketplace Chips */}
+          {/* Floating Live Marketplace Chips — Elevated behind z-50 and gracefully faded during search */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45, duration: 0.6 }}
-            className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[10px] sm:text-xs font-semibold"
+            className={`mt-4 relative z-10 flex flex-wrap items-center justify-center gap-2 text-[10px] sm:text-xs font-semibold transition-all duration-200 ${
+              (heroQuery && heroQuery.trim().length > 0) ? 'opacity-0 pointer-events-none -translate-y-2' : 'opacity-100'
+            }`}
           >
             <a
               href="/dashboard/rfqs"
