@@ -12,6 +12,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 // Popular staple commodity quick filters
 const POPULAR_COMMODITIES = [
@@ -801,6 +802,8 @@ export default function MarketRatesPage() {
 
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
