@@ -8,6 +8,7 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
+  fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
 });
 
 const baseUrl = getSiteUrl();
@@ -240,6 +241,14 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://5.imimg.com" />
+        <link
+          rel="preload"
+          as="image"
+          href="https://res.cloudinary.com/pjsh8sfp/image/upload/f_webp,q_45,w_480/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg"
+          imageSrcSet="https://res.cloudinary.com/pjsh8sfp/image/upload/f_webp,q_45,w_480/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg 480w, https://res.cloudinary.com/pjsh8sfp/image/upload/f_webp,q_45,w_768/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg 768w, https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_55,w_1080/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg 1080w"
+          imageSizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
+          fetchPriority="high"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSiteJsonLd) }}

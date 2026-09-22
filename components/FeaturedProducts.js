@@ -26,17 +26,10 @@ function ProductCard({ product, index }) {
   const displayName = product.name || product.title || 'Verified Wholesale Product';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.03, duration: 0.4 }}
-    >
+    <div>
       <Link href={getProductUrl(product)}>
-        <motion.div
-          whileHover={{ y: -6 }}
-          whileTap={{ scale: 0.98 }}
-          className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-xs hover:shadow-xl hover:border-brand-200 transition-all duration-300 relative flex flex-col glow-border-brand"
+        <div
+          className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden cursor-pointer group h-full shadow-xs hover:shadow-xl hover:border-brand-200 hover:-translate-y-1.5 active:scale-[0.98] transition-all duration-300 relative flex flex-col glow-border-brand"
         >
           {/* Image Area */}
           <div className="relative h-36 sm:h-48 md:h-56 bg-gray-50 overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
@@ -104,9 +97,9 @@ function ProductCard({ product, index }) {
               </span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }
 

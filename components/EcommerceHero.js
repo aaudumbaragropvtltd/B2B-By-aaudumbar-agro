@@ -7,11 +7,13 @@ import SearchAutocomplete from '@/components/SearchAutocomplete';
 export function optimizeBannerUrl(url, width = 1000) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
-    const qualityParam = width <= 600 ? 'q_50' : (width <= 900 ? 'q_55' : 'q_auto:eco');
-    if (url.includes('/upload/f_auto')) {
-      return url.replace(/\/upload\/f_auto(?:,[^,/]+)*?\//, `/upload/f_auto,${qualityParam},w_${width}/`);
+    // High-compression WebP for mobile and tablet to resolve Lighthouse image delivery audit
+    const format = width <= 768 ? 'f_webp' : 'f_auto';
+    const qualityParam = width <= 768 ? 'q_45' : (width <= 1080 ? 'q_55' : 'q_auto:eco');
+    if (url.includes('/upload/f_auto') || url.includes('/upload/f_webp')) {
+      return url.replace(/\/upload\/(?:f_auto|f_webp)(?:,[^,/]+)*?\//, `/upload/${format},${qualityParam},w_${width}/`);
     }
-    return url.replace('/upload/', `/upload/f_auto,${qualityParam},w_${width}/`);
+    return url.replace('/upload/', `/upload/${format},${qualityParam},w_${width}/`);
   }
   return url;
 }
@@ -168,15 +170,8 @@ export default function EcommerceHero({ initialBanners = [] }) {
     >
       {/* Background Slider */}
       <div className="absolute inset-0 z-0">
-        <AnimatePresence initial={false} mode="wait">
-          <motion.div
-            key={activeBanner.id || currentSlide}
-            initial={currentSlide === 0 ? false : { opacity: 0, scale: 1.04 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="absolute inset-0"
-          >
+        {currentSlide === 0 ? (
+          <div className="absolute inset-0">
             <img
               src={bgImageMobile}
               srcSet={`${bgImageMobile} 480w, ${bgImageTablet} 768w, ${bgImageDesktop} 1080w`}
@@ -192,8 +187,35 @@ export default function EcommerceHero({ initialBanners = [] }) {
                 e.target.src = FALLBACK_BANNERS[0].hero_image_url;
               }}
             />
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        ) : (
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={activeBanner.id || currentSlide}
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <img
+                src={bgImageMobile}
+                srcSet={`${bgImageMobile} 480w, ${bgImageTablet} 768w, ${bgImageDesktop} 1080w`}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
+                alt={activeBanner.title || 'Wholesale Banner'}
+                className="absolute inset-0 w-full h-full object-cover object-center"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                loading="eager"
+                fetchPriority="high"
+                decoding="sync"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = FALLBACK_BANNERS[0].hero_image_url;
+                }}
+              />
+            </motion.div>
+          </AnimatePresence>
+        )}
 
         {/* Balanced cinematic scrim: image remains vivid from top to bottom */}
         <div className="absolute inset-0 bg-slate-950/45" />

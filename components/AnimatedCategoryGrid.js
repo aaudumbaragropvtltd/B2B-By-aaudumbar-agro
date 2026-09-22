@@ -1,33 +1,15 @@
 // ============================================================================
-// ANIMATED CATEGORY GRID — Updated with Real IndiaMART Categories
+// ANIMATED CATEGORY GRID — Optimized for High PageSpeed & Mobile Compositor
 // ============================================================================
-// Beautiful animated grid showing all 38 categories from the product catalog.
-// Links to sector-specific directory pages.
+// Zero-JS overhead CSS grid showing 38 categories from the product catalog.
+// Pure GPU transitions, zero forced reflows, and responsive mobile expansion.
 // ============================================================================
 
 "use client";
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { CATEGORIES, getProductsByCategory } from '@/data/products';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.03, delayChildren: 0.05 },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: 'easeOut' },
-  },
-};
 
 export default function AnimatedCategoryGrid({ categoryCounts = null }) {
   const [showAllMobile, setShowAllMobile] = useState(false);
@@ -37,42 +19,24 @@ export default function AnimatedCategoryGrid({ categoryCounts = null }) {
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-10 sm:mb-12">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight"
-          >
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
             Browse All <span className="gradient-text">Categories</span>
-          </motion.h2>
+          </h2>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="mt-2.5 text-xs sm:text-sm md:text-base text-gray-500 max-w-xl mx-auto font-medium"
-          >
+          <p className="mt-2.5 text-xs sm:text-sm md:text-base text-gray-500 max-w-xl mx-auto font-medium">
             Explore verified wholesale products and manufacturers across 38 industry categories
-          </motion.p>
+          </p>
         </div>
 
-        {/* Grid — Streamlined DOM without redundant wrapper divs */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-50px' }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"
-        >
+        {/* Grid — Pure GPU-composited CSS layout without JS animation overhead */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
           {CATEGORIES.map((cat, idx) => {
             const productCount = categoryCounts ? (categoryCounts[cat.id] || 0) : getProductsByCategory(cat.id).length;
             const isHiddenOnMobile = !showAllMobile && idx >= 12;
 
             return (
-              <motion.div
+              <div
                 key={cat.id}
-                variants={cardVariants}
                 className={isHiddenOnMobile ? 'hidden sm:block' : 'block'}
               >
                 <Link
@@ -111,10 +75,10 @@ export default function AnimatedCategoryGrid({ categoryCounts = null }) {
                     )}
                   </div>
                 </Link>
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
 
         {/* Mobile Expand Toggle to save DOM size on initial load */}
         {!showAllMobile && (

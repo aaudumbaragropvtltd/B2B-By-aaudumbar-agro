@@ -14,11 +14,13 @@ const BANNERS_FILE_PATH = path.join(process.cwd(), 'data', 'platform_banners.jso
 export function optimizeBannerImageUrl(url, width = 1000) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
-    const qualityParam = width <= 600 ? 'q_50' : (width <= 900 ? 'q_55' : 'q_auto:eco');
-    if (url.includes('/upload/f_auto')) {
-      return url.replace(/\/upload\/f_auto(?:,[^,/]+)*?\//, `/upload/f_auto,${qualityParam},w_${width}/`);
+    // High-compression WebP for mobile and tablet to resolve Lighthouse image delivery audit
+    const format = width <= 768 ? 'f_webp' : 'f_auto';
+    const qualityParam = width <= 768 ? 'q_45' : (width <= 1080 ? 'q_55' : 'q_auto:eco');
+    if (url.includes('/upload/f_auto') || url.includes('/upload/f_webp')) {
+      return url.replace(/\/upload\/(?:f_auto|f_webp)(?:,[^,/]+)*?\//, `/upload/${format},${qualityParam},w_${width}/`);
     }
-    return url.replace('/upload/', `/upload/f_auto,${qualityParam},w_${width}/`);
+    return url.replace('/upload/', `/upload/${format},${qualityParam},w_${width}/`);
   }
   return url;
 }

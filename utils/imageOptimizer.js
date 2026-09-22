@@ -68,6 +68,14 @@ export function optimizeProductImageUrl(url, options = {}) {
     }
   }
 
+  // Shopify CDN images — add native width, format and quality parameters to compress to ~20-30 KiB
+  if (cleanUrl.includes('cdn/shop/files') || cleanUrl.includes('cdn.shopify.com')) {
+    let base = cleanUrl.replace(/&width=\d+/g, '').replace(/&format=\w+/g, '').replace(/&quality=\d+/g, '');
+    const sep = base.includes('?') ? '&' : '?';
+    const fmt = base.toLowerCase().includes('.png') ? 'jpg' : 'webp';
+    return `${base}${sep}width=${width}&format=${fmt}&quality=60`;
+  }
+
   // Proxy unoptimized third-party image hosts through Cloudinary fetch for WebP/AVIF auto-compression
   if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
     return `https://res.cloudinary.com/pjsh8sfp/image/fetch/f_auto,q_auto:eco,w_${width}/${cleanUrl}`;

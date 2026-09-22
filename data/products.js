@@ -585,7 +585,7 @@ export const PRODUCTS = [
     price: 350,
     unit: "Dozen",
     moq: "100 Doz",
-    image: "https://farmerscraft.in/cdn/shop/files/WhatsApp_Image_2025-04-10_at_8.14.59_PM_1.jpg?v=1773954796&width=400",
+    image: "https://farmerscraft.in/cdn/shop/files/WhatsApp_Image_2025-04-10_at_8.14.59_PM_1.jpg?v=1773954796&width=320&format=webp&quality=60",
     badge: "Best Seller"
   },
   {
@@ -931,7 +931,7 @@ export const PRODUCTS = [
     price: 5500,
     unit: "Piece",
     moq: "20 Pcs",
-    image: "https://umaled.com/cdn/shop/files/40W_solar_street_light_outdoor-UMALED-Surat.png?v=1775828649&width=1024"
+    image: "https://umaled.com/cdn/shop/files/40W_solar_street_light_outdoor-UMALED-Surat.png?v=1775828649&width=320&format=jpg&quality=60"
   },
   {
     id: "sr-5",
@@ -1615,7 +1615,7 @@ export const PRODUCTS = [
     price: 650,
     unit: "Kg",
     moq: "100 Kg",
-    image: "https://careque.in/cdn/shop/files/Ashwagandha_Root_Powder_43db3c7c-57e6-4e85-bd14-3fae6d77d8f3.jpg?v=1756213818&width=416",
+    image: "https://careque.in/cdn/shop/files/Ashwagandha_Root_Powder_43db3c7c-57e6-4e85-bd14-3fae6d77d8f3.jpg?v=1756213818&width=320&format=webp&quality=60",
     badge: "Best Seller"
   },
   {
