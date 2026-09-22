@@ -492,29 +492,51 @@ export default async function DirectoryPage({ searchParams }) {
             sectors={sectors} 
           />
 
-          <div className="flex flex-col lg:flex-row gap-8">
+          {/* Quick Sector Browse Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <Link
+              href={`/directory?type=${type}${query ? `&q=${query}` : ''}`}
+              className={`px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all ${
+                !sectorSlug
+                  ? 'bg-brand-600 text-white font-bold shadow-xs'
+                  : 'bg-white text-gray-700 border border-gray-200 hover:border-brand-500 hover:text-brand-600 font-medium'
+              }`}
+            >
+              All Sectors
+            </Link>
+            {sectors.map(s => (
+              <Link
+                key={s.id || s.slug}
+                href={`/directory?type=${type}&sector=${s.slug}${query ? `&q=${query}` : ''}`}
+                className={`px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all ${
+                  sectorSlug === s.slug
+                    ? 'bg-brand-600 text-white font-bold shadow-xs'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:border-brand-500 hover:text-brand-600 font-medium'
+                }`}
+              >
+                {s.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* ── Main Layout: Sidebar + Catalog Grid ── */}
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* Sidebar Filters */}
-            <div className="w-full lg:w-64 flex-shrink-0 space-y-6">
+            <aside className="w-full lg:w-64 flex-shrink-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6">
               {/* Supplier Types */}
-              <div className="bg-white p-5 rounded-2xl border border-border-subtle shadow-sm">
-                <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wider">Supplier Types</h3>
-                <div className="space-y-3">
+              <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs">
+                <h3 className="font-bold text-gray-900 mb-3 text-xs uppercase tracking-wider">Supplier Types</h3>
+                <div className="space-y-2.5">
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative flex items-center justify-center">
-                      <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded hover:border-brand-500 checked:bg-brand-500 checked:border-brand-500 transition-all" />
-                      <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer" />
+                    <span className="text-xs font-semibold text-gray-700 group-hover:text-brand-600 transition-colors flex items-center gap-1.5">
                       <span className="w-4 h-4 rounded bg-amber-100 flex items-center justify-center text-[10px]">👑</span>
                       Trade Assurance
                     </span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative flex items-center justify-center">
-                      <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded hover:border-brand-500 checked:bg-brand-500 checked:border-brand-500 transition-all" />
-                      <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer" />
+                    <span className="text-xs font-semibold text-gray-700 group-hover:text-brand-600 transition-colors flex items-center gap-1.5">
                       <span className="w-4 h-4 rounded bg-blue-100 flex items-center justify-center text-[10px]">💎</span>
                       Verified Supplier
                     </span>
@@ -523,99 +545,83 @@ export default async function DirectoryPage({ searchParams }) {
               </div>
 
               {/* Product Features */}
-              <div className="bg-white p-5 rounded-2xl border border-border-subtle shadow-sm">
-                <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wider">Product Features</h3>
-                <div className="space-y-3">
+              <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs">
+                <h3 className="font-bold text-gray-900 mb-3 text-xs uppercase tracking-wider">Product Features</h3>
+                <div className="space-y-2.5">
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative flex items-center justify-center">
-                      <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded hover:border-brand-500 checked:bg-brand-500 checked:border-brand-500 transition-all" />
-                      <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer" />
+                    <span className="text-xs font-semibold text-gray-700 group-hover:text-brand-600 transition-colors flex items-center gap-1.5">
                       <span className="w-4 h-4 rounded bg-emerald-100 flex items-center justify-center text-[10px]">📦</span>
                       Ready to Ship
                     </span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative flex items-center justify-center">
-                      <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded hover:border-brand-500 checked:bg-brand-500 checked:border-brand-500 transition-all" />
-                      <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer" />
+                    <span className="text-xs font-semibold text-gray-700 group-hover:text-brand-600 transition-colors flex items-center gap-1.5">
                       <span className="w-4 h-4 rounded bg-purple-100 flex items-center justify-center text-[10px]">🤖</span>
                       AI Priced
                     </span>
                   </label>
                 </div>
               </div>
-            </div>
+            </aside>
 
-            {/* Main Content */}
-            <div className="flex-1">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-gray-200 pb-4">
+            {/* Main Catalog Content */}
+            <div className="flex-1 min-w-0 w-full">
+              {/* Directory Toolbar */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 pb-4 border-b border-gray-200">
                 {/* Products / Suppliers Toggle */}
-                <div className="flex bg-gray-100 p-1 rounded-xl">
+                <div className="flex bg-gray-100/90 p-1 rounded-xl">
                   <Link 
                     href={`/directory?type=products${query ? `&q=${query}` : ''}${sectorSlug ? `&sector=${sectorSlug}` : ''}`}
-                    className={`px-6 py-2 rounded-lg font-medium text-sm transition-all ${type === 'products' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                    className={`px-5 py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${type === 'products' ? 'bg-white text-brand-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}`}
                   >
-                    Products
+                    Products ({products.length})
                   </Link>
                   <Link 
                     href={`/directory?type=suppliers${query ? `&q=${query}` : ''}${sectorSlug ? `&sector=${sectorSlug}` : ''}`}
-                    className={`px-6 py-2 rounded-lg font-medium text-sm transition-all ${type === 'suppliers' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                    className={`px-5 py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${type === 'suppliers' ? 'bg-white text-brand-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}`}
                   >
-                    Suppliers
+                    Suppliers ({suppliers.length})
                   </Link>
                 </div>
 
-                {/* Active Filters Display */}
-                <div>
-                  {(query || sectorSlug) ? (
-                    <div className="flex items-center flex-wrap gap-2 text-sm">
-                      <span className="text-gray-500">Filters:</span>
-                      {query && (
-                        <span className="px-3 py-1 bg-brand-50 text-brand-700 rounded-full font-medium border border-brand-100 flex items-center gap-2">
-                          &quot;{query}&quot;
-                          <Link href={`/directory?type=${type}&sector=${sectorSlug}`} className="hover:text-brand-900">×</Link>
-                        </span>
-                      )}
-                      {sectorSlug && (
-                        <span className="px-3 py-1 bg-brand-50 text-brand-700 rounded-full font-medium border border-brand-100 flex items-center gap-2">
-                          {sectors.find(s => s.slug === sectorSlug)?.name || sectorSlug}
-                          <Link href={`/directory?type=${type}&q=${query}`} className="hover:text-brand-900">×</Link>
-                        </span>
-                      )}
-                      <Link href={`/directory?type=${type}`} className="text-gray-400 hover:text-gray-600 underline text-xs ml-2">Clear All</Link>
-                    </div>
-                  ) : (
-                    <div className="text-sm text-gray-500 font-medium">
-                      Showing all {type === 'products' ? products.length : suppliers.length} {type}
-                    </div>
-                  )}
-                </div>
-
-                {/* View Toggles (Visual Only) */}
-                <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-1">
-                  <button className="p-1.5 rounded-md bg-gray-100 text-gray-900 shadow-sm" title="Grid View">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                  </button>
-                  <button className="p-1.5 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors" title="List View">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                  </button>
+                <div className="text-xs sm:text-sm text-gray-500 font-medium">
+                  Showing <strong className="text-gray-900 font-bold">{type === 'products' ? products.length : suppliers.length}</strong> verified {type}
                 </div>
               </div>
 
+              {/* Active Filters Display */}
+              {(query || sectorSlug) && (
+                <div className="flex items-center flex-wrap gap-2 text-xs mb-6 p-3 bg-white border border-gray-200/80 rounded-xl shadow-2xs">
+                  <span className="text-gray-500 font-medium">Active Filters:</span>
+                  {query && (
+                    <span className="px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg font-bold border border-brand-200 flex items-center gap-1.5">
+                      &quot;{query}&quot;
+                      <Link href={`/directory?type=${type}&sector=${sectorSlug}`} className="hover:text-brand-900 ml-1">✕</Link>
+                    </span>
+                  )}
+                  {sectorSlug && (
+                    <span className="px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg font-bold border border-brand-200 flex items-center gap-1.5">
+                      {sectors.find(s => s.slug === sectorSlug)?.name || sectorSlug}
+                      <Link href={`/directory?type=${type}&q=${query}`} className="hover:text-brand-900 ml-1">✕</Link>
+                    </span>
+                  )}
+                  <Link href={`/directory?type=${type}`} className="text-gray-500 hover:text-brand-600 underline font-semibold ml-auto">
+                    Clear All
+                  </Link>
+                </div>
+              )}
+
               {/* Products OR Suppliers Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
                 
                 {type === 'products' && (
                   products.length > 0 ? (
                     products.map((product, idx) => (
-                      <Link key={product.id} href={getProductUrl(product)} className="group">
+                      <Link key={product.id} href={getProductUrl(product)} className="group block">
                         <div 
-                          className="bg-white rounded-3xl overflow-hidden border border-border-subtle hover:shadow-2xl transition-all duration-500 h-full flex flex-col relative card-3d hover-lift card-glow animate-slide-up"
-                          style={{ animationDelay: `${idx * 0.05}s` }}
+                          className="bg-white rounded-3xl overflow-hidden border border-gray-200 hover:shadow-2xl transition-all duration-300 h-full flex flex-col relative card-3d hover-lift card-glow"
                         >
                           {/* 7-Day Resiliency Indicator (is_stale) */}
                           {product.is_stale && (
@@ -625,11 +631,11 @@ export default async function DirectoryPage({ searchParams }) {
                             </div>
                           )}
                           
-                          <div className="h-48 overflow-hidden bg-gray-100 relative group-hover:opacity-90 transition-opacity">
+                          <div className="h-48 overflow-hidden bg-gray-100 relative group-hover:opacity-95 transition-opacity">
                             <CommodityImage 
                               src={product.hero_image_url || 'https://images.unsplash.com/photo-1565043666747-69f6646db940?w=500'} 
                               category={product.sector_id?.name || 'Industrial Product'}
-                              className="w-full h-full transform group-hover:scale-105 transition-transform duration-500"
+                              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                             />
                             <div className="absolute top-3 right-3 z-10">
                               <FavoriteButton 
@@ -648,40 +654,42 @@ export default async function DirectoryPage({ searchParams }) {
                             </div>
                           </div>
                           
-                          <div className="p-5 flex-1 flex flex-col bg-gradient-to-b from-white to-gray-50/50">
-                            <div className="text-xs font-semibold text-brand-600 mb-2 truncate flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
-                              {product.sector_id?.name || 'Industrial Product'}
+                          <div className="p-5 flex-1 flex flex-col justify-between bg-white">
+                            <div>
+                              <div className="text-xs font-semibold text-brand-600 mb-1.5 truncate flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                                {product.sector_id?.name || 'Industrial Product'}
+                              </div>
+                              
+                              <h3 className="font-bold text-gray-900 text-base leading-snug mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors">
+                                {product.title}
+                              </h3>
+                              
+                              <p className="text-xs text-gray-500 line-clamp-2 mb-4">
+                                {product.description}
+                              </p>
                             </div>
                             
-                            <h3 className="font-bold text-gray-900 text-lg leading-tight mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors">
-                              {product.title}
-                            </h3>
-                            
-                            <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
-                              {product.description}
-                            </p>
-                            
-                            <div className="mt-auto border-t border-gray-100 pt-4">
-                              <div className="flex justify-between items-end mb-3">
+                            <div className="border-t border-gray-100 pt-3.5 space-y-2.5">
+                              <div className="flex justify-between items-baseline flex-wrap gap-1">
                                 <div>
-                                  <span className="text-2xl font-extrabold text-gray-900">
+                                  <span className="text-xl font-black text-gray-900">
                                     ₹{Number(product.base_price_per_unit).toLocaleString('en-IN')}
                                   </span>
                                   <span className="text-xs text-gray-500 ml-1">/{product.unit_label}</span>
                                 </div>
                                 {product.quality_grade && (
-                                  <span className="px-2.5 py-1 bg-white border border-gray-200 text-gray-700 text-[10px] font-bold rounded-md shadow-sm">
+                                  <span className="px-2 py-0.5 bg-gray-50 border border-gray-200 text-gray-700 text-[10px] font-bold rounded-md shrink-0">
                                     {product.quality_grade}
                                   </span>
                                 )}
                               </div>
                               
-                              <div className="flex items-center text-xs text-gray-500 gap-1.5 bg-white p-2 rounded-lg border border-gray-100">
-                                <span className="text-base">🏢</span>
-                                <span className="font-semibold text-gray-700 truncate">{product.technical_specifications?.['Supplier Name'] || product.supplier_id?.company_name || 'Verified Supplier'}</span>
-                                <span className="text-gray-300">•</span>
-                                <span className="truncate" title={[product.supplier_id?.city, product.supplier_id?.state].filter(Boolean).join(', ') || 'India'}>
+                              <div className="flex items-center text-[11px] text-gray-500 gap-1.5 bg-gray-50/80 p-2 rounded-xl border border-gray-100 min-w-0">
+                                <span className="text-sm shrink-0">🏢</span>
+                                <span className="font-semibold text-gray-700 truncate min-w-0">{product.technical_specifications?.['Supplier Name'] || product.supplier_id?.company_name || 'Verified Supplier'}</span>
+                                <span className="text-gray-300 shrink-0">•</span>
+                                <span className="truncate shrink-0" title={[product.supplier_id?.city, product.supplier_id?.state].filter(Boolean).join(', ') || 'India'}>
                                   {product.supplier_id?.city ? `${product.supplier_id.city}, ${product.supplier_id.state || ''}`.replace(/,\s*$/, '') : 'India'}
                                 </span>
                               </div>
@@ -696,8 +704,8 @@ export default async function DirectoryPage({ searchParams }) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
-                      <p className="text-gray-500 max-w-sm mx-auto">Try adjusting your search or filters to find what you&apos;re looking for.</p>
-                      <Link href="/directory" className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-brand-50 text-brand-700 font-bold rounded-xl hover:bg-brand-100 transition-colors">
+                      <p className="text-gray-500 max-w-sm mx-auto text-sm">Try adjusting your search or filters to find what you&apos;re looking for.</p>
+                      <Link href="/directory" className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-brand-50 text-brand-700 font-bold text-xs rounded-xl hover:bg-brand-100 transition-colors">
                         Clear all filters
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </Link>
@@ -710,51 +718,55 @@ export default async function DirectoryPage({ searchParams }) {
                     suppliers.map((supplier, idx) => {
                       const tier = TIER_STYLES[supplier.tier] || TIER_STYLES.Gold;
                       return (
-                        <Link key={supplier.id} href={`/directory/supplier/${supplier.id}`} className="group">
+                        <Link key={supplier.id} href={`/directory/supplier/${supplier.id}`} className="group block">
                           <div 
-                            className="bg-white rounded-3xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 h-full card-3d hover-lift card-glow flex flex-col animate-slide-up"
-                            style={{ animationDelay: `${idx * 0.05}s` }}
+                            className="bg-white rounded-3xl border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 h-full card-3d hover-lift card-glow flex flex-col justify-between"
                           >
-                            <div className={`h-2 ${tier.bg} w-full`} />
-                            <div className="p-6 flex-1 flex flex-col relative z-10 bg-white">
-                              <div className="flex items-start gap-4 mb-5">
-                                <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-3xl border border-gray-100 group-hover:scale-110 transition-transform duration-500 overflow-hidden relative shadow-sm">
-                                  {supplier.logo ? (
-                                    <img src={supplier.logo} alt={supplier.name} className="w-full h-full object-cover" />
-                                  ) : (
-                                    supplier.icon
-                                  )}
+                            <div>
+                              <div className={`h-2 ${tier.bg} w-full`} />
+                              <div className="p-5 relative z-10 bg-white space-y-4">
+                                <div className="flex items-start gap-3.5">
+                                  <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl border border-gray-100 group-hover:scale-105 transition-transform duration-300 overflow-hidden relative shrink-0 shadow-2xs">
+                                    {supplier.logo ? (
+                                      <img src={supplier.logo} alt={supplier.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                      supplier.icon
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="font-bold text-gray-900 text-base leading-tight group-hover:text-brand-600 transition-colors truncate">
+                                      {supplier.name}
+                                    </h3>
+                                    <p className="text-xs text-gray-400 mt-0.5 truncate">{supplier.location}</p>
+                                  </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="font-bold text-gray-900 group-hover:text-brand-600 transition-colors truncate">
-                                    {supplier.name}
-                                  </h3>
-                                  <p className="text-xs text-gray-400 mt-0.5">{supplier.location}</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 mb-4">
-                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold text-white ${tier.bg}`}>
-                                  {tier.text}
-                                </span>
-                                <span className="px-2 py-0.5 rounded-full bg-gray-50 text-[10px] font-medium text-gray-500 border border-gray-100">
-                                  {supplier.sector}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-3 gap-2 mb-3 mt-auto">
-                                <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100">
-                                  <div className="text-sm font-extrabold text-gray-900">{supplier.responseRate}</div>
-                                  <div className="text-[9px] text-gray-400 uppercase tracking-wider">Response</div>
-                                </div>
-                                <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100">
-                                  <div className="text-sm font-extrabold text-gray-900">{supplier.responseTime}</div>
-                                  <div className="text-[9px] text-gray-400 uppercase tracking-wider">Avg Time</div>
-                                </div>
-                                <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100">
-                                  <div className="text-sm font-extrabold text-gray-900">{supplier.products}</div>
-                                  <div className="text-[9px] text-gray-400 uppercase tracking-wider">Products</div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${tier.bg}`}>
+                                    {tier.text}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-full bg-gray-50 text-[10px] font-medium text-gray-600 border border-gray-200 truncate max-w-[150px]">
+                                    {supplier.sector}
+                                  </span>
                                 </div>
                               </div>
-                              <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-2">
+                            </div>
+
+                            <div className="px-5 pb-5 pt-0 bg-white">
+                              <div className="grid grid-cols-3 gap-2 mb-3">
+                                <div className="text-center p-2 rounded-xl bg-gray-50 border border-gray-100 min-w-0">
+                                  <div className="text-xs sm:text-sm font-extrabold text-gray-900 truncate">{supplier.responseRate}</div>
+                                  <div className="text-[9px] text-gray-400 uppercase tracking-wider truncate">Response</div>
+                                </div>
+                                <div className="text-center p-2 rounded-xl bg-gray-50 border border-gray-100 min-w-0">
+                                  <div className="text-xs sm:text-sm font-extrabold text-gray-900 truncate">{supplier.responseTime}</div>
+                                  <div className="text-[9px] text-gray-400 uppercase tracking-wider truncate">Avg Time</div>
+                                </div>
+                                <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100 min-w-0">
+                                  <div className="text-xs sm:text-sm font-extrabold text-gray-900 truncate">{supplier.products}</div>
+                                  <div className="text-[9px] text-gray-400 uppercase tracking-wider truncate">Products</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                 <span className="text-[10px] text-gray-400">Est. {supplier.yearEstablished}</span>
                                 <span className="text-xs font-semibold text-brand-600 flex items-center gap-1 group-hover:underline">
                                   View Profile
@@ -772,8 +784,8 @@ export default async function DirectoryPage({ searchParams }) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                       <h3 className="text-xl font-bold text-gray-900 mb-2">No suppliers found</h3>
-                      <p className="text-gray-500 max-w-sm mx-auto">Try adjusting your search or filters to find what you&apos;re looking for.</p>
-                      <Link href="/directory?type=suppliers" className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-brand-50 text-brand-700 font-bold rounded-xl hover:bg-brand-100 transition-colors">
+                      <p className="text-gray-500 max-w-sm mx-auto text-sm">Try adjusting your search or filters to find what you&apos;re looking for.</p>
+                      <Link href="/directory?type=suppliers" className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-brand-50 text-brand-700 font-bold text-xs rounded-xl hover:bg-brand-100 transition-colors">
                         Clear all filters
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </Link>
@@ -782,57 +794,57 @@ export default async function DirectoryPage({ searchParams }) {
                 )}
               </div>
             </div>
-
-            {/* Comprehensive B2B Sourcing Guide & Industry Knowledge */}
-            <article className="mt-16 bg-white rounded-3xl p-8 sm:p-12 border border-gray-200/80 shadow-sm text-slate-700 space-y-6">
-              <header className="border-b border-gray-100 pb-5">
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                  Pan-India B2B Wholesale Directory &amp; Manufacturer Procurement Guide
-                </h2>
-                <p className="text-sm text-slate-500 mt-1">
-                  Connecting institutional procurement managers, wholesale traders, and corporate distributors directly with verified manufacturers across 38 core sectors.
-                </p>
-              </header>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 mb-2">
-                    Direct Factory Pricing &amp; Transparent Bulk MOQs
-                  </h3>
-                  <p>
-                    B2B India eliminates multi-tier trading intermediaries, allowing corporate buyers, retail chains, and MSME distributors to access direct factory-gate wholesale prices. Every catalog entry specifies clear Minimum Order Quantities (MOQ), tiered volume rate breaks, available pack sizes, and standard loading godown locations. Whether sourcing agro commodities like Turmeric (Haldi) and Basmati Rice or heavy industrial components, buyers receive transparent commercial terms upfront.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 mb-2">
-                    Milestone-Based 10% Advance Escrow Protection
-                  </h3>
-                  <p>
-                    All contracts initiated through our directory operate under our strict 10% advance escrow framework. When an order is placed, the buyer&apos;s 10% advance is held safely in escrow, locking commodity prices and reserving inventory. The remaining 90% balance is payable only after loading-dock inspection confirms that batch moisture, grain size, quality grade, and packaging match contracted specifications.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 mb-2">
-                    Diamond, Platinum &amp; Gold Verified Sellers
-                  </h3>
-                  <p>
-                    Every supplier displayed in our directory undergoes stringent compliance audits. Our operational team verifies government GSTIN registrations, corporate PAN credentials, bank account validity, and physical godown or manufacturing unit addresses. Diamond and Platinum badges represent suppliers with multi-year trading histories, fast response times under 2 hours, and verified dockside dispatch fulfillment records.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 mb-2">
-                    Integrated Freight Hauling &amp; Gate Pass Logistics
-                  </h3>
-                  <p>
-                    Procurement managers can choose between direct doorstep transportation or self-arranged godown pickup. When doorstep hauling is selected, B2B India coordinates trusted commercial freight carriers, automated weighbridge certificates, and regulatory GST E-Way bills for transit across all Indian states and union territories, ensuring prompt delivery and end-to-end transparency.
-                  </p>
-                </div>
-              </div>
-            </article>
           </div>
+
+          {/* Comprehensive B2B Sourcing Guide & Industry Knowledge */}
+          <article className="mt-16 bg-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-gray-200/80 shadow-xs text-slate-700 space-y-6">
+            <header className="border-b border-gray-100 pb-5">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
+                Pan-India B2B Wholesale Directory &amp; Manufacturer Procurement Guide
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed">
+                Connecting institutional procurement managers, wholesale traders, and corporate distributors directly with verified manufacturers across 38 core sectors.
+              </p>
+            </header>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 text-xs sm:text-sm leading-relaxed">
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-2">
+                  Direct Factory Pricing &amp; Transparent Bulk MOQs
+                </h3>
+                <p>
+                  B2B India eliminates multi-tier trading intermediaries, allowing corporate buyers, retail chains, and MSME distributors to access direct factory-gate wholesale prices. Every catalog entry specifies clear Minimum Order Quantities (MOQ), tiered volume rate breaks, available pack sizes, and standard loading godown locations. Whether sourcing agro commodities like Turmeric (Haldi) and Basmati Rice or heavy industrial components, buyers receive transparent commercial terms upfront.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-2">
+                  Milestone-Based 10% Advance Escrow Protection
+                </h3>
+                <p>
+                  All contracts initiated through our directory operate under our strict 10% advance escrow framework. When an order is placed, the buyer&apos;s 10% advance is held safely in escrow, locking commodity prices and reserving inventory. The remaining 90% balance is payable only after loading-dock inspection confirms that batch moisture, grain size, quality grade, and packaging match contracted specifications.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-2">
+                  Diamond, Platinum &amp; Gold Verified Sellers
+                </h3>
+                <p>
+                  Every supplier displayed in our directory undergoes stringent compliance audits. Our operational team verifies government GSTIN registrations, corporate PAN credentials, bank account validity, and physical godown or manufacturing unit addresses. Diamond and Platinum badges represent suppliers with multi-year trading histories, fast response times under 2 hours, and verified dockside dispatch fulfillment records.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-2">
+                  Integrated Freight Hauling &amp; Gate Pass Logistics
+                </h3>
+                <p>
+                  Procurement managers can choose between direct doorstep transportation or self-arranged godown pickup. When doorstep hauling is selected, B2B India coordinates trusted commercial freight carriers, automated weighbridge certificates, and regulatory GST E-Way bills for transit across all Indian states and union territories, ensuring prompt delivery and end-to-end transparency.
+                </p>
+              </div>
+            </div>
+          </article>
         </div>
       </main>
       <Footer />
