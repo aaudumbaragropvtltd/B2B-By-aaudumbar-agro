@@ -15,8 +15,8 @@ export function optimizeBannerImageUrl(url, width = 1000) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
     // High-compression WebP for mobile and tablet to resolve Lighthouse image delivery audit
-    const format = width <= 768 ? 'f_webp' : 'f_auto';
-    const qualityParam = width <= 768 ? 'q_45' : (width <= 1080 ? 'q_55' : 'q_auto:eco');
+    const format = width <= 1080 ? 'f_webp' : 'f_auto';
+    const qualityParam = width <= 640 ? 'q_45' : (width <= 1080 ? 'q_50' : 'q_auto:eco');
     if (url.includes('/upload/f_auto') || url.includes('/upload/f_webp')) {
       return url.replace(/\/upload\/(?:f_auto|f_webp)(?:,[^,/]+)*?\//, `/upload/${format},${qualityParam},w_${width}/`);
     }

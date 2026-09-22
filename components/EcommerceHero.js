@@ -8,8 +8,8 @@ export function optimizeBannerUrl(url, width = 1000) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
     // High-compression WebP for mobile and tablet to resolve Lighthouse image delivery audit
-    const format = width <= 768 ? 'f_webp' : 'f_auto';
-    const qualityParam = width <= 768 ? 'q_45' : (width <= 1080 ? 'q_55' : 'q_auto:eco');
+    const format = width <= 1080 ? 'f_webp' : 'f_auto';
+    const qualityParam = width <= 640 ? 'q_45' : (width <= 1080 ? 'q_50' : 'q_auto:eco');
     if (url.includes('/upload/f_auto') || url.includes('/upload/f_webp')) {
       return url.replace(/\/upload\/(?:f_auto|f_webp)(?:,[^,/]+)*?\//, `/upload/${format},${qualityParam},w_${width}/`);
     }
@@ -173,36 +173,11 @@ export default function EcommerceHero({ initialBanners = [] }) {
       <div className="absolute inset-0 z-0">
         {currentSlide === 0 ? (
           <div className="absolute inset-0">
-            <img
-              src={bgImageMobile}
-              srcSet={`${bgImageMobile} 480w, ${bgImageTablet} 768w, ${bgImageDesktop} 1080w`}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
-              alt={activeBanner.title || 'Wholesale Banner'}
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-              loading="eager"
-              fetchPriority="high"
-              decoding="sync"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = FALLBACK_BANNERS[0].hero_image_url;
-              }}
-            />
-          </div>
-        ) : (
-          <AnimatePresence initial={false} mode="wait">
-            <motion.div
-              key={activeBanner.id || currentSlide}
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              className="absolute inset-0"
-            >
+            <picture className="absolute inset-0 w-full h-full">
+              <source media="(max-width: 640px)" srcSet={bgImageMobile} />
+              <source media="(max-width: 1024px)" srcSet={bgImageTablet} />
               <img
-                src={bgImageMobile}
-                srcSet={`${bgImageMobile} 480w, ${bgImageTablet} 768w, ${bgImageDesktop} 1080w`}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
+                src={bgImageDesktop}
                 alt={activeBanner.title || 'Wholesale Banner'}
                 className="absolute inset-0 w-full h-full object-cover object-center"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
@@ -214,6 +189,34 @@ export default function EcommerceHero({ initialBanners = [] }) {
                   e.target.src = FALLBACK_BANNERS[0].hero_image_url;
                 }}
               />
+            </picture>
+          </div>
+        ) : (
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={activeBanner.id || currentSlide}
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <picture className="absolute inset-0 w-full h-full">
+                <source media="(max-width: 640px)" srcSet={bgImageMobile} />
+                <source media="(max-width: 1024px)" srcSet={bgImageTablet} />
+                <img
+                  src={bgImageDesktop}
+                  alt={activeBanner.title || 'Wholesale Banner'}
+                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = FALLBACK_BANNERS[0].hero_image_url;
+                  }}
+                />
+              </picture>
             </motion.div>
           </AnimatePresence>
         )}
