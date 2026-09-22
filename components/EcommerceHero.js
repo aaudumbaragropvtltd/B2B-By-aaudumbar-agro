@@ -88,8 +88,9 @@ export default function EcommerceHero({ initialBanners = [] }) {
     window.location.href = `/directory?q=${encodeURIComponent(query)}`;
   };
 
-  // Fetch dynamic banners from CMS API
+  // Only fetch dynamic banners if initialBanners was not provided by SSR
   useEffect(() => {
+    if (initialBanners && initialBanners.length > 0) return;
     async function loadDynamicBanners() {
       try {
         const res = await fetch('/api/banners');
@@ -104,7 +105,7 @@ export default function EcommerceHero({ initialBanners = [] }) {
       }
     }
     loadDynamicBanners();
-  }, []);
+  }, [initialBanners]);
 
   // Advance slides after comfortable interval to maintain low main-thread activity
   useEffect(() => {
@@ -255,35 +256,48 @@ export default function EcommerceHero({ initialBanners = [] }) {
 
       {/* Hero Content - Perfectly Balanced & Centered Over The Image */}
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center my-auto">
-        <motion.div
-          key={`text-${activeBanner.id || currentSlide}`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="w-full flex flex-col items-center"
-        >
-          <span className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 mb-2.5 sm:mb-4 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-emerald-300 text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-md">
-            {activeBanner.badge_text || '10% Advance Escrow'}
-          </span>
+        {currentSlide === 0 ? (
+          <div className="w-full flex flex-col items-center">
+            <span className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 mb-2.5 sm:mb-4 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-emerald-300 text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-md">
+              {activeBanner.badge_text || '10% Advance Escrow'}
+            </span>
 
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black text-white tracking-tight mb-2.5 sm:mb-4 leading-[1.2] drop-shadow-xl max-w-3xl">
-            {activeBanner.title}
-          </h1>
+            <h1 className="text-2xl sm:text-4xl md:text-6xl font-black text-white tracking-tight mb-2.5 sm:mb-4 leading-[1.2] drop-shadow-xl max-w-3xl">
+              {activeBanner.title}
+            </h1>
 
-          {activeBanner.subtitle && (
-            <p className="text-xs sm:text-sm md:text-base text-slate-100/90 max-w-xl mx-auto mb-4 sm:mb-6 font-medium line-clamp-2 sm:line-clamp-none drop-shadow">
-              {activeBanner.subtitle}
-            </p>
-          )}
-        </motion.div>
+            {activeBanner.subtitle && (
+              <p className="text-xs sm:text-sm md:text-base text-slate-100/90 max-w-xl mx-auto mb-4 sm:mb-6 font-medium line-clamp-2 sm:line-clamp-none drop-shadow">
+                {activeBanner.subtitle}
+              </p>
+            )}
+          </div>
+        ) : (
+          <motion.div
+            key={`text-${activeBanner.id || currentSlide}`}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full flex flex-col items-center"
+          >
+            <span className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 mb-2.5 sm:mb-4 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-emerald-300 text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-md">
+              {activeBanner.badge_text || '10% Advance Escrow'}
+            </span>
 
-        {/* Glassmorphism Search Bar with Animated Halo */}
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25 }}
-          className="w-full max-w-2xl relative z-50"
-        >
+            <h1 className="text-2xl sm:text-4xl md:text-6xl font-black text-white tracking-tight mb-2.5 sm:mb-4 leading-[1.2] drop-shadow-xl max-w-3xl">
+              {activeBanner.title}
+            </h1>
+
+            {activeBanner.subtitle && (
+              <p className="text-xs sm:text-sm md:text-base text-slate-100/90 max-w-xl mx-auto mb-4 sm:mb-6 font-medium line-clamp-2 sm:line-clamp-none drop-shadow">
+                {activeBanner.subtitle}
+              </p>
+            )}
+          </motion.div>
+        )}
+
+        {/* Glassmorphism Search Bar with Instant Paint */}
+        <div className="w-full max-w-2xl relative z-50">
           <form onSubmit={handleHeroSearch} suppressHydrationWarning className="relative z-50 group">
             <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 via-emerald-400 to-amber-400 rounded-3xl blur-md opacity-30 group-hover:opacity-75 group-focus-within:opacity-85 transition-opacity duration-700 halo-glow" />
             <div className="relative z-50 flex items-center bg-slate-900/70 sm:bg-white/15 backdrop-blur-xl border border-white/30 rounded-2xl p-1.5 sm:p-2 shadow-2xl transition-all duration-300 group-focus-within:border-white/60">
@@ -310,10 +324,7 @@ export default function EcommerceHero({ initialBanners = [] }) {
           </form>
 
           {/* Floating Live Marketplace Chips — Elevated behind z-50 and gracefully faded during search */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45, duration: 0.6 }}
+          <div
             className={`mt-4 relative z-10 flex flex-wrap items-center justify-center gap-2 text-[10px] sm:text-xs font-semibold transition-all duration-200 ${
               (heroQuery && heroQuery.trim().length > 0) ? 'opacity-0 pointer-events-none -translate-y-2' : 'opacity-100'
             }`}
@@ -345,8 +356,8 @@ export default function EcommerceHero({ initialBanners = [] }) {
               <span>🏭 38+ Sectors</span>
               <span className="text-[10px]">→</span>
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Slide Indicators with Accessible Touch Targets & Composited Pill State */}

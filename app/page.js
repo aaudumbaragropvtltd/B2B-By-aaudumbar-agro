@@ -173,23 +173,8 @@ export default async function HomePage() {
     console.error("Failed to fetch data for homepage", e);
   }
 
-  const primaryBannerImg =
-    heroBanners[0]?.hero_image_url ||
-    'https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto:eco,w_1080/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg';
-  const preloadMobileUrl = optimizeBannerImageUrl(primaryBannerImg, 480);
-  const preloadTabletUrl = optimizeBannerImageUrl(primaryBannerImg, 768);
-  const preloadDesktopUrl = optimizeBannerImageUrl(primaryBannerImg, 1080);
-
   return (
     <div className="bg-gray-50 min-h-screen">
-      <link
-        rel="preload"
-        as="image"
-        href={preloadMobileUrl}
-        imageSrcSet={`${preloadMobileUrl} 480w, ${preloadTabletUrl} 768w, ${preloadDesktopUrl} 1080w`}
-        imageSizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
-        fetchPriority="high"
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
