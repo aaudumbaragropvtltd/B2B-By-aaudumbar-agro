@@ -35,8 +35,7 @@ import {
   SITE_URL,
 } from '@/utils/seoUtils';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 300; // 5-minute ISR edge cache
 
 /**
  * Next.js Dynamic Metadata for Rank #1 Google SEO

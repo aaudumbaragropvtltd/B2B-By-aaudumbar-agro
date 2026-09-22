@@ -11,12 +11,11 @@ import { getSiteUrl, generateBreadcrumbJsonLd } from '@/utils/seoUtils';
 
 const siteUrl = getSiteUrl();
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 120;
 
 export const metadata = {
-  title: "India B2B Trade Directory — Verified Manufacturers & Wholesale Prices | b2bindia.site",
-  description: "Explore India's largest verified B2B trade directory on b2bindia.site across 38 industrial sectors. Compare live factory wholesale prices, check MOQ, get instant quotations, and trade with automated escrow protection.",
+  title: "B2B Trade Directory & Verified Suppliers",
+  description: "Explore India's largest verified B2B trade directory across 38 industrial sectors. Compare factory wholesale prices, check MOQ, and trade with automated escrow protection.",
   keywords: [
     "b2bindia.site",
     "b2bindia",
@@ -33,7 +32,7 @@ export const metadata = {
     canonical: `${siteUrl}/directory`,
   },
   openGraph: {
-    title: "India B2B Trade Directory — Verified Manufacturers & Wholesale Suppliers | b2bindia.site",
+    title: "B2B Trade Directory & Verified Suppliers | B2B India",
     description: "Browse 38 sectors, compare wholesale prices, and trade directly with verified Indian manufacturers on b2bindia.site.",
     url: `${siteUrl}/directory`,
     siteName: "b2bindia.site | B2B India",
@@ -42,7 +41,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "India B2B Trade Directory | b2bindia.site",
+    title: "B2B Trade Directory & Verified Suppliers | B2B India",
     description: "Browse 38 industrial sectors and connect with verified Indian manufacturers on b2bindia.site.",
   },
 };
@@ -242,17 +241,14 @@ export default async function DirectoryPage({ searchParams }) {
       const { createAdminClient } = await import('@/services/supabaseServer');
       const supabase = createAdminClient();
       
-      // Fetch Sectors
-      const { data: sectorData } = await supabase
+      // Concurrently query Sectors, Products, Suppliers, and Live Counts
+      const sectorsPromise = supabase
         .from('industry_sectors')
         .select('id, name, slug, description, hero_image_url')
         .is('parent_id', null)
         .eq('is_active', true)
         .order('display_order');
-        
-      if (sectorData && sectorData.length > 0) sectors = sectorData;
 
-      // Fetch Products with Relations
       let productsQuery = supabase
         .from('products')
         .select(`
@@ -266,37 +262,45 @@ export default async function DirectoryPage({ searchParams }) {
       if (query) {
         productsQuery = productsQuery.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
       }
-      
-      const { data: productData, error: productError } = await productsQuery;
 
-      if (productError) {
-        console.error("Products query error:", productError);
-      }
-
-      if (!productError && productData && productData.length > 0) {
-        products = productData;
-      }
-      
-      // Fetch Suppliers: All registered enterprise suppliers & trade partners
-      const { data: supplierData, error: supplierError } = await supabase
+      const suppliersPromise = supabase
         .from('users')
         .select('id, company_name, full_name, city, state, categories, display_id, created_at, company_logo_url, role')
         .in('role', ['supplier', 'both'])
         .not('company_name', 'is', null);
 
-      // LIVE REAL PRODUCT COUNT: Query the active products directly to get exact real-time counts per supplier
-      const { data: allActiveProductRows } = await supabase
+      const activeProductRowsPromise = supabase
         .from('products')
         .select('supplier_id')
         .eq('is_active', true);
 
+      const [sectorRes, productRes, supplierRes, activeCountsRes] = await Promise.allSettled([
+        sectorsPromise,
+        productsQuery,
+        suppliersPromise,
+        activeProductRowsPromise,
+      ]);
+
+      if (sectorRes.status === 'fulfilled' && sectorRes.value?.data && sectorRes.value.data.length > 0) {
+        sectors = sectorRes.value.data;
+      }
+
+      if (productRes.status === 'fulfilled' && productRes.value?.data && productRes.value.data.length > 0) {
+        products = productRes.value.data;
+      }
+
+      const supplierData = supplierRes.status === 'fulfilled' ? supplierRes.value?.data : null;
+      const supplierError = supplierRes.status === 'rejected' ? supplierRes.reason : null;
+
       const liveSupplierProductCounts = {};
-      allActiveProductRows?.forEach(p => {
-        const supId = typeof p.supplier_id === 'object' ? p.supplier_id?.id : p.supplier_id;
-        if (supId) {
-          liveSupplierProductCounts[supId] = (liveSupplierProductCounts[supId] || 0) + 1;
-        }
-      });
+      if (activeCountsRes.status === 'fulfilled' && activeCountsRes.value?.data) {
+        activeCountsRes.value.data.forEach(p => {
+          const supId = typeof p.supplier_id === 'object' ? p.supplier_id?.id : p.supplier_id;
+          if (supId) {
+            liveSupplierProductCounts[supId] = (liveSupplierProductCounts[supId] || 0) + 1;
+          }
+        });
+      }
 
       // Standardize and merge DB suppliers + curated static suppliers
       const allMappedSuppliers = [];
@@ -778,6 +782,56 @@ export default async function DirectoryPage({ searchParams }) {
                 )}
               </div>
             </div>
+
+            {/* Comprehensive B2B Sourcing Guide & Industry Knowledge */}
+            <article className="mt-16 bg-white rounded-3xl p-8 sm:p-12 border border-gray-200/80 shadow-sm text-slate-700 space-y-6">
+              <header className="border-b border-gray-100 pb-5">
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  Pan-India B2B Wholesale Directory &amp; Manufacturer Procurement Guide
+                </h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Connecting institutional procurement managers, wholesale traders, and corporate distributors directly with verified manufacturers across 38 core sectors.
+                </p>
+              </header>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 mb-2">
+                    Direct Factory Pricing &amp; Transparent Bulk MOQs
+                  </h3>
+                  <p>
+                    B2B India eliminates multi-tier trading intermediaries, allowing corporate buyers, retail chains, and MSME distributors to access direct factory-gate wholesale prices. Every catalog entry specifies clear Minimum Order Quantities (MOQ), tiered volume rate breaks, available pack sizes, and standard loading godown locations. Whether sourcing agro commodities like Turmeric (Haldi) and Basmati Rice or heavy industrial components, buyers receive transparent commercial terms upfront.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 mb-2">
+                    Milestone-Based 10% Advance Escrow Protection
+                  </h3>
+                  <p>
+                    All contracts initiated through our directory operate under our strict 10% advance escrow framework. When an order is placed, the buyer&apos;s 10% advance is held safely in escrow, locking commodity prices and reserving inventory. The remaining 90% balance is payable only after loading-dock inspection confirms that batch moisture, grain size, quality grade, and packaging match contracted specifications.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 mb-2">
+                    Diamond, Platinum &amp; Gold Verified Sellers
+                  </h3>
+                  <p>
+                    Every supplier displayed in our directory undergoes stringent compliance audits. Our operational team verifies government GSTIN registrations, corporate PAN credentials, bank account validity, and physical godown or manufacturing unit addresses. Diamond and Platinum badges represent suppliers with multi-year trading histories, fast response times under 2 hours, and verified dockside dispatch fulfillment records.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 mb-2">
+                    Integrated Freight Hauling &amp; Gate Pass Logistics
+                  </h3>
+                  <p>
+                    Procurement managers can choose between direct doorstep transportation or self-arranged godown pickup. When doorstep hauling is selected, B2B India coordinates trusted commercial freight carriers, automated weighbridge certificates, and regulatory GST E-Way bills for transit across all Indian states and union territories, ensuring prompt delivery and end-to-end transparency.
+                  </p>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
       </main>

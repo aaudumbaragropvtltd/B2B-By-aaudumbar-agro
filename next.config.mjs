@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Allow external images from Unsplash for hero graphics and product photos
+  compress: true,
+  poweredByHeader: false,
+
+  // Allow external images and optimize formats to AVIF/WebP for high-speed delivery
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400,
     remotePatterns: [
       {
         protocol: 'https',
@@ -18,6 +23,11 @@ const nextConfig = {
         hostname: 'res.cloudinary.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '5.imimg.com',
+        pathname: '/**',
+      },
     ],
   },
 
@@ -30,6 +40,34 @@ const nextConfig = {
       {
         source: '/api/sitemap',
         destination: '/api/sitemap.xml',
+      },
+    ];
+  },
+
+  // Performance & Edge Caching Headers for 100% Core Web Vitals & Speed
+  async headers() {
+    return [
+      {
+        source: '/:all*(svg|jpg|jpeg|png|webp|avif|ico|woff|woff2)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+        ],
       },
     ];
   },
