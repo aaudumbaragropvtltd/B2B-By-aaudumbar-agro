@@ -19,7 +19,6 @@ import Footer from '@/components/Footer';
 import CommodityImage from '@/components/CommodityImage';
 import ProductImageGallery from '@/components/ProductImageGallery';
 import QuotationDock from './QuotationDock';
-import MandiBenchmarkCard from '@/components/MandiBenchmarkCard';
 import ProductViewTracker from '@/components/ProductViewTracker';
 import FavoriteButton from '@/components/FavoriteButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -347,14 +346,9 @@ export default async function ProductDetailPage({ params }) {
               <QuotationDock product={{ ...product, shippingEstimate, distanceKm }} />
             </div>
 
-            {/* Live APMC Mandi Benchmark Rates (CommodityOnline Integration) */}
-            <div className="lg:col-span-2 order-3">
-              <MandiBenchmarkCard product={product} />
-            </div>
-
             {/* Logistics Calculator */}
             {isLogisticsEligible ? (
-              <div className="lg:col-span-2 order-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative">
+              <div className="lg:col-span-2 order-3 bg-white p-6 rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative">
                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                   <span className="text-xl">🚚</span>
                   Agriculture & Bulk Commodity Logistics
@@ -393,7 +387,7 @@ export default async function ProductDetailPage({ params }) {
                 </div>
               </div>
             ) : (
-              <div className="lg:col-span-2 order-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+              <div className="lg:col-span-2 order-3 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-2">
                   <span className="text-xl">📦</span>
                   Pan-India Direct Factory Logistics
@@ -408,7 +402,7 @@ export default async function ProductDetailPage({ params }) {
             )}
 
             {/* Technical Specifications Table */}
-            <div className="lg:col-span-2 order-5 rounded-2xl bg-white shadow-sm border border-gray-200 overflow-hidden">
+            <div className="lg:col-span-2 order-4 rounded-2xl bg-white shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
