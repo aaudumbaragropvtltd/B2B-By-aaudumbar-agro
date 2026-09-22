@@ -15,7 +15,7 @@ import { getProductUrl } from '@/utils/slugUtils';
 import { optimizeProductImageUrl } from '@/utils/imageOptimizer';
 
 function ProductMiniCard({ product }) {
-  const imageSrc = optimizeProductImageUrl(product.image || product.hero_image_url, { width: 300 });
+  const imageSrc = optimizeProductImageUrl(product.image || product.hero_image_url, { width: 220 });
 
   return (
     <Link href={getProductUrl(product)} className="flex-shrink-0 w-40 sm:w-48 mx-2">
@@ -28,8 +28,8 @@ function ProductMiniCard({ product }) {
           <img
             src={imageSrc}
             alt={product.name || 'B2B Product'}
-            width="200"
-            height="150"
+            width="192"
+            height="128"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
             decoding="async"

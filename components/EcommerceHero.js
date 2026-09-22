@@ -8,9 +8,9 @@ export function optimizeBannerUrl(url, width = 1000) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
     if (url.includes('/upload/f_auto,q_auto')) {
-      return url.replace(/\/upload\/f_auto,q_auto,w_\d+\//, `/upload/f_auto,q_auto,w_${width}/`);
+      return url.replace(/\/upload\/f_auto,q_auto(?::eco|:good|:low)?(?:,w_\d+)?\//, `/upload/f_auto,q_auto:eco,w_${width}/`);
     }
-    return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
+    return url.replace('/upload/', `/upload/f_auto,q_auto:eco,w_${width}/`);
   }
   return url;
 }
@@ -111,7 +111,7 @@ export default function EcommerceHero({ initialBanners = [] }) {
           const rawUrl = b.hero_image_url || b.image;
           if (rawUrl) {
             const img = new window.Image();
-            img.src = optimizeBannerUrl(rawUrl, 1000);
+            img.src = optimizeBannerUrl(rawUrl, 768);
           }
         });
       }, 3500);
@@ -169,8 +169,9 @@ export default function EcommerceHero({ initialBanners = [] }) {
 
   const activeBanner = banners[currentSlide] || FALLBACK_BANNERS[0];
   const rawBgImage = activeBanner.hero_image_url || activeBanner.image || FALLBACK_BANNERS[0].hero_image_url;
-  const bgImageMobile = optimizeBannerUrl(rawBgImage, 600);
-  const bgImageDesktop = optimizeBannerUrl(rawBgImage, 1000);
+  const bgImageMobile = optimizeBannerUrl(rawBgImage, 480);
+  const bgImageTablet = optimizeBannerUrl(rawBgImage, 768);
+  const bgImageDesktop = optimizeBannerUrl(rawBgImage, 1080);
 
   return (
     <section
@@ -192,8 +193,8 @@ export default function EcommerceHero({ initialBanners = [] }) {
           >
             <img
               src={bgImageDesktop}
-              srcSet={`${bgImageMobile} 600w, ${bgImageDesktop} 1000w`}
-              sizes="(max-width: 640px) 100vw, 1000px"
+              srcSet={`${bgImageMobile} 480w, ${bgImageTablet} 768w, ${bgImageDesktop} 1080w`}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
               alt={activeBanner.title || 'Wholesale Banner'}
               className="absolute inset-0 w-full h-full object-cover object-center"
               style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}

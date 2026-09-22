@@ -133,7 +133,7 @@ export default async function HomePage() {
         unit: p.unit_label,
         moq: p.bulk_minimum_order,
         badge: p.quality_grade === 'Premium' ? 'Trade Assurance' : (p.quality_grade ? 'Verified' : null),
-        image: optimizeProductImageUrl(p.hero_image_url, { width: 400 }),
+        image: optimizeProductImageUrl(p.hero_image_url, { width: 320 }),
         category: p.sector_id?.slug || 'general',
         supplierName: p.technical_specifications?.['Supplier Name'] || p.supplier_id?.company_name || 'Verified Supplier'
       }));
@@ -175,9 +175,10 @@ export default async function HomePage() {
 
   const primaryBannerImg =
     heroBanners[0]?.hero_image_url ||
-    'https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto,w_1000/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg';
-  const preloadMobileUrl = optimizeBannerImageUrl(primaryBannerImg, 600);
-  const preloadDesktopUrl = optimizeBannerImageUrl(primaryBannerImg, 1000);
+    'https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto:eco,w_1080/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg';
+  const preloadMobileUrl = optimizeBannerImageUrl(primaryBannerImg, 480);
+  const preloadTabletUrl = optimizeBannerImageUrl(primaryBannerImg, 768);
+  const preloadDesktopUrl = optimizeBannerImageUrl(primaryBannerImg, 1080);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -185,8 +186,8 @@ export default async function HomePage() {
         rel="preload"
         as="image"
         href={preloadDesktopUrl}
-        imageSrcSet={`${preloadMobileUrl} 600w, ${preloadDesktopUrl} 1000w`}
-        imageSizes="(max-width: 640px) 100vw, 1000px"
+        imageSrcSet={`${preloadMobileUrl} 480w, ${preloadTabletUrl} 768w, ${preloadDesktopUrl} 1080w`}
+        imageSizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
         fetchPriority="high"
       />
       <script

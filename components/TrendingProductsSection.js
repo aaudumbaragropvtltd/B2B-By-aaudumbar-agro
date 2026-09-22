@@ -24,7 +24,8 @@ const BADGE_STYLES = {
 };
 
 function ProductCard({ product, index }) {
-  const imageSrc = optimizeProductImageUrl(product.image || product.hero_image_url, { width: 400 });
+  const imageSrc = optimizeProductImageUrl(product.image || product.hero_image_url, { width: 320 });
+  const imageSrc480 = optimizeProductImageUrl(product.image || product.hero_image_url, { width: 480 });
   const displayName = product.name || product.title || 'Verified Wholesale Product';
 
   return (
@@ -45,9 +46,11 @@ function ProductCard({ product, index }) {
           <div className="h-36 sm:h-44 bg-gray-50 relative overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
             <img
               src={imageSrc}
+              srcSet={`${imageSrc} 320w, ${imageSrc480} 480w`}
+              sizes="(max-width: 640px) 208px, 256px"
               alt={displayName}
-              width="320"
-              height="240"
+              width="256"
+              height="176"
               className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
               loading="lazy"
               decoding="async"

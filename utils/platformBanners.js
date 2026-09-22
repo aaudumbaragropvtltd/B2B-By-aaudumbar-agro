@@ -15,9 +15,9 @@ export function optimizeBannerImageUrl(url, width = 1000) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
     if (url.includes('/upload/f_auto,q_auto')) {
-      return url.replace(/\/upload\/f_auto,q_auto,w_\d+\//, `/upload/f_auto,q_auto,w_${width}/`);
+      return url.replace(/\/upload\/f_auto,q_auto(?::eco|:good|:low)?(?:,w_\d+)?\//, `/upload/f_auto,q_auto:eco,w_${width}/`);
     }
-    return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
+    return url.replace('/upload/', `/upload/f_auto,q_auto:eco,w_${width}/`);
   }
   return url;
 }

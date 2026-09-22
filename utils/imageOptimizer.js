@@ -7,9 +7,9 @@
 // ============================================================================
 
 export function optimizeProductImageUrl(url, options = {}) {
-  const { width = 400, quality = 80 } = options;
+  const { width = 320, quality = 75 } = options;
   if (!url || typeof url !== 'string') {
-    return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=400&q=80';
+    return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=320&q=75';
   }
 
   let cleanUrl = url.trim();
@@ -24,12 +24,18 @@ export function optimizeProductImageUrl(url, options = {}) {
     return `https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=${width}&q=${quality}`;
   }
 
-  // Cloudinary image auto-format & scale
-  if (cleanUrl.includes('res.cloudinary.com') && cleanUrl.includes('/upload/')) {
-    if (cleanUrl.includes('/upload/f_auto,q_auto')) {
-      return cleanUrl.replace(/\/upload\/f_auto,q_auto(?:,w_\d+)?\//, `/upload/f_auto,q_auto,w_${width}/`);
+  // Cloudinary image auto-format & eco compression
+  if (cleanUrl.includes('res.cloudinary.com')) {
+    if (cleanUrl.includes('/upload/')) {
+      if (cleanUrl.includes('/upload/f_auto,q_auto')) {
+        return cleanUrl.replace(/\/upload\/f_auto,q_auto(?::eco|:good|:low)?(?:,w_\d+)?\//, `/upload/f_auto,q_auto:eco,w_${width}/`);
+      }
+      return cleanUrl.replace('/upload/', `/upload/f_auto,q_auto:eco,w_${width}/`);
     }
-    return cleanUrl.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
+    if (cleanUrl.includes('/image/fetch/')) {
+      return cleanUrl.replace(/\/fetch\/f_auto,q_auto(?::eco|:good|:low)?(?:,w_\d+)?\//, `/fetch/f_auto,q_auto:eco,w_${width}/`);
+    }
+    return cleanUrl;
   }
 
   // Shopify CDN images (cdn/shop/files or cdn.shopify.com)
@@ -69,6 +75,11 @@ export function optimizeProductImageUrl(url, options = {}) {
     if (cleanUrl.includes('impolicy=queryparam')) {
       return `${cleanUrl}&im=Resize=(${width},${width}),aspect=fit`;
     }
+  }
+
+  // Proxy unoptimized third-party image hosts through Cloudinary fetch for WebP/AVIF auto-compression
+  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+    return `https://res.cloudinary.com/pjsh8sfp/image/fetch/f_auto,q_auto:eco,w_${width}/${cleanUrl}`;
   }
 
   return cleanUrl;
