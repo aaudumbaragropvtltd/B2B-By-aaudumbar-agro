@@ -4,6 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchAutocomplete from '@/components/SearchAutocomplete';
 
+export function optimizeBannerUrl(url, width = 1000) {
+  if (!url || typeof url !== 'string') return url;
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    if (url.includes('/upload/f_auto,q_auto')) {
+      return url.replace(/\/upload\/f_auto,q_auto,w_\d+\//, `/upload/f_auto,q_auto,w_${width}/`);
+    }
+    return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
+  }
+  return url;
+}
+
 // Official Admin Panel CMS Banners (Strictly synchronized with data/platform_banners.json)
 const FALLBACK_BANNERS = [
   {
@@ -11,7 +22,7 @@ const FALLBACK_BANNERS = [
     title: "India’s Verified B2B Wholesale Marketplace",
     subtitle: "Direct ex-factory bulk procurement with 10% Advance Escrow Protection, dock inspections, and automated GST billing.",
     badge_text: "10% Advance Escrow",
-    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg",
+    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto,w_1000/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg",
     cta_text: "Explore 38+ Wholesale Sectors",
     cta_link: "/directory",
     sector_slug: "all",
@@ -23,7 +34,7 @@ const FALLBACK_BANNERS = [
     title: "APMC Mandi Direct Agro & Spice Sourcing",
     subtitle: "Connect directly with certified agricultural aggregators in Nashik, Erode, Unjha, and Guntur with daily live mandi rates.",
     badge_text: "Live Mandi Intelligence",
-    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108587/b2b-bharat/banners/1789108583730_ChatGPT_Image_Sep_11__2026__12.jpg",
+    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto,w_1000/v1789108587/b2b-bharat/banners/1789108583730_ChatGPT_Image_Sep_11__2026__12.jpg",
     cta_text: "View Live Mandi Rates",
     cta_link: "/market-rates",
     sector_slug: "food-agriculture",
@@ -35,7 +46,7 @@ const FALLBACK_BANNERS = [
     title: "Heavy Industrial & Raw Materials Exchange",
     subtitle: "Bulk TMT steel, polymers, textile fabrics, and chemicals with verified factory lab certificates and dock logistics.",
     badge_text: "Verified Industrial Hub",
-    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108718/b2b-bharat/banners/1789108715249_ChatGPT_Image_Sep_11__2026__12.jpg",
+    hero_image_url: "https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto,w_1000/v1789108718/b2b-bharat/banners/1789108715249_ChatGPT_Image_Sep_11__2026__12.jpg",
     cta_text: "Post Enterprise RFQ",
     cta_link: "/#rfq-form",
     sector_slug: "metals-mining",
@@ -92,16 +103,19 @@ export default function EcommerceHero({ initialBanners = [] }) {
     loadDynamicBanners();
   }, []);
 
-  // Preload all banner images immediately so they appear with zero lag on website load
+  // Preload secondary banner images lazily after idle delay to avoid competing with LCP on mobile
   useEffect(() => {
-    if (banners && banners.length > 0 && typeof window !== 'undefined') {
-      banners.forEach(b => {
-        const url = b.hero_image_url || b.image;
-        if (url) {
-          const img = new window.Image();
-          img.src = url;
-        }
-      });
+    if (banners && banners.length > 1 && typeof window !== 'undefined') {
+      const timer = setTimeout(() => {
+        banners.slice(1).forEach((b) => {
+          const rawUrl = b.hero_image_url || b.image;
+          if (rawUrl) {
+            const img = new window.Image();
+            img.src = optimizeBannerUrl(rawUrl, 1000);
+          }
+        });
+      }, 3500);
+      return () => clearTimeout(timer);
     }
   }, [banners]);
 
@@ -154,7 +168,9 @@ export default function EcommerceHero({ initialBanners = [] }) {
   };
 
   const activeBanner = banners[currentSlide] || FALLBACK_BANNERS[0];
-  const bgImage = activeBanner.hero_image_url || activeBanner.image || FALLBACK_BANNERS[0].hero_image_url;
+  const rawBgImage = activeBanner.hero_image_url || activeBanner.image || FALLBACK_BANNERS[0].hero_image_url;
+  const bgImageMobile = optimizeBannerUrl(rawBgImage, 600);
+  const bgImageDesktop = optimizeBannerUrl(rawBgImage, 1000);
 
   return (
     <section
@@ -168,14 +184,16 @@ export default function EcommerceHero({ initialBanners = [] }) {
         <AnimatePresence initial={false} mode="wait">
           <motion.div
             key={activeBanner.id || currentSlide}
-            initial={{ opacity: 0, scale: 1.04 }}
+            initial={currentSlide === 0 ? false : { opacity: 0, scale: 1.04 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.1, ease: "easeInOut" }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <img
-              src={bgImage}
+              src={bgImageDesktop}
+              srcSet={`${bgImageMobile} 600w, ${bgImageDesktop} 1000w`}
+              sizes="(max-width: 640px) 100vw, 1000px"
               alt={activeBanner.title || 'Wholesale Banner'}
               className="absolute inset-0 w-full h-full object-cover object-center"
               style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}

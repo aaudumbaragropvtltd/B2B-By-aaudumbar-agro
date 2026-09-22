@@ -21,7 +21,7 @@ import CategoryShowcase from '@/components/CategoryShowcase';
 import AnimatedCategoryGrid from '@/components/AnimatedCategoryGrid';
 import KnowledgeHubFaq from '@/components/KnowledgeHubFaq';
 import Footer from '@/components/Footer';
-import { getActiveBanners } from '@/utils/platformBanners';
+import { getActiveBanners, optimizeBannerImageUrl } from '@/utils/platformBanners';
 import {
   getSiteUrl,
   getPlatformKnowledgeFaqs,
@@ -174,8 +174,22 @@ export default async function HomePage() {
     console.error("Failed to fetch data for homepage", e);
   }
 
+  const primaryBannerImg =
+    heroBanners[0]?.hero_image_url ||
+    'https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto,w_1000/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg';
+  const preloadMobileUrl = optimizeBannerImageUrl(primaryBannerImg, 600);
+  const preloadDesktopUrl = optimizeBannerImageUrl(primaryBannerImg, 1000);
+
   return (
     <div className="bg-gray-50 min-h-screen">
+      <link
+        rel="preload"
+        as="image"
+        href={preloadDesktopUrl}
+        imageSrcSet={`${preloadMobileUrl} 600w, ${preloadDesktopUrl} 1000w`}
+        imageSizes="(max-width: 640px) 100vw, 1000px"
+        fetchPriority="high"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

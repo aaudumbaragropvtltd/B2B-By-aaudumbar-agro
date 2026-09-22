@@ -76,13 +76,13 @@ function ProductCard({ product, index }) {
                 <span className="text-base sm:text-xl font-extrabold text-gray-900 font-mono group-hover:text-brand-700 transition-colors">
                   {formatPrice(product.price)}
                 </span>
-                <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium">
+                <span className="text-[10px] sm:text-[11px] text-gray-600 font-medium">
                   / {product.unit || 'Unit'}
                 </span>
               </div>
 
               {/* MOQ */}
-              <div className="mt-1 text-[10px] sm:text-[11px] text-gray-500 font-medium">
+              <div className="mt-1 text-[10px] sm:text-[11px] text-gray-600 font-medium">
                 MOQ: {product.moq || '1 Unit'}
               </div>
             </div>

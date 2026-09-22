@@ -11,13 +11,24 @@ import { createClient } from '@supabase/supabase-js';
 
 const BANNERS_FILE_PATH = path.join(process.cwd(), 'data', 'platform_banners.json');
 
+export function optimizeBannerImageUrl(url, width = 1000) {
+  if (!url || typeof url !== 'string') return url;
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    if (url.includes('/upload/f_auto,q_auto')) {
+      return url.replace(/\/upload\/f_auto,q_auto,w_\d+\//, `/upload/f_auto,q_auto,w_${width}/`);
+    }
+    return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
+  }
+  return url;
+}
+
 export const DEFAULT_BANNERS = [
   {
     id: 'banner-1',
     title: 'India’s Verified B2B Wholesale Marketplace',
     subtitle: 'Direct ex-factory bulk procurement with 10% Advance Escrow Protection, dock inspections, and automated GST billing.',
     badge_text: '10% Advance Escrow',
-    hero_image_url: 'https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg',
+    hero_image_url: 'https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto,w_1000/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg',
     cta_text: 'Explore 38+ Wholesale Sectors',
     cta_link: '/directory',
     sector_slug: 'all',
@@ -30,7 +41,7 @@ export const DEFAULT_BANNERS = [
     title: 'APMC Mandi Direct Agro & Spice Sourcing',
     subtitle: 'Connect directly with certified agricultural aggregators in Nashik, Erode, Unjha, and Guntur with daily live mandi rates.',
     badge_text: 'Live Mandi Intelligence',
-    hero_image_url: 'https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108587/b2b-bharat/banners/1789108583730_ChatGPT_Image_Sep_11__2026__12.jpg',
+    hero_image_url: 'https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto,w_1000/v1789108587/b2b-bharat/banners/1789108583730_ChatGPT_Image_Sep_11__2026__12.jpg',
     cta_text: 'View Live Mandi Rates',
     cta_link: '/market-rates',
     sector_slug: 'food-agriculture',
@@ -43,7 +54,7 @@ export const DEFAULT_BANNERS = [
     title: 'Heavy Industrial & Raw Materials Exchange',
     subtitle: 'Bulk TMT steel, polymers, textile fabrics, and chemicals with verified factory lab certificates and dock logistics.',
     badge_text: 'Verified Industrial Hub',
-    hero_image_url: 'https://res.cloudinary.com/pjsh8sfp/image/upload/v1789108718/b2b-bharat/banners/1789108715249_ChatGPT_Image_Sep_11__2026__12.jpg',
+    hero_image_url: 'https://res.cloudinary.com/pjsh8sfp/image/upload/f_auto,q_auto,w_1000/v1789108718/b2b-bharat/banners/1789108715249_ChatGPT_Image_Sep_11__2026__12.jpg',
     cta_text: 'Post Enterprise RFQ',
     cta_link: '/#rfq-form',
     sector_slug: 'metals-mining',

@@ -246,14 +246,14 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
-        {/* Google Analytics 4 Tracking via Next.js Script */}
+        {/* Google Analytics 4 Tracking via Next.js Script (loaded during browser idle time to optimize TBT and FCP) */}
         <Script
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-B2BINDIA01'}`}
         />
         <Script
           id="google-analytics"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];

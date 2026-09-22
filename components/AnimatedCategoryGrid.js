@@ -104,7 +104,7 @@ export default function AnimatedCategoryGrid({ categoryCounts = null }) {
                         </span>
                       </span>
                       {productCount > 0 && (
-                        <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium hidden sm:inline">
+                        <span className="text-[9px] sm:text-[10px] text-gray-600 font-medium hidden sm:inline">
                           {productCount} products
                         </span>
                       )}

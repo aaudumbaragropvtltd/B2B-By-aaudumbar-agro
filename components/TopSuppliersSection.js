@@ -191,7 +191,7 @@ export default function TopSuppliersSection({ initialSuppliers = [] }) {
                           <h3 className="font-bold text-gray-900 group-hover:text-brand-600 transition-colors truncate">
                             {supplier.name}
                           </h3>
-                          <p className="text-xs text-gray-400 mt-0.5">{supplier.location}</p>
+                          <p className="text-xs text-gray-600 mt-0.5">{supplier.location}</p>
                         </div>
                       </div>
 
@@ -200,7 +200,7 @@ export default function TopSuppliersSection({ initialSuppliers = [] }) {
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold text-white ${tier.bg}`}>
                           {tier.text}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full bg-gray-50 text-[10px] font-medium text-gray-500 border border-gray-100">
+                        <span className="px-2 py-0.5 rounded-full bg-gray-50 text-[10px] font-medium text-gray-600 border border-gray-100">
                           {supplier.sector}
                         </span>
                       </div>
@@ -212,21 +212,21 @@ export default function TopSuppliersSection({ initialSuppliers = [] }) {
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 live-pulse-dot" />
                             {supplier.responseRate}
                           </div>
-                          <div className="text-[9px] text-gray-400 uppercase tracking-wider">Response</div>
+                          <div className="text-[9px] text-gray-600 uppercase tracking-wider font-semibold">Response</div>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100 group-hover:bg-brand-50/50 transition-colors">
                           <div className="text-sm font-extrabold text-gray-900">{supplier.responseTime}</div>
-                          <div className="text-[9px] text-gray-400 uppercase tracking-wider">Avg Time</div>
+                          <div className="text-[9px] text-gray-600 uppercase tracking-wider font-semibold">Avg Time</div>
                         </div>
                         <div className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100 group-hover:bg-brand-50/50 transition-colors">
                           <div className="text-sm font-extrabold text-gray-900">{supplier.products}</div>
-                          <div className="text-[9px] text-gray-400 uppercase tracking-wider">Products</div>
+                          <div className="text-[9px] text-gray-600 uppercase tracking-wider font-semibold">Products</div>
                         </div>
                       </div>
 
                       {/* Footer */}
                       <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                        <span className="text-[10px] text-gray-400">Est. {supplier.yearEstablished}</span>
+                        <span className="text-[10px] text-gray-600 font-medium">Est. {supplier.yearEstablished}</span>
                         <span className="text-xs font-semibold text-brand-600 flex items-center gap-1 group-hover:underline">
                           View Profile
                           <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

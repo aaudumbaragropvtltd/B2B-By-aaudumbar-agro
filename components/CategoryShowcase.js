@@ -43,9 +43,9 @@ function ProductMiniCard({ product }) {
             <span className="text-sm font-extrabold text-gray-900">
               {formatPrice(product.price)}
             </span>
-            <span className="text-[9px] text-gray-400">/{product.unit}</span>
+            <span className="text-[9px] text-gray-600 font-medium">/{product.unit}</span>
           </div>
-          <div className="mt-1 text-[9px] text-gray-400 font-medium">
+          <div className="mt-1 text-[9px] text-gray-600 font-medium">
             MOQ: {product.moq}
           </div>
         </div>
