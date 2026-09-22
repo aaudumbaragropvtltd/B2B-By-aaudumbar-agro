@@ -88,11 +88,8 @@ export default async function HomePage() {
         },
         image: `${siteUrl}/logo.png`,
         sameAs: [
-          'https://www.linkedin.com/company/b2b-bharat',
-          'https://twitter.com/b2bindia_site',
           'https://www.facebook.com/b2bindia.site',
           'https://www.instagram.com/b2bindia.site',
-          'https://www.youtube.com/@b2bindia-official',
           'https://en.wikipedia.org/wiki/Business-to-business',
           'https://en.wikipedia.org/wiki/Wholesale',
           'https://en.wikipedia.org/wiki/Escrow',
@@ -147,11 +144,8 @@ export default async function HomePage() {
           },
         ],
         sameAs: [
-          'https://www.linkedin.com/company/b2b-bharat',
-          'https://twitter.com/b2bindia_site',
           'https://www.facebook.com/b2bindia.site',
           'https://www.instagram.com/b2bindia.site',
-          'https://www.youtube.com/@b2bindia-official',
           'https://en.wikipedia.org/wiki/Agricultural_produce_market_committee',
         ],
       },
@@ -160,10 +154,13 @@ export default async function HomePage() {
         '@id': `${siteUrl}/#faq`,
         mainEntity: faqSchema.mainEntity,
       },
-      {
-        ...escrowHowToSchema,
-        '@id': `${siteUrl}/#howto`,
-      },
+      (() => {
+        const { '@context': _ctx, ...cleanHowTo } = escrowHowToSchema;
+        return {
+          ...cleanHowTo,
+          '@id': `${siteUrl}/#howto`,
+        };
+      })(),
     ],
   };
 

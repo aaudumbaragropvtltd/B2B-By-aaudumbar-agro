@@ -13,6 +13,8 @@ export default function robots() {
 
   const publicAllowedPaths = [
     '/',
+    '/_next/static/*',
+    '/_next/image*',
     '/directory',
     '/directory/*',
     '/directory/product/*',
@@ -24,6 +26,7 @@ export default function robots() {
     '/privacy',
     '/shipping-policy',
     '/refund-policy',
+    '/cookie',
     '/llms.txt',
     '/llms-full.txt',
     '/public/*',
@@ -33,12 +36,10 @@ export default function robots() {
 
   const privateDisallowedPaths = [
     '/api/',
-    '/_next/',
     '/dashboard/',
     '/admin/',
     '/test-flow/',
     '/test-razorpay/',
-    '/cookie/',
   ];
 
   return {
@@ -53,10 +54,10 @@ export default function robots() {
         allow: publicAllowedPaths,
         disallow: [
           '/api/',
-          '/_next/',
           '/dashboard/',
           '/admin/',
           '/test-flow/',
+          '/test-razorpay/',
         ],
       },
       {

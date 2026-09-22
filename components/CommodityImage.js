@@ -43,9 +43,13 @@ export default function CommodityImage({ src, category, className = "aspect-vide
     );
   }
 
+  const secureSrc = src && typeof src === 'string'
+    ? src.replace(/^http:\/\//i, 'https://')
+    : src;
+
   return (
     <img 
-      src={src} 
+      src={secureSrc} 
       alt={category || "Bulk Commodity"} 
       className={`${className} object-cover border border-white/5`}
       loading="lazy"

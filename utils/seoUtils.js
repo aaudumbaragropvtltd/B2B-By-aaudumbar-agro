@@ -293,11 +293,11 @@ export function generateProductMetadata(product) {
   const galleryImages = allImages.length > 0
     ? Array.from(new Set(allImages)).slice(0, 5)
     : [primaryImage];
-
-  // High-CTR, Intent-Matched SEO Title Formula for Google Top Ranking (~55 chars)
-  const metaTitle = title.toLowerCase().includes('wholesale')
-    ? `${title} at ₹${price}/${unit} | b2bindia.site`
-    : `Buy ${title} Wholesale at ₹${price}/${unit} | b2bindia.site`;
+  const cleanTitle = title.length > 25 ? `${title.slice(0, 23).trim()}…` : title;
+  const unitShort = unit.length > 5 ? unit.slice(0, 4) : unit;
+  const metaTitle = cleanTitle.toLowerCase().includes('wholesale')
+    ? `${cleanTitle} (₹${price}/${unitShort})`
+    : `${cleanTitle} (₹${price}/${unitShort})`;
   const metaDescription = `Buy ${title} in bulk at verified price ₹${price}/${unit} online on b2bindia.site from ${supplierName} in ${location}. Minimum Order: ${moq} ${unit}. 100% GST tax invoice, verified escrow payment protection, and pan-India logistics dispatch on b2bindia.site.`;
 
   const productSlug = getProductSlug(product);
@@ -311,7 +311,7 @@ export function generateProductMetadata(product) {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${title} Wholesale at ₹${price}/${unit} | b2bindia.site`,
+      title: `${cleanTitle} Wholesale at ₹${price}/${unit} | B2B India`,
       description: `Wholesale price ₹${price}/${unit} on b2bindia.site | Direct supply from ${supplierName} in ${location}. Secure escrow checkout & pan-India dispatch.`,
       url: canonicalUrl,
       siteName: 'b2bindia.site | B2B India',
@@ -326,7 +326,7 @@ export function generateProductMetadata(product) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} Wholesale Price ₹${price}/${unit} | b2bindia.site`,
+      title: `${cleanTitle} Wholesale Price ₹${price}/${unit} | B2B India`,
       description: metaDescription,
       images: galleryImages.map((imgUrl) => (imgUrl.startsWith('http') ? imgUrl : `${currentSiteUrl}${imgUrl}`)),
     },
@@ -392,16 +392,7 @@ export function generateProductJsonLd(product) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     '@id': `${productUrl}#product`,
-    isPartOf: {
-      '@type': 'WebSite',
-      '@id': `${currentSiteUrl}/#website`,
-      name: 'b2bindia.site',
-      url: currentSiteUrl,
-    },
-    mainEntityOfPage: {
-      '@type': 'ItemPage',
-      '@id': productUrl,
-    },
+    mainEntityOfPage: productUrl,
     name: title,
     alternateName: alternateNames,
     image: galleryImages,
@@ -437,11 +428,6 @@ export function generateProductJsonLd(product) {
         '@type': 'Organization',
         name: supplierName,
         url: `${currentSiteUrl}/directory/supplier/${product.supplier_id?.id || 'demo-supplier-1'}`,
-        parentOrganization: {
-          '@type': 'Organization',
-          name: 'b2bindia.site',
-          url: currentSiteUrl,
-        },
       },
       hasMerchantReturnPolicy: {
         '@type': 'MerchantReturnPolicy',
@@ -455,7 +441,7 @@ export function generateProductJsonLd(product) {
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: '0',
+          value: 0,
           currency: 'INR',
         },
         shippingDestination: {
@@ -468,23 +454,23 @@ export function generateProductJsonLd(product) {
             '@type': 'QuantitativeValue',
             minValue: 1,
             maxValue: 3,
-            unitCode: 'd',
+            unitCode: 'DAY',
           },
           transitTime: {
             '@type': 'QuantitativeValue',
             minValue: 2,
             maxValue: 7,
-            unitCode: 'd',
+            unitCode: 'DAY',
           },
         },
       },
     },
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: ratingVal,
-      reviewCount: reviewCountVal,
-      bestRating: '5',
-      worstRating: '1',
+      ratingValue: Number(ratingVal),
+      reviewCount: parseInt(reviewCountVal, 10),
+      bestRating: 5,
+      worstRating: 1,
     },
   };
 }
@@ -562,9 +548,11 @@ export function generateSectorMetadata(sectorData) {
   const slug = sectorData.slug || '';
   const currentSiteUrl = getSiteUrl();
   const canonicalUrl = `${currentSiteUrl}/directory/${slug}`;
+  const cleanSector = sectorName.length > 25 ? `${sectorName.slice(0, 23).trim()}…` : sectorName;
+  const metaTitle = `Wholesale ${cleanSector} Online`;
 
   return {
-    title: `Buy Wholesale ${sectorName} Online | b2bindia.site`,
+    title: metaTitle,
     description: `Source verified ${sectorName} directly from top Indian manufacturers and wholesale distributors on b2bindia.site. Compare wholesale prices, check MOQ, get GST invoices, and secure escrow settlement.`,
     keywords: [
       'b2bindia.site',
@@ -582,7 +570,7 @@ export function generateSectorMetadata(sectorData) {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `Wholesale ${sectorName} — Indian Manufacturers & Suppliers | b2bindia.site`,
+      title: `Wholesale ${cleanSector} | B2B India`,
       description: `Direct B2B sourcing for ${sectorName} on b2bindia.site. Connect with top verified suppliers with escrow payment protection.`,
       url: canonicalUrl,
       siteName: 'b2bindia.site | B2B India',
@@ -599,7 +587,7 @@ export function generateSectorMetadata(sectorData) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Wholesale ${sectorName} | b2bindia.site`,
+      title: `Wholesale ${cleanSector} | B2B India`,
       description: `Source ${sectorName} in bulk from verified Indian suppliers on b2bindia.site.`,
       images: [sectorData.hero_image_url || `${currentSiteUrl}/og-image.jpg`],
     },
@@ -634,12 +622,20 @@ export function generateSectorJsonLd(sectorData, products = []) {
     description: `Comprehensive directory of verified manufacturers, suppliers, and wholesale prices in ${sectorName}.`,
     mainEntity: {
       '@type': 'ItemList',
-      itemListElement: products.slice(0, 50).map((prod, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        url: `${currentSiteUrl}/directory/product/${getProductSlug(prod)}`,
-        name: prod.title || prod.name,
-      })),
+      itemListElement: products.slice(0, 50).map((prod, index) => {
+        const prodUrl = `${currentSiteUrl}/directory/product/${getProductSlug(prod)}`;
+        return {
+          '@type': 'ListItem',
+          position: index + 1,
+          name: prod.title || prod.name,
+          item: {
+            '@type': 'Product',
+            '@id': `${prodUrl}#product`,
+            name: prod.title || prod.name,
+            url: prodUrl,
+          },
+        };
+      }),
     },
   };
 }
@@ -653,9 +649,11 @@ export function generateSupplierMetadata(supplier) {
   const sector = supplier.sector || 'Industrial Manufacturing';
   const currentSiteUrl = getSiteUrl();
   const canonicalUrl = `${currentSiteUrl}/directory/supplier/${supplier.id}`;
+  const cleanName = name.length > 28 ? `${name.slice(0, 26).trim()}…` : name;
+  const metaTitle = `${cleanName} — Verified Supplier`;
 
   return {
-    title: `${name} — Verified B2B Supplier in ${location} | b2bindia.site`,
+    title: metaTitle,
     description: `Connect with ${name} on b2bindia.site, a verified Indian supplier in ${sector} sector located in ${location}. View product catalog, wholesale price list, business credentials, and request direct quotations.`,
     keywords: [
       'b2bindia.site',
@@ -671,7 +669,7 @@ export function generateSupplierMetadata(supplier) {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${name} — Verified Supplier Profile | b2bindia.site`,
+      title: `${cleanName} — Verified Supplier | B2B India`,
       description: `Verified manufacturer in ${location} with active B2B catalog on b2bindia.site.`,
       url: canonicalUrl,
       siteName: 'b2bindia.site | B2B India',
@@ -731,7 +729,7 @@ export function generateEscrowHowToJsonLd() {
     estimatedCost: {
       '@type': 'MonetaryAmount',
       currency: 'INR',
-      value: '10000',
+      value: 10000,
     },
     supply: [
       { '@type': 'HowToSupply', name: 'Valid GSTIN & Business Registration' },

@@ -436,15 +436,29 @@ export default async function DirectoryPage({ searchParams }) {
         description: 'Comprehensive directory of verified manufacturers, wholesale commodities, and primary suppliers in India.',
         mainEntity: {
           '@type': 'ItemList',
-          itemListElement: products.slice(0, 30).map((prod, index) => ({
-            '@type': 'ListItem',
-            position: index + 1,
-            url: `${siteUrl}${getProductUrl(prod)}`,
-            name: prod.title,
-          })),
+          itemListElement: products.slice(0, 30).map((prod, index) => {
+            const prodUrl = `${siteUrl}${getProductUrl(prod)}`;
+            return {
+              '@type': 'ListItem',
+              position: index + 1,
+              name: prod.title,
+              item: {
+                '@type': 'Product',
+                '@id': `${prodUrl}#product`,
+                name: prod.title,
+                url: prodUrl,
+              },
+            };
+          }),
         },
       },
-      breadcrumbsJson,
+      (() => {
+        const { '@context': _ctx, ...cleanBreadcrumbs } = breadcrumbsJson;
+        return {
+          ...cleanBreadcrumbs,
+          '@id': `${siteUrl}/directory#breadcrumb`,
+        };
+      })(),
     ],
   };
 
@@ -463,7 +477,7 @@ export default async function DirectoryPage({ searchParams }) {
               Trade <span className="gradient-text">Directory</span>
             </h1>
             <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-              Find verified suppliers, compare prices, and source directly from India's largest B2B manufacturer network.
+              Find verified suppliers, compare prices, and source directly from India&apos;s largest B2B manufacturer network.
             </p>
           </div>
 

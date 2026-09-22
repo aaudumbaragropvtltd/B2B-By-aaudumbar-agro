@@ -266,7 +266,7 @@ export const PRODUCTS = [
     price: 380,
     unit: "Bag",
     moq: "100 Bags",
-    image: "http://buildiyo.store/cdn/shop/files/Ramco_Super_fast.jpg?v=1755501774",
+    image: "https://buildiyo.store/cdn/shop/files/Ramco_Super_fast.jpg?v=1755501774",
     badge: "Verified"
   },
   {
@@ -818,7 +818,7 @@ export const PRODUCTS = [
     price: 1.2,
     unit: "Piece",
     moq: "10000 Pcs",
-    image: "http://channelpackaging.in/wp-content/uploads/2021/10/Premium-printed-edited.jpg"
+    image: "https://channelpackaging.in/wp-content/uploads/2021/10/Premium-printed-edited.jpg"
   },
   {
     id: "pp-5",
@@ -1578,7 +1578,7 @@ export const PRODUCTS = [
     price: 42,
     unit: "Sq Ft",
     moq: "200 Sq Ft",
-    image: "http://www.zakamlovahardwarestore.in/cdn/shop/products/fabricgrey_1200x1200.jpg?v=1603714907"
+    image: "https://www.zakamlovahardwarestore.in/cdn/shop/products/fabricgrey_1200x1200.jpg?v=1603714907"
   },
   {
     id: "pg-1",

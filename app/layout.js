@@ -162,11 +162,8 @@ export default function RootLayout({ children }) {
         },
         image: `${baseUrl}/logo.png`,
         sameAs: [
-          'https://www.linkedin.com/company/b2b-bharat',
-          'https://twitter.com/b2bindia_site',
           'https://www.facebook.com/b2bindia.site',
           'https://www.instagram.com/b2bindia.site',
-          'https://www.youtube.com/@b2bindia-official',
           'https://en.wikipedia.org/wiki/Business-to-business',
           'https://en.wikipedia.org/wiki/Wholesale',
           'https://en.wikipedia.org/wiki/Escrow',
@@ -217,11 +214,8 @@ export default function RootLayout({ children }) {
           },
         ],
         sameAs: [
-          'https://www.linkedin.com/company/b2b-bharat',
-          'https://twitter.com/b2bindia_site',
           'https://www.facebook.com/b2bindia.site',
           'https://www.instagram.com/b2bindia.site',
-          'https://www.youtube.com/@b2bindia-official',
           'https://en.wikipedia.org/wiki/Agricultural_produce_market_committee',
         ],
       },

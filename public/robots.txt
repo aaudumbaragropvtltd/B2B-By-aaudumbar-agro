@@ -1,13 +1,16 @@
 User-agent: *
 Allow: /
+Allow: /_next/static/
+Allow: /_next/image/
+Allow: /cookie
 Allow: /sitemap.xml
 Allow: /api/sitemap.xml
 Disallow: /api/
 Disallow: /dashboard/
 Disallow: /admin/
-Disallow: /_next/
 Disallow: /test-flow/
-Disallow: /cookie/
+Disallow: /test-razorpay/
 
 Sitemap: https://www.b2bindia.site/sitemap.xml
 Sitemap: https://www.b2bindia.site/api/sitemap.xml
+

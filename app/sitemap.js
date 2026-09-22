@@ -15,7 +15,7 @@ export default async function sitemap() {
   const baseUrl = getSiteUrl();
   const now = new Date();
 
-  // 1. Static Core Platform Pages
+  // 1. Static Core Platform Pages (Public, High-Value Indexable Content Only)
   const staticPages = [
     {
       url: `${baseUrl}`,
@@ -34,12 +34,6 @@ export default async function sitemap() {
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/orders`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.7,
     },
     {
       url: `${baseUrl}/support`,
@@ -72,10 +66,10 @@ export default async function sitemap() {
       priority: 0.4,
     },
     {
-      url: `${baseUrl}/login`,
+      url: `${baseUrl}/cookie`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.5,
+      priority: 0.4,
     },
   ];
 
@@ -97,16 +91,32 @@ export default async function sitemap() {
     priority: 0.9,
   }));
 
-  // 4. Verified Supplier Profiles
-  const supplierIds = ['demo-supplier-1', 's0', 's1', 's2', 's3', 's4'];
-  // Also collect any unique supplier IDs from products
+  // 4. Verified Supplier Profiles (Only Real, Active Supplier UUIDs)
+  const verifiedSupplierIds = [
+    '114f0006-bdd3-430d-95ba-0f9df91aa7eb',
+    'ccbc1c96-b165-4afa-87af-fb9a82571c03',
+    '4cd41f3d-9df5-4c26-a0d2-acfee02ee9af',
+    '1d1fb33d-8485-4271-b201-3ff2f0690438',
+    '28a27773-226e-427d-835d-7c8d5e3036a8',
+    '289357d9-4214-4aca-8452-5b578a812397',
+    'bc09a874-61f8-416b-8115-d14011382a9e',
+    '3bf5b8ca-c730-4674-a2b2-b5e9a8a2d9fe',
+    'bf79d26b-1e7c-4132-8a27-28886395dee0',
+    'b09ec205-1e0e-45bc-9e87-62d0eb31c0e9',
+    'fdc86fa7-5fbd-4efd-b88f-fb314514f93e',
+    '5b1eee7b-7aea-4926-bb15-503779e62c58',
+    '6751b2de-2e22-45f4-bc21-561da57f5566',
+  ];
+
+  // Collect unique supplier IDs from catalog products
   products.forEach((p) => {
-    if (p.supplier_id?.id && !supplierIds.includes(p.supplier_id.id)) {
-      supplierIds.push(p.supplier_id.id);
+    const sId = p.supplier_id?.id;
+    if (sId && !sId.startsWith('demo-') && !verifiedSupplierIds.includes(sId)) {
+      verifiedSupplierIds.push(sId);
     }
   });
 
-  const supplierPages = supplierIds.map((sId) => ({
+  const supplierPages = verifiedSupplierIds.map((sId) => ({
     url: `${baseUrl}/directory/supplier/${sId}`,
     lastModified: now,
     changeFrequency: 'weekly',
