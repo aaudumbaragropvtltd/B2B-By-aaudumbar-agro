@@ -244,21 +244,21 @@ export default function RootLayout({ children }) {
         <link
           rel="preload"
           as="image"
-          href="https://res.cloudinary.com/pjsh8sfp/image/upload/f_webp,q_45,w_480/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg"
+          href="https://res.cloudinary.com/pjsh8sfp/image/upload/c_fill,g_auto,w_540,h_720,f_webp,q_45/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg"
           media="(max-width: 640px)"
           fetchPriority="high"
         />
         <link
           rel="preload"
           as="image"
-          href="https://res.cloudinary.com/pjsh8sfp/image/upload/f_webp,q_45,w_768/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg"
+          href="https://res.cloudinary.com/pjsh8sfp/image/upload/c_fill,g_auto,w_960,h_640,f_webp,q_50/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg"
           media="(min-width: 641px) and (max-width: 1024px)"
           fetchPriority="high"
         />
         <link
           rel="preload"
           as="image"
-          href="https://res.cloudinary.com/pjsh8sfp/image/upload/f_webp,q_50,w_1080/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg"
+          href="https://res.cloudinary.com/pjsh8sfp/image/upload/c_fill,g_auto,w_1280,h_640,f_auto,q_auto:eco/v1789108422/b2b-bharat/banners/1789108417666_ChatGPT_Image_Sep_11__2026__12.jpg"
           media="(min-width: 1025px)"
           fetchPriority="high"
         />

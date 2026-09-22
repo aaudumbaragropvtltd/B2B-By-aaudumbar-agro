@@ -11,16 +11,17 @@ import { createClient } from '@supabase/supabase-js';
 
 const BANNERS_FILE_PATH = path.join(process.cwd(), 'data', 'platform_banners.json');
 
-export function optimizeBannerImageUrl(url, width = 1000) {
+export function optimizeBannerImageUrl(url, width = 1000, height = null) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
     // High-compression WebP for mobile and tablet to resolve Lighthouse image delivery audit
     const format = width <= 1080 ? 'f_webp' : 'f_auto';
     const qualityParam = width <= 640 ? 'q_45' : (width <= 1080 ? 'q_50' : 'q_auto:eco');
-    if (url.includes('/upload/f_auto') || url.includes('/upload/f_webp')) {
-      return url.replace(/\/upload\/(?:f_auto|f_webp)(?:,[^,/]+)*?\//, `/upload/${format},${qualityParam},w_${width}/`);
+    const sizeParam = height ? `c_fill,g_auto,w_${width},h_${height}` : `w_${width}`;
+    if (url.includes('/upload/f_auto') || url.includes('/upload/f_webp') || url.includes('/upload/c_fill')) {
+      return url.replace(/\/upload\/(?:f_auto|f_webp|c_fill)(?:,[^,/]+)*?\//, `/upload/${sizeParam},${format},${qualityParam}/`);
     }
-    return url.replace('/upload/', `/upload/${format},${qualityParam},w_${width}/`);
+    return url.replace('/upload/', `/upload/${sizeParam},${format},${qualityParam}/`);
   }
   return url;
 }
