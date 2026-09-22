@@ -78,6 +78,12 @@ export async function GET(request) {
       lastUpdated: new Date(lastFetchTime).toISOString(),
       count: liveDynamicRates.length,
       commodities: liveDynamicRates,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
     });
   } catch (err) {
     console.error('Error serving mandi rates:', err);

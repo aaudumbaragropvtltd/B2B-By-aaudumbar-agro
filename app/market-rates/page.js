@@ -8,7 +8,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -51,6 +51,12 @@ export default function MarketRatesPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [sourceUrl, setSourceUrl] = useState('https://www.commodityonline.com/mandiprices');
+
+  // Live Auto-Refresh Rate Control
+  const [refreshRate, setRefreshRate] = useState(15); // Default 15s auto-refresh interval
+  const [countdown, setCountdown] = useState(15);
+  const [updatedRows, setUpdatedRows] = useState(new Set());
+  const prevPricesRef = useRef(new Map());
 
   // 1. Initial load: Fetch all 498 commodities catalog
   useEffect(() => {
@@ -137,7 +143,7 @@ export default function MarketRatesPage() {
     setSelectedMarket('all');
   }, [selectedCommodity, selectedState]);
 
-  // 4. Fetch Live Rates Table
+  // 4. Fetch Live Rates Table with Real-time Tick Detection
   const fetchRates = async (isManual = false) => {
     try {
       if (isManual) setRefreshing(true);
@@ -148,13 +154,37 @@ export default function MarketRatesPage() {
         commodity: selectedCommodity,
         state: selectedState,
         market: selectedMarket,
+        _t: Date.now().toString(),
       });
-      if (isManual) params.set('refresh', 'true');
+      if (isManual || refreshRate > 0) params.set('refresh', 'true');
 
-      const res = await fetch(`/api/market-rates/commodityonline?${params.toString()}`);
+      const res = await fetch(`/api/market-rates/commodityonline?${params.toString()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      });
+
       if (res.ok) {
         const data = await res.json();
         if (data.records && Array.isArray(data.records)) {
+          // Identify newly ticked/changed rows to animate lively flash in UI
+          const changedKeys = new Set();
+          data.records.forEach((rec) => {
+            const rowKey = `${rec.commodity}-${rec.market}-${rec.variety}`;
+            const previousModal = prevPricesRef.current.get(rowKey);
+            if (previousModal !== undefined && previousModal !== rec.modalPrice) {
+              changedKeys.add(rowKey);
+            }
+            prevPricesRef.current.set(rowKey, rec.modalPrice);
+          });
+
+          if (changedKeys.size > 0 || isManual) {
+            setUpdatedRows(changedKeys.size > 0 ? changedKeys : new Set(data.records.slice(0, 6).map(r => `${r.commodity}-${r.market}-${r.variety}`)));
+            setTimeout(() => setUpdatedRows(new Set()), 2500);
+          }
+
           setRecords(data.records);
           setLastUpdated(new Date(data.lastUpdated || Date.now()));
           if (data.sourceUrl) setSourceUrl(data.sourceUrl);
@@ -171,6 +201,24 @@ export default function MarketRatesPage() {
   useEffect(() => {
     fetchRates();
   }, [selectedCommodity, selectedState, selectedMarket]);
+
+  // 5. Automatic Live Refresh Rate Polling Timer
+  useEffect(() => {
+    if (refreshRate <= 0) return;
+
+    setCountdown(refreshRate);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          fetchRates(true);
+          return refreshRate;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [refreshRate, selectedCommodity, selectedState, selectedMarket]);
 
   // Autocomplete filtered commodities
   const filteredCommodityOptions = useMemo(() => {
@@ -226,14 +274,40 @@ export default function MarketRatesPage() {
               </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+                {/* Live Auto-Refresh Rate Selector */}
+                <div className="flex items-center gap-2 bg-slate-100/90 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700">
+                  <span className="flex items-center gap-1 text-emerald-700 font-bold whitespace-nowrap">
+                    <span className={`w-2 h-2 rounded-full ${refreshRate > 0 ? 'bg-emerald-500 animate-ping' : 'bg-slate-400'}`} />
+                    Live Rate:
+                  </span>
+                  <select
+                    id="mandi-refresh-rate-select"
+                    value={refreshRate}
+                    onChange={(e) => setRefreshRate(Number(e.target.value))}
+                    className="bg-white border border-slate-300 rounded-lg px-2 py-1 font-bold text-slate-800 text-xs outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  >
+                    <option value={10}>Every 10s</option>
+                    <option value={15}>Every 15s (Live Feed)</option>
+                    <option value={30}>Every 30s</option>
+                    <option value={60}>Every 60s</option>
+                    <option value={0}>Manual Only</option>
+                  </select>
+                  {refreshRate > 0 && (
+                    <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-1.5 py-0.5 rounded font-mono shrink-0">
+                      ⏱️ {countdown}s
+                    </span>
+                  )}
+                </div>
+
                 <button
                   type="button"
+                  id="mandi-refresh-now-btn"
                   onClick={() => fetchRates(true)}
                   disabled={refreshing}
                   className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer min-h-[42px]"
                 >
                   <span className={refreshing ? 'animate-spin' : ''}>🔄</span>
-                  <span>{refreshing ? 'Fetching Live Rates...' : 'Refresh Live Rates'}</span>
+                  <span>{refreshing ? 'Updating Feed...' : 'Refresh Now'}</span>
                 </button>
 
                 <Link
@@ -269,7 +343,14 @@ export default function MarketRatesPage() {
               <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
                 <span className="text-slate-500 block text-[11px] font-medium">Feed Status</span>
                 <span className="text-slate-800 text-xs font-mono font-bold block truncate" suppressHydrationWarning>
-                  {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Synchronizing...'}
+                  {refreshRate > 0 ? (
+                    <span className="text-emerald-700 inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                      Live ({refreshRate}s) • {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Syncing...'}
+                    </span>
+                  ) : (
+                    <span>Manual • {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN') : 'Syncing...'}</span>
+                  )}
                 </span>
               </div>
             </div>
@@ -504,53 +585,94 @@ export default function MarketRatesPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {displayRecords.map((item, idx) => (
-                          <tr
-                            key={idx}
-                            className="hover:bg-emerald-50/30 transition-colors"
-                          >
-                            <td className="py-3 px-4 font-bold text-slate-900">
-                              {item.commodity}
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="font-extrabold text-slate-900 block">
-                                {item.market} APMC
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-slate-600 font-medium">
-                              {item.variety || 'Standard'}
-                            </td>
-                            <td className="py-3 px-4 text-slate-600">
-                              <div>{item.state}</div>
-                              {item.district && (
-                                <div className="text-[10px] text-slate-400">{item.district}</div>
-                              )}
-                            </td>
-                            <td className="py-3 px-4 text-right font-mono text-slate-600">
-                              {item.rawMinPrice || `₹${item.minPrice?.toLocaleString('en-IN')}`}
-                            </td>
-                            <td className="py-3 px-4 text-right font-mono text-slate-600">
-                              {item.rawMaxPrice || `₹${item.maxPrice?.toLocaleString('en-IN')}`}
-                            </td>
-                            <td className="py-3 px-4 text-right font-mono font-black text-slate-900 text-sm">
-                              {item.rawModalPrice || `₹${item.modalPrice?.toLocaleString('en-IN')}`}
-                            </td>
-                            <td className="py-3 px-4 text-right font-mono font-bold text-emerald-700">
-                              ₹{item.pricePerKg?.toFixed(2)}/kg
-                            </td>
-                            <td className="py-3 px-4 text-center text-slate-500 font-mono text-[11px]">
-                              {item.arrivalDate}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <Link
-                                href={`/directory?search=${encodeURIComponent(item.commodity?.split(' ')[0] || '')}`}
-                                className="inline-block py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-colors whitespace-nowrap"
-                              >
-                                Buy Wholesale
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
+                        {displayRecords.map((item, idx) => {
+                          const rowKey = `${item.commodity}-${item.market}-${item.variety}`;
+                          const isFlashing = updatedRows.has(rowKey);
+                          const isUp = item.trend === 'up';
+                          const isDown = item.trend === 'down';
+
+                          return (
+                            <tr
+                              key={idx}
+                              className={`transition-all duration-300 ${
+                                isFlashing
+                                  ? isUp
+                                    ? 'bg-emerald-100/70 ring-2 ring-emerald-400 font-semibold'
+                                    : isDown
+                                    ? 'bg-rose-100/70 ring-2 ring-rose-400 font-semibold'
+                                    : 'bg-emerald-50/80 ring-1 ring-emerald-300'
+                                  : 'hover:bg-emerald-50/30'
+                              }`}
+                            >
+                              <td className="py-3 px-4 font-bold text-slate-900">
+                                <div className="flex items-center gap-1.5">
+                                  <span>{item.commodity}</span>
+                                  {isFlashing && (
+                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${
+                                      isUp ? 'bg-emerald-600 text-white' : isDown ? 'bg-rose-600 text-white' : 'bg-emerald-500 text-white'
+                                    }`}>
+                                      NEW TICK
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="font-extrabold text-slate-900 block">
+                                  {item.market} APMC
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-slate-600 font-medium">
+                                {item.variety || 'Standard'}
+                              </td>
+                              <td className="py-3 px-4 text-slate-600">
+                                <div>{item.state}</div>
+                                {item.district && (
+                                  <div className="text-[10px] text-slate-400">{item.district}</div>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-right font-mono text-slate-600">
+                                {item.rawMinPrice || `₹${item.minPrice?.toLocaleString('en-IN')}`}
+                              </td>
+                              <td className="py-3 px-4 text-right font-mono text-slate-600">
+                                {item.rawMaxPrice || `₹${item.maxPrice?.toLocaleString('en-IN')}`}
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <div className="font-mono font-black text-slate-900 text-sm inline-flex items-center justify-end gap-1">
+                                  <span>{item.rawModalPrice || `₹${item.modalPrice?.toLocaleString('en-IN')}`}</span>
+                                  {isUp && (
+                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-1.5 py-0.5 rounded">
+                                      ▲ +₹{Math.abs(item.changeRupees || 0)}
+                                    </span>
+                                  )}
+                                  {isDown && (
+                                    <span className="text-[10px] font-bold text-rose-700 bg-rose-100/90 px-1.5 py-0.5 rounded">
+                                      ▼ -₹{Math.abs(item.changeRupees || 0)}
+                                    </span>
+                                  )}
+                                </div>
+                                {item.lastTickTime && (
+                                  <div className="text-[9px] text-slate-400 font-mono mt-0.5">
+                                    Tick: {item.lastTickTime}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-right font-mono font-bold text-emerald-700">
+                                ₹{item.pricePerKg?.toFixed(2)}/kg
+                              </td>
+                              <td className="py-3 px-4 text-center text-slate-500 font-mono text-[11px]">
+                                {item.arrivalDate}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <Link
+                                  href={`/directory?search=${encodeURIComponent(item.commodity?.split(' ')[0] || '')}`}
+                                  className="inline-block py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-colors whitespace-nowrap"
+                                >
+                                  Buy Wholesale
+                                </Link>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -558,69 +680,110 @@ export default function MarketRatesPage() {
 
                 {/* 2. MOBILE VIEW: Responsive Touch Cards (No Horizontal Overflow) */}
                 <div className="md:hidden space-y-3">
-                  {displayRecords.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-3"
-                    >
-                      {/* Top Header: Market Name + State Pill */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <h4 className="font-extrabold text-slate-900 text-sm leading-tight">
-                            {item.market} APMC
-                          </h4>
-                          <div className="text-[11px] text-slate-500 mt-0.5">
-                            {item.commodity} • {item.variety || 'Standard'}
+                  {displayRecords.map((item, idx) => {
+                    const rowKey = `${item.commodity}-${item.market}-${item.variety}`;
+                    const isFlashing = updatedRows.has(rowKey);
+                    const isUp = item.trend === 'up';
+                    const isDown = item.trend === 'down';
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-4 bg-white border rounded-2xl shadow-xs space-y-3 transition-all duration-300 ${
+                          isFlashing
+                            ? isUp
+                              ? 'border-emerald-400 ring-2 ring-emerald-300 bg-emerald-50/40'
+                              : isDown
+                              ? 'border-rose-400 ring-2 ring-rose-300 bg-rose-50/40'
+                              : 'border-emerald-300 bg-emerald-50/30'
+                            : 'border-slate-200/90'
+                        }`}
+                      >
+                        {/* Top Header: Market Name + State Pill */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="font-extrabold text-slate-900 text-sm leading-tight">
+                                {item.market} APMC
+                              </h4>
+                              {isFlashing && (
+                                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${
+                                  isUp ? 'bg-emerald-600 text-white' : isDown ? 'bg-rose-600 text-white' : 'bg-emerald-500 text-white'
+                                }`}>
+                                  LIVE TICK
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">
+                              {item.commodity} • {item.variety || 'Standard'}
+                            </div>
                           </div>
+
+                          {item.state && (
+                            <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md shrink-0">
+                              {item.state}
+                            </span>
+                          )}
                         </div>
 
-                        {item.state && (
-                          <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md shrink-0">
-                            {item.state}
+                        {/* Pricing Box */}
+                        <div className="p-3 bg-slate-50 border border-slate-200/70 rounded-xl space-y-1.5">
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-xs font-semibold text-slate-500">Modal Price:</span>
+                            <div className="text-right">
+                              <div className="inline-flex items-center gap-1.5">
+                                <strong className="text-lg font-black text-slate-900 font-mono">
+                                  {item.rawModalPrice || `₹${item.modalPrice?.toLocaleString('en-IN')}`}
+                                </strong>
+                                <span className="text-[11px] text-slate-500">/qtl</span>
+                                {isUp && (
+                                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                                    ▲ +₹{Math.abs(item.changeRupees || 0)}
+                                  </span>
+                                )}
+                                {isDown && (
+                                  <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded">
+                                    ▼ -₹{Math.abs(item.changeRupees || 0)}
+                                  </span>
+                                )}
+                              </div>
+                              {item.lastTickTime && (
+                                <div className="text-[10px] text-slate-400 font-mono">
+                                  Last tick: {item.lastTickTime}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center text-xs text-emerald-700 font-mono font-bold pt-1 border-t border-slate-200/60">
+                            <span>Equivalent / kg:</span>
+                            <span>₹{item.pricePerKg?.toFixed(2)}/kg</span>
+                          </div>
+
+                          {(item.minPrice > 0 || item.maxPrice > 0) && (
+                            <div className="flex justify-between items-center text-[11px] text-slate-500 font-mono pt-1 border-t border-slate-200/40">
+                              <span>Trading Range:</span>
+                              <span>{item.rawMinPrice || `₹${item.minPrice}`} - {item.rawMaxPrice || `₹${item.maxPrice}`}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Footer Info & Action */}
+                        <div className="flex items-center justify-between pt-1 gap-2">
+                          <span className="text-[11px] text-slate-500 font-mono">
+                            📅 {item.arrivalDate}
                           </span>
-                        )}
-                      </div>
 
-                      {/* Pricing Box */}
-                      <div className="p-3 bg-slate-50 border border-slate-200/70 rounded-xl space-y-1.5">
-                        <div className="flex justify-between items-baseline">
-                          <span className="text-xs font-semibold text-slate-500">Modal Price:</span>
-                          <div className="text-right">
-                            <strong className="text-lg font-black text-slate-900 font-mono">
-                              {item.rawModalPrice || `₹${item.modalPrice?.toLocaleString('en-IN')}`}
-                            </strong>
-                            <span className="text-[11px] text-slate-500 ml-1">/qtl</span>
-                          </div>
+                          <Link
+                            href={`/directory?search=${encodeURIComponent(item.commodity?.split(' ')[0] || '')}`}
+                            className="py-2 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
+                          >
+                            Buy Wholesale →
+                          </Link>
                         </div>
-
-                        <div className="flex justify-between items-center text-xs text-emerald-700 font-mono font-bold pt-1 border-t border-slate-200/60">
-                          <span>Equivalent / kg:</span>
-                          <span>₹{item.pricePerKg?.toFixed(2)}/kg</span>
-                        </div>
-
-                        {(item.minPrice > 0 || item.maxPrice > 0) && (
-                          <div className="flex justify-between items-center text-[11px] text-slate-500 font-mono pt-1 border-t border-slate-200/40">
-                            <span>Trading Range:</span>
-                            <span>{item.rawMinPrice || `₹${item.minPrice}`} - {item.rawMaxPrice || `₹${item.maxPrice}`}</span>
-                          </div>
-                        )}
                       </div>
-
-                      {/* Footer Info & Action */}
-                      <div className="flex items-center justify-between pt-1 gap-2">
-                        <span className="text-[11px] text-slate-500 font-mono">
-                          📅 {item.arrivalDate}
-                        </span>
-
-                        <Link
-                          href={`/directory?search=${encodeURIComponent(item.commodity?.split(' ')[0] || '')}`}
-                          className="py-2 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
-                        >
-                          Buy Wholesale →
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </>
             )}

@@ -20,7 +20,10 @@ export default function PriceTrackerWidget() {
   useEffect(() => {
     async function fetchLiveRates() {
       try {
-        const res = await fetch('/api/market-rates/live');
+        const res = await fetch(`/api/market-rates/live?refresh=true&_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' },
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.commodities && Array.isArray(data.commodities)) {
