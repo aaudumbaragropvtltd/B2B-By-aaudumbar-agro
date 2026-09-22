@@ -38,15 +38,6 @@ export function optimizeProductImageUrl(url, options = {}) {
     return cleanUrl;
   }
 
-  // Shopify CDN images (cdn/shop/files or cdn.shopify.com)
-  if (cleanUrl.includes('cdn/shop/files') || cleanUrl.includes('cdn.shopify.com')) {
-    if (/([?&])width=\d+/.test(cleanUrl)) {
-      return cleanUrl.replace(/([?&])width=\d+/, `$1width=${width}`);
-    }
-    const separator = cleanUrl.includes('?') ? '&' : '?';
-    return `${cleanUrl}${separator}width=${width}`;
-  }
-
   // Unsplash images
   if (cleanUrl.includes('images.unsplash.com')) {
     if (cleanUrl.includes('w=')) {

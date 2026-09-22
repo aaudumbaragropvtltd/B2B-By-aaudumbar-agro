@@ -14,10 +14,11 @@ const BANNERS_FILE_PATH = path.join(process.cwd(), 'data', 'platform_banners.jso
 export function optimizeBannerImageUrl(url, width = 1000) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
-    if (url.includes('/upload/f_auto,q_auto')) {
-      return url.replace(/\/upload\/f_auto,q_auto(?::eco|:good|:low)?(?:,w_\d+)?\//, `/upload/f_auto,q_auto:eco,w_${width}/`);
+    const qualityParam = width <= 600 ? 'q_50' : (width <= 900 ? 'q_55' : 'q_auto:eco');
+    if (url.includes('/upload/f_auto')) {
+      return url.replace(/\/upload\/f_auto(?:,[^,/]+)*?\//, `/upload/f_auto,${qualityParam},w_${width}/`);
     }
-    return url.replace('/upload/', `/upload/f_auto,q_auto:eco,w_${width}/`);
+    return url.replace('/upload/', `/upload/f_auto,${qualityParam},w_${width}/`);
   }
   return url;
 }

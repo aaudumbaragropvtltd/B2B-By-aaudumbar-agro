@@ -32,11 +32,11 @@
     "tailwindcss": "^4"
   },
   "browserslist": [
-    "Chrome >= 90",
-    "Edge >= 90",
-    "Safari >= 15",
-    "iOS >= 15",
-    "Firefox >= 90",
+    "Chrome >= 94",
+    "Edge >= 94",
+    "Safari >= 15.4",
+    "iOS >= 15.4",
+    "Firefox >= 93",
     "not dead"
   ]
 }

@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchAutocomplete from '@/components/SearchAutocomplete';
 
 export function optimizeBannerUrl(url, width = 1000) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
-    if (url.includes('/upload/f_auto,q_auto')) {
-      return url.replace(/\/upload\/f_auto,q_auto(?::eco|:good|:low)?(?:,w_\d+)?\//, `/upload/f_auto,q_auto:eco,w_${width}/`);
+    const qualityParam = width <= 600 ? 'q_50' : (width <= 900 ? 'q_55' : 'q_auto:eco');
+    if (url.includes('/upload/f_auto')) {
+      return url.replace(/\/upload\/f_auto(?:,[^,/]+)*?\//, `/upload/f_auto,${qualityParam},w_${width}/`);
     }
-    return url.replace('/upload/', `/upload/f_auto,q_auto:eco,w_${width}/`);
+    return url.replace('/upload/', `/upload/f_auto,${qualityParam},w_${width}/`);
   }
   return url;
 }
@@ -103,32 +104,17 @@ export default function EcommerceHero({ initialBanners = [] }) {
     loadDynamicBanners();
   }, []);
 
-  // Preload secondary banner images lazily after idle delay to avoid competing with LCP on mobile
+  // Advance slides after comfortable interval to maintain low main-thread activity
   useEffect(() => {
-    if (banners && banners.length > 1 && typeof window !== 'undefined') {
-      const timer = setTimeout(() => {
-        banners.slice(1).forEach((b) => {
-          const rawUrl = b.hero_image_url || b.image;
-          if (rawUrl) {
-            const img = new window.Image();
-            img.src = optimizeBannerUrl(rawUrl, 768);
-          }
-        });
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
-  }, [banners]);
-
-  useEffect(() => {
-    if (!banners.length) return;
+    if (!banners.length || banners.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
-    }, 6000);
+    }, 8000);
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const touchStartRef = useRef(null);
+  const touchEndRef = useRef(null);
 
   // Swipe sensitivity threshold in px
   const minSwipeDistance = 50;
@@ -144,17 +130,17 @@ export default function EcommerceHero({ initialBanners = [] }) {
   };
 
   const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    touchEndRef.current = null;
+    touchStartRef.current = e.targetTouches[0].clientX;
   };
 
   const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    touchEndRef.current = e.targetTouches[0].clientX;
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
+    if (!touchStartRef.current || !touchEndRef.current) return;
+    const distance = touchStartRef.current - touchEndRef.current;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
@@ -192,7 +178,7 @@ export default function EcommerceHero({ initialBanners = [] }) {
             className="absolute inset-0"
           >
             <img
-              src={bgImageDesktop}
+              src={bgImageMobile}
               srcSet={`${bgImageMobile} 480w, ${bgImageTablet} 768w, ${bgImageDesktop} 1080w`}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
               alt={activeBanner.title || 'Wholesale Banner'}
@@ -200,7 +186,7 @@ export default function EcommerceHero({ initialBanners = [] }) {
               style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
               loading="eager"
               fetchPriority="high"
-              decoding="async"
+              decoding="sync"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = FALLBACK_BANNERS[0].hero_image_url;

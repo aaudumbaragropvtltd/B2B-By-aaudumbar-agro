@@ -185,7 +185,7 @@ export default async function HomePage() {
       <link
         rel="preload"
         as="image"
-        href={preloadDesktopUrl}
+        href={preloadMobileUrl}
         imageSrcSet={`${preloadMobileUrl} 480w, ${preloadTabletUrl} 768w, ${preloadDesktopUrl} 1080w`}
         imageSizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1080px"
         fetchPriority="high"
