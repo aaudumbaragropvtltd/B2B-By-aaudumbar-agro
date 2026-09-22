@@ -1,12 +1,10 @@
 // ============================================================================
 // FOOTER COMPONENT
 // ============================================================================
-// Clean, spacious, enterprise-grade footer:
-// 1. Brand identity, GST/Escrow trust badges & verified social channels
-// 2. Clear, dedicated Policies & Legal column (Razorpay compliant)
-// 3. Enterprise Support & Registered Office (Schema.org Microdata)
-// 4. Neatly aligned, responsive 38 Industrial Sectors Directory Grid (2 cols mobile / 3 cols tablet / 4 cols desktop)
-// 5. Well-spaced, non-colliding bottom copyright bar with touch-friendly navigation
+// Structure matching exact user specification:
+// 1. Browse 38 Industrial Sectors & Wholesale Directories Grid (Top)
+// 2. Enterprise Section: Brand, Policies & Legal, Enterprise Support (Middle)
+// 3. Copyright & Legal Quick Links Bar (Bottom)
 // ============================================================================
 
 import React from 'react';
@@ -24,12 +22,57 @@ export default function Footer() {
       />
 
       {/* Main Footer Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 pb-12 relative z-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-12 relative z-20 space-y-10 sm:space-y-12">
         
-        {/* ── Top 3-Column Enterprise Section ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 pb-10 border-b border-white/10">
+        {/* ── 1. Wholesale Industry Sectors Directory (38 Sectors) — Placed at the top ── */}
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-3 border-b border-white/10">
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-4 rounded-full bg-amber-400 inline-block shrink-0" />
+              <h4 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                Browse 38 Industrial Sectors &amp; Wholesale Directories
+              </h4>
+            </div>
+            
+            <Link
+              href="/directory"
+              className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors inline-flex items-center gap-1.5 group self-start sm:self-auto cursor-pointer"
+            >
+              <span>Explore Master Directory</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </Link>
+          </div>
+
+          {/* Neatly Aligned Responsive Grid:
+              - Mobile (<640px): 2 balanced columns with generous tap targets
+              - Tablet (640px - 1024px): 3 balanced columns
+              - Desktop (>=1024px): 4 balanced columns
+          */}
+          <nav 
+            aria-label="38 Industrial Sectors Directory"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-2.5 text-xs text-slate-300"
+          >
+            {STATIC_SECTORS.map((sector) => (
+              <Link
+                key={sector.slug}
+                href={`/directory/${sector.slug}`}
+                className="group flex items-start gap-1.5 py-1 text-slate-300/85 hover:text-white transition-all duration-150"
+              >
+                <span className="text-amber-400/70 group-hover:text-amber-400 text-xs font-mono leading-none mt-0.5 shrink-0 transition-transform group-hover:translate-x-0.5 select-none">
+                  ›
+                </span>
+                <span className="text-[11px] sm:text-xs leading-snug group-hover:text-amber-300 group-hover:underline underline-offset-2 break-words">
+                  {sector.name}
+                </span>
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        {/* ── 2. Top Enterprise 3-Column Section (Brand, Policies & Legal, Enterprise Support) ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 sm:pt-10 border-t border-white/10">
           
-          {/* 1. Brand & Trust Column */}
+          {/* Brand & Trust Column */}
           <div className="sm:col-span-2 lg:col-span-5 space-y-4">
             <Link href="/" className="inline-flex items-center gap-3 group">
               <B2BLogo className="w-10 h-10 transition-transform group-hover:scale-105" />
@@ -79,7 +122,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* 2. Policies & Legal Column (Razorpay Compliance) */}
+          {/* Policies & Legal Column (Razorpay Compliance) */}
           <div className="lg:col-span-3 space-y-4">
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-3.5 rounded-full bg-amber-400 inline-block" />
@@ -137,7 +180,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* 3. Support & Corporate Office (Schema.org Microdata) */}
+          {/* Enterprise Support & Corporate Office (Schema.org Microdata) */}
           <div
             className="lg:col-span-4 space-y-4"
             itemScope
@@ -201,54 +244,9 @@ export default function Footer() {
             </div>
           </div>
         </div>
-
-        {/* ── Wholesale Industry Sectors Directory (38 Sectors) ── */}
-        <div className="pt-8 sm:pt-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-2 border-b border-white/10">
-            <div className="flex items-center gap-2.5">
-              <span className="w-1.5 h-4 rounded-full bg-amber-400 inline-block shrink-0" />
-              <h4 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
-                Browse 38 Industrial Sectors &amp; Wholesale Directories
-              </h4>
-            </div>
-            
-            <Link
-              href="/directory"
-              className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors inline-flex items-center gap-1.5 group self-start sm:self-auto cursor-pointer"
-            >
-              <span>Explore Master Directory</span>
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
-          </div>
-
-          {/* Neatly Aligned Responsive Grid:
-              - Mobile (<640px): 2 balanced columns with generous tap targets
-              - Tablet (640px - 1024px): 3 balanced columns
-              - Desktop (>=1024px): 4 balanced columns
-          */}
-          <nav 
-            aria-label="38 Industrial Sectors Directory"
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-2.5 text-xs text-slate-300"
-          >
-            {STATIC_SECTORS.map((sector) => (
-              <Link
-                key={sector.slug}
-                href={`/directory/${sector.slug}`}
-                className="group flex items-start gap-1.5 py-1 text-slate-300/85 hover:text-white transition-all duration-150"
-              >
-                <span className="text-amber-400/70 group-hover:text-amber-400 text-xs font-mono leading-none mt-0.5 shrink-0 transition-transform group-hover:translate-x-0.5 select-none">
-                  ›
-                </span>
-                <span className="text-[11px] sm:text-xs leading-snug group-hover:text-amber-300 group-hover:underline underline-offset-2 break-words">
-                  {sector.name}
-                </span>
-              </Link>
-            ))}
-          </nav>
-        </div>
       </div>
 
-      {/* ── Bottom Bar: Clean, Spaced, High-Contrast ── */}
+      {/* ── 3. Bottom Bar: Clean, Spaced, High-Contrast ── */}
       <div className="border-t border-white/10 bg-black/60 py-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-300">
           <p className="font-medium text-center md:text-left text-slate-300 text-[11px] sm:text-xs">
