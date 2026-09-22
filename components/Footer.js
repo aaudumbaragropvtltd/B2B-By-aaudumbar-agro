@@ -126,36 +126,36 @@ export default function Footer() {
             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-5 pb-1 border-b border-white/10 inline-block">
               Enterprise Support
             </h4>
-            <div className="space-y-4 text-sm text-white/60">
+            <div className="space-y-4 text-sm text-slate-300">
               <div>
-                <div className="text-white/40 text-xs uppercase tracking-wider mb-1 font-semibold">
+                <div className="text-slate-300 text-xs uppercase tracking-wider mb-1 font-bold">
                   Official Email
                 </div>
                 <a
                   href="mailto:support@b2bindia.site"
                   itemProp="email"
-                  className="text-white/80 hover:text-accent-400 transition-colors duration-200 font-medium"
+                  className="text-white hover:text-accent-400 transition-colors duration-200 font-medium"
                 >
                   support@b2bindia.site
                 </a>
               </div>
               <div>
-                <div className="text-white/40 text-xs uppercase tracking-wider mb-1 font-semibold">
+                <div className="text-slate-300 text-xs uppercase tracking-wider mb-1 font-bold">
                   Helpline
                 </div>
                 <a
                   href="tel:+918408841998"
                   itemProp="telephone"
-                  className="text-white/90 hover:text-accent-400 font-semibold transition-colors duration-200"
+                  className="text-white hover:text-accent-400 font-semibold transition-colors duration-200"
                 >
                   +91 8408841998
                 </a>
               </div>
               <div itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
-                <div className="text-white/40 text-xs uppercase tracking-wider mb-1 font-semibold">
+                <div className="text-slate-300 text-xs uppercase tracking-wider mb-1 font-bold">
                   Registered Office
                 </div>
-                <p className="leading-relaxed text-xs text-white/60">
+                <p className="leading-relaxed text-xs text-slate-200">
                   <span itemProp="streetAddress">Plot No. 5, Prerna Nagar, Garkheda Parisar</span>,<br />
                   <span itemProp="addressLocality">Chhatrapati Sambhajinagar</span>{' '}
                   <span itemProp="postalCode">431009</span>,{' '}
@@ -169,10 +169,10 @@ export default function Footer() {
 
         {/* Wholesale Industry Sectors Directory — Solves Weak Internal Link Equity */}
         <div className="border-t border-white/10 pt-8 mt-10">
-          <h4 className="text-xs font-bold text-white/80 uppercase tracking-wider mb-4">
+          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
             Browse 38 Industrial Sectors &amp; Wholesale Directories
           </h4>
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-white/50 leading-relaxed">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-300 leading-relaxed">
             {STATIC_SECTORS.map((sector) => (
               <Link
                 key={sector.slug}
@@ -186,30 +186,30 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Bar — Clean, Spaced, No Collisions */}
-      <div className="border-t border-white/10 bg-black/40 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/40">
-          <p className="font-medium text-center md:text-left">
+      {/* Bottom Bar — Clean, Spaced, High-Contrast */}
+      <div className="border-t border-white/10 bg-black/50 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-300">
+          <p className="font-semibold text-center md:text-left text-slate-200">
             © 2026 Aaudumbar Agro Pvt. Ltd. All rights reserved.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-5 text-white/50">
+          <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-5 text-slate-300 font-medium">
             <Link href="/terms" className="hover:text-white transition-colors">
               Terms
             </Link>
-            <span className="text-white/20 select-none">•</span>
+            <span className="text-white/40 select-none">•</span>
             <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy
             </Link>
-            <span className="text-white/20 select-none">•</span>
+            <span className="text-white/40 select-none">•</span>
             <Link href="/refund-policy" className="hover:text-white transition-colors">
               Refunds
             </Link>
-            <span className="text-white/20 select-none">•</span>
+            <span className="text-white/40 select-none">•</span>
             <Link href="/shipping-policy" className="hover:text-white transition-colors">
               Shipping
             </Link>
-            <span className="text-white/20 select-none">•</span>
+            <span className="text-white/40 select-none">•</span>
             <Link href="/support" className="hover:text-white transition-colors">
               Contact Us
             </Link>

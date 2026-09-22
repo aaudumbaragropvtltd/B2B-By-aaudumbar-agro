@@ -24,7 +24,7 @@ const FALLBACK_RFQS = [
     destination: 'Mundra Port, Gujarat',
     deadline: '2026-09-15',
     status: 'open',
-    created_at: new Date().toISOString(),
+    created_at: '2026-09-18T10:00:00.000Z',
     notes: 'Packaging in 50kg PP bags with custom export stenciling. Quality inspection required.',
     users: { company_name: 'Shree Krishna Agro Exports', city: 'Karnal', state: 'Haryana', verification_level: 'Diamond' }
   },
@@ -37,7 +37,7 @@ const FALLBACK_RFQS = [
     destination: 'Chakan Industrial Area, Pune',
     deadline: '2026-09-10',
     status: 'open',
-    created_at: new Date().toISOString(),
+    created_at: '2026-09-17T14:30:00.000Z',
     notes: 'Grade 8.8 and 10.9 with zinc phosphating. ISO/TS certification certificate mandatory.',
     users: { company_name: 'Bharat Dynamics Auto Components', city: 'Pune', state: 'Maharashtra', verification_level: 'Platinum' }
   },
@@ -50,7 +50,7 @@ const FALLBACK_RFQS = [
     destination: 'Bhiwandi Logistics Park, Mumbai',
     deadline: '2026-09-05',
     status: 'open',
-    created_at: new Date().toISOString(),
+    created_at: '2026-09-16T09:15:00.000Z',
     notes: 'Blow moulding grade for industrial containers. Virgin prime polymer only.',
     users: { company_name: 'Apex Polymer Packaging Solutions', city: 'Thane', state: 'Maharashtra', verification_level: 'Gold' }
   },
@@ -63,7 +63,7 @@ const FALLBACK_RFQS = [
     destination: 'Jaipur Solar Park Site',
     deadline: '2026-09-20',
     status: 'open',
-    created_at: new Date().toISOString(),
+    created_at: '2026-09-15T11:45:00.000Z',
     notes: 'BIS approved with minimum 5-year on-site manufacturer replacement warranty.',
     users: { company_name: 'Surya Shakti Renewable Infra', city: 'Jaipur', state: 'Rajasthan', verification_level: 'Diamond' }
   },
@@ -99,7 +99,7 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
   const [selectedRfqForQuote, setSelectedRfqForQuote] = useState(null);
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
-  // Sync latest live marketplace RFQs and user profile
+  // Sync latest live marketplace RFQs (public route) and lazily fetch user profile only when quoting
   React.useEffect(() => {
     fetch('/api/rfq?view=marketplace')
       .then(res => res.ok ? res.json() : null)
@@ -109,7 +109,11 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
         }
       })
       .catch(() => {});
+  }, []);
 
+  // Fetch user profile only on demand when user interacts with RFQ actions
+  React.useEffect(() => {
+    if (!showSmartRFQModal && !selectedRfqForQuote) return;
     fetch('/api/dashboard/profile')
       .then(res => res.ok ? res.json() : null)
       .then(data => {
@@ -118,7 +122,7 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [showSmartRFQModal, selectedRfqForQuote]);
 
   const displayRfqs = rfqs.length > 0 ? rfqs : FALLBACK_RFQS;
 
@@ -197,7 +201,7 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-slate-400 font-medium">
+                  <span className="text-xs text-slate-400 font-medium" suppressHydrationWarning>
                     {rfq.created_at ? new Date(rfq.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'Today'}
                   </span>
                 </div>
@@ -245,7 +249,7 @@ export default function LiveRFQsSection({ initialRfqs = [] }) {
                   </div>
                   <div className="bg-slate-900/60 rounded-xl p-2.5 border border-slate-700/40">
                     <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Needed By</div>
-                    <div className="text-xs font-semibold text-slate-200 mt-0.5">
+                    <div className="text-xs font-semibold text-slate-200 mt-0.5" suppressHydrationWarning>
                       {rfq.deadline ? new Date(rfq.deadline).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Immediate'}
                     </div>
                   </div>

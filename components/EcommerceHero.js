@@ -338,29 +338,36 @@ export default function EcommerceHero({ initialBanners = [] }) {
         </motion.div>
       </div>
 
-      {/* Slide Indicators with Mobile Nav Touch Controls */}
-      <div className="absolute bottom-3 sm:bottom-6 flex items-center gap-2.5 z-20">
+      {/* Slide Indicators with Accessible Touch Targets & Composited Pill State */}
+      <div className="absolute bottom-3 sm:bottom-6 flex items-center gap-1 sm:gap-2 z-20">
         <button
           onClick={handlePrevSlide}
           type="button"
           aria-label="Previous slide"
           suppressHydrationWarning
-          className="sm:hidden w-6 h-6 rounded-full bg-white/15 text-white flex items-center justify-center text-xs backdrop-blur-md border border-white/20 cursor-pointer active:scale-90"
+          className="sm:hidden w-10 h-10 rounded-full bg-white/15 text-white flex items-center justify-center text-sm backdrop-blur-md border border-white/20 cursor-pointer active:scale-90"
         >
           ‹
         </button>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center">
           {banners.map((_, idx) => (
             <button
               key={idx}
+              type="button"
               onClick={() => setCurrentSlide(idx)}
               suppressHydrationWarning
-              className={`h-1.5 sm:h-2 rounded-full transition-all cursor-pointer ${
-                currentSlide === idx ? 'w-6 sm:w-8 bg-brand-500' : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/70'
-              }`}
+              className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full"
               aria-label={`Go to slide ${idx + 1}`}
-            />
+            >
+              <span
+                className={`h-2 rounded-full transition-all duration-300 pointer-events-none ${
+                  currentSlide === idx
+                    ? 'w-7 sm:w-8 bg-brand-500 shadow-sm'
+                    : 'w-2 bg-white/50 group-hover:bg-white/80'
+                }`}
+              />
+            </button>
           ))}
         </div>
 
@@ -369,7 +376,7 @@ export default function EcommerceHero({ initialBanners = [] }) {
           type="button"
           aria-label="Next slide"
           suppressHydrationWarning
-          className="sm:hidden w-6 h-6 rounded-full bg-white/15 text-white flex items-center justify-center text-xs backdrop-blur-md border border-white/20 cursor-pointer active:scale-90"
+          className="sm:hidden w-10 h-10 rounded-full bg-white/15 text-white flex items-center justify-center text-sm backdrop-blur-md border border-white/20 cursor-pointer active:scale-90"
         >
           ›
         </button>

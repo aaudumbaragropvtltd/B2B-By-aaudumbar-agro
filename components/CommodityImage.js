@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import { optimizeProductImageUrl } from '@/utils/imageOptimizer';
 
 export default function CommodityImage({ src, category, className = "aspect-video w-full h-auto sm:aspect-[4/3]" }) {
   const [isBroken, setIsBroken] = useState(!src);
@@ -43,16 +44,17 @@ export default function CommodityImage({ src, category, className = "aspect-vide
     );
   }
 
-  const secureSrc = src && typeof src === 'string'
-    ? src.replace(/^http:\/\//i, 'https://')
-    : src;
+  const optimizedSrc = optimizeProductImageUrl(src, { width: 400 });
 
   return (
     <img 
-      src={secureSrc} 
+      src={optimizedSrc} 
       alt={category || "Bulk Commodity"} 
+      width="400"
+      height="300"
       className={`${className} object-cover border border-white/5`}
       loading="lazy"
+      decoding="async"
       onError={() => setIsBroken(true)}
     />
   );

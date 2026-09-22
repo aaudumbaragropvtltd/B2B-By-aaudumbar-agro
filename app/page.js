@@ -22,6 +22,7 @@ import AnimatedCategoryGrid from '@/components/AnimatedCategoryGrid';
 import KnowledgeHubFaq from '@/components/KnowledgeHubFaq';
 import Footer from '@/components/Footer';
 import { getActiveBanners, optimizeBannerImageUrl } from '@/utils/platformBanners';
+import { optimizeProductImageUrl } from '@/utils/imageOptimizer';
 import {
   getSiteUrl,
   getPlatformKnowledgeFaqs,
@@ -132,9 +133,7 @@ export default async function HomePage() {
         unit: p.unit_label,
         moq: p.bulk_minimum_order,
         badge: p.quality_grade === 'Premium' ? 'Trade Assurance' : (p.quality_grade ? 'Verified' : null),
-        image: (p.hero_image_url && p.hero_image_url.trim() !== '')
-          ? p.hero_image_url
-          : 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80',
+        image: optimizeProductImageUrl(p.hero_image_url, { width: 400 }),
         category: p.sector_id?.slug || 'general',
         supplierName: p.technical_specifications?.['Supplier Name'] || p.supplier_id?.company_name || 'Verified Supplier'
       }));

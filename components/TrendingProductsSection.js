@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { PRODUCTS, formatPrice, SUPPLIER } from '@/data/products';
 import { getProductUrl } from '@/utils/slugUtils';
+import { optimizeProductImageUrl } from '@/utils/imageOptimizer';
 
 // Pick trending products (ones with badges)
 const TRENDING_PRODUCTS = PRODUCTS.filter(p => p.badge).slice(0, 12);
@@ -23,10 +24,7 @@ const BADGE_STYLES = {
 };
 
 function ProductCard({ product, index }) {
-  const fallbackImg = 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80';
-  const imageSrc = (product.image && typeof product.image === 'string' && product.image.trim() !== '') 
-    ? product.image 
-    : (product.hero_image_url || fallbackImg);
+  const imageSrc = optimizeProductImageUrl(product.image || product.hero_image_url, { width: 400 });
   const displayName = product.name || product.title || 'Verified Wholesale Product';
 
   return (
@@ -48,8 +46,11 @@ function ProductCard({ product, index }) {
             <img
               src={imageSrc}
               alt={displayName}
+              width="320"
+              height="240"
               className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
               loading="lazy"
+              decoding="async"
             />
             {/* Badge */}
             {product.badge && (

@@ -12,12 +12,10 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { PRODUCTS, formatPrice } from '@/data/products';
 import { getProductUrl } from '@/utils/slugUtils';
+import { optimizeProductImageUrl } from '@/utils/imageOptimizer';
 
 function ProductMiniCard({ product }) {
-  const fallbackImg = 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80';
-  const imageSrc = (product.image && typeof product.image === 'string' && product.image.trim() !== '') 
-    ? product.image 
-    : (product.hero_image_url || fallbackImg);
+  const imageSrc = optimizeProductImageUrl(product.image || product.hero_image_url, { width: 300 });
 
   return (
     <Link href={getProductUrl(product)} className="flex-shrink-0 w-40 sm:w-48 mx-2">
@@ -30,8 +28,11 @@ function ProductMiniCard({ product }) {
           <img
             src={imageSrc}
             alt={product.name || 'B2B Product'}
+            width="200"
+            height="150"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
+            decoding="async"
           />
         </div>
         {/* Content */}
@@ -55,8 +56,8 @@ function ProductMiniCard({ product }) {
 }
 
 export default function CategoryShowcase({ initialProducts = [] }) {
-  // Use DB products if provided, otherwise fallback to static
-  const allProducts = initialProducts.length > 0 ? initialProducts : PRODUCTS.slice(0, 20);
+  // Use DB products if provided, otherwise fallback to static (limit to 10 for lightweight DOM and fast rendering)
+  const allProducts = (initialProducts.length > 0 ? initialProducts : PRODUCTS).slice(0, 10);
   const doubled = [...allProducts, ...allProducts];
 
   return (

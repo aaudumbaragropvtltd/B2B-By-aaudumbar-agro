@@ -184,6 +184,8 @@ export default function Navbar() {
             <form onSubmit={handleSearch} suppressHydrationWarning className="flex w-full rounded-xl bg-white/90 backdrop-blur-md shadow-sm border border-gray-200 focus-within:ring-2 focus-within:ring-brand-500/50 hover:shadow-md transition-all card-glow relative group">
               <div className="absolute inset-0 rounded-xl gradient-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <select
+                id="desktop-category-select"
+                aria-label="Filter products by sector category"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 suppressHydrationWarning

@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { getFeaturedProducts, formatPrice, getCategoryById, SUPPLIER } from '@/data/products';
 import { getProductUrl } from '@/utils/slugUtils';
+import { optimizeProductImageUrl } from '@/utils/imageOptimizer';
 
 const BADGE_STYLES = {
   'Best Seller': 'bg-gradient-to-r from-red-500 to-orange-500 text-white',
@@ -20,10 +21,7 @@ const BADGE_STYLES = {
 };
 
 function ProductCard({ product, index }) {
-  const fallbackImg = 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80';
-  const imageSrc = (product.image && typeof product.image === 'string' && product.image.trim() !== '') 
-    ? product.image 
-    : (product.hero_image_url || fallbackImg);
+  const imageSrc = optimizeProductImageUrl(product.image || product.hero_image_url, { width: 400 });
   const displayName = product.name || product.title || 'Verified Wholesale Product';
 
   return (
@@ -44,8 +42,11 @@ function ProductCard({ product, index }) {
             <img
               src={imageSrc}
               alt={displayName}
+              width="360"
+              height="270"
               className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
               loading="lazy"
+              decoding="async"
             />
             {/* Badge */}
             {product.badge && (

@@ -548,7 +548,7 @@ export const PRODUCTS = [
     price: 620,
     unit: "Kg",
     moq: "200 Kg",
-    image: "https://5.imimg.com/data5/SELLER/Default/2026/1/575392795/CI/LG/VR/249856603/indian-black-pepper-malabar-tellicherry-kollimalai-origins.png"
+    image: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: "fa-4",
@@ -585,7 +585,7 @@ export const PRODUCTS = [
     price: 350,
     unit: "Dozen",
     moq: "100 Doz",
-    image: "https://farmerscraft.in/cdn/shop/files/WhatsApp_Image_2025-04-10_at_8.14.59_PM_1.jpg?v=1773954796&width=1946",
+    image: "https://farmerscraft.in/cdn/shop/files/WhatsApp_Image_2025-04-10_at_8.14.59_PM_1.jpg?v=1773954796&width=400",
     badge: "Best Seller"
   },
   {
@@ -1559,7 +1559,7 @@ export const PRODUCTS = [
     price: 85,
     unit: "Sq Ft",
     moq: "500 Sq Ft",
-    image: "https://5.imimg.com/data5/SELLER/Default/2020/12/QW/DI/CN/41595527/bwr-grade-plywood.jpeg",
+    image: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=600&q=80",
     badge: "Best Seller"
   },
   {

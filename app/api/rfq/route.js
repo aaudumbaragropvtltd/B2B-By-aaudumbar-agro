@@ -16,6 +16,25 @@ export async function GET(request) {
       }
     );
 
+    const url = new URL(request.url);
+    const view = url.searchParams.get('view');
+
+    // Marketplace view is public for open broadcasted buy leads
+    if (view === 'marketplace') {
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      );
+      const { data, error } = await supabaseAdmin
+        .from('rfqs')
+        .select('id, product_name, quantity, unit, target_price, destination, deadline, notes, status, created_at, users:buyer_id(company_name, city, state, verification_level)')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) return NextResponse.json([], { status: 200 });
+      return NextResponse.json(data || [], { status: 200 });
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new NextResponse('Unauthorized', { status: 401 });
 
@@ -26,9 +45,6 @@ export async function GET(request) {
 
     const profile = await resolveAuthenticatedUser(supabaseAdmin, user, 'both');
     if (!profile) return new NextResponse('User profile not found', { status: 404 });
-
-    const url = new URL(request.url);
-    const view = url.searchParams.get('view');
 
     let query = supabaseAdmin
       .from('rfqs')
