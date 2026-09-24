@@ -1,5 +1,82 @@
 [
   {
+    "id": "log-1790276358712-8sd2",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: APMC Mandi Direct Agro & Spice Sourcing (active: false)",
+    "metadata": {
+      "bannerId": "banner-2",
+      "is_active": false
+    },
+    "created_at": "2026-09-24T18:59:18.712Z"
+  },
+  {
+    "id": "log-1790276356054-pbfa",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: India’s Verified B2B Wholesale Marketplace (active: true)",
+    "metadata": {
+      "bannerId": "banner-1",
+      "is_active": true
+    },
+    "created_at": "2026-09-24T18:59:16.054Z"
+  },
+  {
+    "id": "log-1790276353258-nydi",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: India’s Verified B2B Wholesale Marketplace (active: false)",
+    "metadata": {
+      "bannerId": "banner-1",
+      "is_active": false
+    },
+    "created_at": "2026-09-24T18:59:13.258Z"
+  },
+  {
+    "id": "log-1790276325458-9zhh",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: India’s Verified B2B Wholesale Marketplace (active: true)",
+    "metadata": {
+      "bannerId": "banner-1",
+      "is_active": true
+    },
+    "created_at": "2026-09-24T18:58:45.458Z"
+  },
+  {
+    "id": "log-1790276298871-whl4",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: India’s Verified B2B Wholesale Marketplace (active: false)",
+    "metadata": {
+      "bannerId": "banner-1",
+      "is_active": false
+    },
+    "created_at": "2026-09-24T18:58:18.871Z"
+  },
+  {
+    "id": "log-1790276095645-g476",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: India’s Verified B2B Wholesale Marketplace (active: true)",
+    "metadata": {
+      "bannerId": "banner-1",
+      "is_active": true
+    },
+    "created_at": "2026-09-24T18:54:55.645Z"
+  },
+  {
+    "id": "log-1790276095265-vbkx",
+    "level": "INFO",
+    "service": "cms_banners",
+    "message": "Updated banner: India’s Verified B2B Wholesale Marketplace (active: false)",
+    "metadata": {
+      "bannerId": "banner-1",
+      "is_active": false
+    },
+    "created_at": "2026-09-24T18:54:55.265Z"
+  },
+  {
     "id": "log-1789238232010-x0ed",
     "level": "INFO",
     "service": "admin_settings",

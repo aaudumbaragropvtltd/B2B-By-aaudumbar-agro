@@ -65,6 +65,7 @@ export default function EcommerceHero({ initialBanners = [] }) {
   );
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroQuery, setHeroQuery] = useState('');
+  const [isPaused, setIsPaused] = useState(false);
 
   // Sync with initialBanners if provided
   useEffect(() => {
@@ -89,15 +90,14 @@ export default function EcommerceHero({ initialBanners = [] }) {
     window.location.href = `/directory?q=${encodeURIComponent(query)}`;
   };
 
-  // Only fetch dynamic banners if initialBanners was not provided by SSR
+  // Synchronize with live active banners to reflect admin pause/unpause immediately
   useEffect(() => {
-    if (initialBanners && initialBanners.length > 0) return;
     async function loadDynamicBanners() {
       try {
-        const res = await fetch('/api/banners');
+        const res = await fetch(`/api/banners?t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          if (data.banners && data.banners.length > 0) {
+          if (Array.isArray(data.banners) && data.banners.length > 0) {
             setBanners(data.banners);
           }
         }
@@ -106,16 +106,16 @@ export default function EcommerceHero({ initialBanners = [] }) {
       }
     }
     loadDynamicBanners();
-  }, [initialBanners]);
+  }, []);
 
-  // Advance slides after comfortable interval to maintain low main-thread activity
+  // Advance slides after comfortable interval; pauses on hover or user interaction
   useEffect(() => {
-    if (!banners.length || banners.length <= 1) return;
+    if (!banners.length || banners.length <= 1 || isPaused) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
     }, 8000);
     return () => clearInterval(timer);
-  }, [banners.length]);
+  }, [banners.length, isPaused]);
 
   const touchStartRef = useRef(null);
   const touchEndRef = useRef(null);
@@ -168,6 +168,8 @@ export default function EcommerceHero({ initialBanners = [] }) {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
       className="relative w-full h-[76vh] min-h-[500px] sm:min-h-[580px] md:h-[82vh] overflow-hidden bg-slate-950 flex items-center justify-center pt-16 sm:pt-20 pb-8 sm:pb-12 select-none"
     >
       {/* Background Slider */}

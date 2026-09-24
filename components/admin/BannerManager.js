@@ -14,6 +14,7 @@ export default function BannerManager() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [togglingBannerId, setTogglingBannerId] = useState(null);
 
   // Sector / Category Banners State
   const [sectorBanners, setSectorBanners] = useState([]);
@@ -22,6 +23,7 @@ export default function BannerManager() {
   const [editingSector, setEditingSector] = useState(null);
   const [sectorModalOpen, setSectorModalOpen] = useState(false);
   const [uploadingSectorImage, setUploadingSectorImage] = useState(false);
+  const [togglingSectorSlug, setTogglingSectorSlug] = useState(null);
 
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
@@ -46,6 +48,7 @@ export default function BannerManager() {
     hero_image_url: '',
     subtitle: '',
     badge_text: 'Verified Wholesale Sourcing',
+    is_active: true,
   });
 
   const showToast = (msg, type = 'success') => {
@@ -57,7 +60,10 @@ export default function BannerManager() {
   const fetchBanners = async () => {
     setLoadingBanners(true);
     try {
-      const res = await fetch('/api/admin/cms/banners');
+      const res = await fetch(`/api/admin/cms/banners?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.banners) setBanners(data.banners);
@@ -73,7 +79,10 @@ export default function BannerManager() {
   const fetchSectorBanners = async () => {
     setLoadingSectors(true);
     try {
-      const res = await fetch('/api/admin/cms/sector-banners');
+      const res = await fetch(`/api/admin/cms/sector-banners?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.sectorBanners) setSectorBanners(data.sectorBanners);
@@ -213,6 +222,7 @@ export default function BannerManager() {
       hero_image_url: sector.hero_image_url || 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600',
       subtitle: sector.subtitle || 'Source verified bulk supplies directly from Indian manufacturers with escrow protection, factory pricing, and pan-India logistics.',
       badge_text: sector.badge_text || 'Verified Wholesale Sourcing',
+      is_active: sector.is_active !== undefined ? Boolean(sector.is_active) : true,
     });
     setSectorModalOpen(true);
   };
@@ -272,20 +282,69 @@ export default function BannerManager() {
     }
   };
 
-  // Toggle Homepage Banner Status
+  // Toggle Homepage Banner Status (Optimistic UI with Instant Feedback)
   const handleToggleActive = async (banner) => {
+    const nextState = !Boolean(banner.is_active);
+
+    // 1. Instant optimistic update
+    setBanners(prev => prev.map(b => b.id === banner.id ? { ...b, is_active: nextState } : b));
+    setTogglingBannerId(banner.id);
+
     try {
       const res = await fetch('/api/admin/cms/banners', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...banner, is_active: !banner.is_active }),
+        body: JSON.stringify({ ...banner, is_active: nextState }),
       });
-      if (res.ok) {
-        showToast(`Banner ${banner.is_active ? 'deactivated' : 'activated'}`);
-        fetchBanners();
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`Slide ${nextState ? 'published live on website' : 'paused successfully'}`);
+        if (data.banner) {
+          setBanners(prev => prev.map(b => b.id === banner.id ? data.banner : b));
+        }
+      } else {
+        // Revert on error
+        setBanners(prev => prev.map(b => b.id === banner.id ? { ...b, is_active: banner.is_active } : b));
+        showToast(data.error || 'Failed to update banner status', 'error');
       }
     } catch (err) {
+      // Revert on network failure
+      setBanners(prev => prev.map(b => b.id === banner.id ? { ...b, is_active: banner.is_active } : b));
       showToast('Error toggling banner status', 'error');
+    } finally {
+      setTogglingBannerId(null);
+    }
+  };
+
+  // Toggle Category / Sector Banner Status (Optimistic UI)
+  const handleToggleSectorActive = async (sector) => {
+    const currentActive = sector.is_active !== false;
+    const nextState = !currentActive;
+
+    // 1. Instant optimistic update
+    setSectorBanners(prev => prev.map(s => s.slug === sector.slug ? { ...s, is_active: nextState } : s));
+    setTogglingSectorSlug(sector.slug);
+
+    try {
+      const res = await fetch('/api/admin/cms/sector-banners', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...sector, is_active: nextState }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`"${sector.name}" banner ${nextState ? 'published live' : 'paused successfully'}`);
+      } else {
+        // Revert on error
+        setSectorBanners(prev => prev.map(s => s.slug === sector.slug ? { ...s, is_active: currentActive } : s));
+        showToast(data.error || 'Failed to update category banner status', 'error');
+      }
+    } catch (err) {
+      // Revert on network failure
+      setSectorBanners(prev => prev.map(s => s.slug === sector.slug ? { ...s, is_active: currentActive } : s));
+      showToast('Error toggling category banner status', 'error');
+    } finally {
+      setTogglingSectorSlug(null);
     }
   };
 
@@ -473,13 +532,21 @@ export default function BannerManager() {
                   <div className="p-4 bg-slate-950/70 border-t border-slate-800/80 flex items-center justify-between gap-2">
                     <button
                       onClick={() => handleToggleActive(banner)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                      disabled={togglingBannerId === banner.id}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                         banner.is_active
                           ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
                           : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                      }`}
+                      } ${togglingBannerId === banner.id ? 'opacity-70 cursor-wait' : ''}`}
                     >
-                      {banner.is_active ? 'Pause Slide' : 'Publish Live'}
+                      {togglingBannerId === banner.id ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          <span>Updating...</span>
+                        </>
+                      ) : (
+                        banner.is_active ? '⏸ Pause Slide' : '▶ Publish Live'
+                      )}
                     </button>
 
                     <div className="flex items-center gap-2">
@@ -566,9 +633,18 @@ export default function BannerManager() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-3 left-3 flex items-center gap-2">
                       <span className="px-2.5 py-0.5 rounded-full bg-brand-600 text-white text-[10px] font-black shadow-md uppercase tracking-wider">
                         {sector.badge_text || 'Verified Sector'}
+                      </span>
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-md ${
+                          sector.is_active !== false
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                            : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                        }`}
+                      >
+                        {sector.is_active !== false ? '● Live' : '○ Paused'}
                       </span>
                     </div>
 
@@ -601,16 +677,31 @@ export default function BannerManager() {
                   </div>
 
                   {/* Actions */}
-                  <div className="p-4 bg-slate-950/80 border-t border-slate-800/80 flex items-center justify-between">
-                    <div className="text-[11px] text-slate-400 font-medium truncate max-w-[180px]">
-                      {sector.hero_image_url?.startsWith('/uploads') ? '📁 Local Computer Image' : '🌐 Web URL Image'}
-                    </div>
+                  <div className="p-4 bg-slate-950/80 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => handleToggleSectorActive(sector)}
+                      disabled={togglingSectorSlug === sector.slug}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        sector.is_active !== false
+                          ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                          : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                      } ${togglingSectorSlug === sector.slug ? 'opacity-70 cursor-wait' : ''}`}
+                    >
+                      {togglingSectorSlug === sector.slug ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          <span>Updating...</span>
+                        </>
+                      ) : (
+                        sector.is_active !== false ? '⏸ Pause Banner' : '▶ Publish Live'
+                      )}
+                    </button>
 
                     <button
                       onClick={() => handleOpenSectorEdit(sector)}
-                      className="px-4 py-2 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-brand-600/20 flex items-center gap-1.5 cursor-pointer"
+                      className="px-3.5 py-1.5 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-brand-600/20 flex items-center gap-1.5 cursor-pointer"
                     >
-                      <span>🖼️ Change Banner</span>
+                      <span>🖼️ Edit</span>
                     </button>
                   </div>
                 </div>
@@ -964,6 +1055,19 @@ export default function BannerManager() {
                     className="w-full px-4 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs font-medium text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
                   />
                 </div>
+
+                {/* Published Status Checkbox */}
+                <label className="flex items-center gap-3 p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sectorFormData.is_active !== false}
+                    onChange={(e) => setSectorFormData({ ...sectorFormData, is_active: e.target.checked })}
+                    className="w-4 h-4 rounded text-brand-600 focus:ring-0 cursor-pointer"
+                  />
+                  <span className="text-xs font-bold text-slate-300">
+                    Publish Category Banner live on Directory Page
+                  </span>
+                </label>
 
                 {/* Modal Actions */}
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">

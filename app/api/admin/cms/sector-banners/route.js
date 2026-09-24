@@ -27,7 +27,7 @@ export async function GET() {
 export async function PUT(request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { slug, hero_image_url, subtitle, badge_text, name } = body;
+    const { slug, hero_image_url, subtitle, badge_text, name, is_active } = body;
 
     if (!slug) {
       return NextResponse.json({ success: false, error: 'Sector slug is required' }, { status: 400 });
@@ -38,6 +38,7 @@ export async function PUT(request) {
       subtitle,
       badge_text,
       name,
+      ...(is_active !== undefined ? { is_active: Boolean(is_active) } : {}),
     });
 
     await logPlatformEvent({

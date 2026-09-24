@@ -68,6 +68,8 @@ export const DEFAULT_BANNERS = [
   },
 ];
 
+const BANNER_CONFIG_ACTION = 'platform_banners_config';
+
 function getSupabaseAdmin() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return createClient(
@@ -85,10 +87,13 @@ function readLocalBanners() {
     }
     if (fs.existsSync(BANNERS_FILE_PATH)) {
       const data = fs.readFileSync(BANNERS_FILE_PATH, 'utf8');
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
     }
   } catch (err) {
-    console.warn('Error reading local banners file:', err.message);
+    // Read error or read-only filesystem on serverless
   }
   // Initialize default
   writeLocalBanners(DEFAULT_BANNERS);
@@ -103,8 +108,92 @@ function writeLocalBanners(banners) {
     fs.writeFileSync(BANNERS_FILE_PATH, JSON.stringify(banners, null, 2), 'utf8');
     return true;
   } catch (err) {
-    console.error('Error writing local banners file:', err.message);
+    // Graceful fallback for read-only serverless filesystems
     return false;
+  }
+}
+
+/**
+ * Load banners from Supabase (platform_banners table or activity_logs config store).
+ */
+async function getSupabaseBanners() {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  // 1. Try public.platform_banners table
+  try {
+    const { data, error } = await supabase
+      .from('platform_banners')
+      .select('*')
+      .order('display_order', { ascending: true });
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+  } catch (e) {}
+
+  // 2. Fallback to Supabase activity_logs table (persistent store across all environments)
+  try {
+    const { data, error } = await supabase
+      .from('activity_logs')
+      .select('details')
+      .eq('action', BANNER_CONFIG_ACTION)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (!error && data && data.length > 0 && Array.isArray(data[0].details?.banners)) {
+      return data[0].details.banners;
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+/**
+ * Persist banners to Supabase (platform_banners table and activity_logs config store).
+ */
+async function saveSupabaseBanners(banners) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return;
+
+  // 1. Try public.platform_banners table if present
+  try {
+    const { error: pbErr } = await supabase.from('platform_banners').select('id').limit(1);
+    if (!pbErr) {
+      for (const b of banners) {
+        await supabase.from('platform_banners').upsert([b], { onConflict: 'id' });
+      }
+    }
+  } catch (e) {}
+
+  // 2. Persist to activity_logs
+  try {
+    const { data: existing } = await supabase
+      .from('activity_logs')
+      .select('id')
+      .eq('action', BANNER_CONFIG_ACTION)
+      .order('created_at', { ascending: false });
+
+    const payload = {
+      action: BANNER_CONFIG_ACTION,
+      details: { banners, updated_at: new Date().toISOString() },
+      created_at: new Date().toISOString(),
+    };
+
+    if (existing && existing.length > 0) {
+      await supabase
+        .from('activity_logs')
+        .update(payload)
+        .eq('id', existing[0].id);
+
+      if (existing.length > 1) {
+        const extraIds = existing.slice(1).map((r) => r.id);
+        await supabase.from('activity_logs').delete().in('id', extraIds);
+      }
+    } else {
+      await supabase.from('activity_logs').insert([payload]);
+    }
+  } catch (e) {
+    console.warn('Notice: banners sync to Supabase activity_logs failed:', e.message);
   }
 }
 
@@ -114,7 +203,7 @@ function writeLocalBanners(banners) {
 export async function getActiveBanners(sectorSlug = null) {
   const all = await getAllBanners();
   return all
-    .filter((b) => b.is_active)
+    .filter((b) => b.is_active === true || b.is_active === 'true' || b.is_active === 1)
     .filter((b) => !sectorSlug || !b.sector_slug || b.sector_slug === 'all' || b.sector_slug === sectorSlug)
     .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
 }
@@ -123,19 +212,14 @@ export async function getActiveBanners(sectorSlug = null) {
  * Get all banners for Admin CMS.
  */
 export async function getAllBanners() {
-  const local = readLocalBanners();
-  const supabase = getSupabaseAdmin();
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('platform_banners')
-        .select('*')
-        .order('display_order', { ascending: true });
-      if (!error && data && data.length > 0) {
-        return data;
-      }
-    } catch (e) {}
+  // 1. Try Supabase first (Supabase holds the live truth across serverless instances)
+  const dbBanners = await getSupabaseBanners();
+  if (dbBanners && dbBanners.length > 0) {
+    return dbBanners.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
   }
+
+  // 2. Fallback to local JSON file
+  const local = readLocalBanners();
   return local.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
 }
 
@@ -143,9 +227,9 @@ export async function getAllBanners() {
  * Create a new banner slide.
  */
 export async function createBanner(bannerData) {
-  const banners = readLocalBanners();
+  const banners = await getAllBanners();
   const newBanner = {
-    id: `banner-${Date.now()}`,
+    id: bannerData.id || `banner-${Date.now()}`,
     title: bannerData.title || 'New Wholesale Promotion',
     subtitle: bannerData.subtitle || '',
     badge_text: bannerData.badge_text || 'Featured Deal',
@@ -161,13 +245,7 @@ export async function createBanner(bannerData) {
 
   banners.push(newBanner);
   writeLocalBanners(banners);
-
-  const supabase = getSupabaseAdmin();
-  if (supabase) {
-    try {
-      await supabase.from('platform_banners').insert([newBanner]);
-    } catch (e) {}
-  }
+  await saveSupabaseBanners(banners);
 
   return newBanner;
 }
@@ -176,38 +254,36 @@ export async function createBanner(bannerData) {
  * Update an existing banner slide.
  */
 export async function updateBanner(id, bannerData) {
-  const banners = readLocalBanners();
+  const banners = await getAllBanners();
   const index = banners.findIndex((b) => b.id === id);
   if (index === -1) {
     throw new Error(`Banner with ID ${id} not found`);
   }
 
-  banners[index] = {
+  const updatedBanner = {
     ...banners[index],
     ...bannerData,
     id, // Keep existing ID
     updated_at: new Date().toISOString(),
   };
 
+  banners[index] = updatedBanner;
+
   writeLocalBanners(banners);
+  await saveSupabaseBanners(banners);
 
-  const supabase = getSupabaseAdmin();
-  if (supabase) {
-    try {
-      await supabase.from('platform_banners').update(banners[index]).eq('id', id);
-    } catch (e) {}
-  }
-
-  return banners[index];
+  return updatedBanner;
 }
 
 /**
  * Delete a banner slide.
  */
 export async function deleteBanner(id) {
-  const banners = readLocalBanners();
+  const banners = await getAllBanners();
   const filtered = banners.filter((b) => b.id !== id);
+
   writeLocalBanners(filtered);
+  await saveSupabaseBanners(filtered);
 
   const supabase = getSupabaseAdmin();
   if (supabase) {
