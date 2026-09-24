@@ -136,6 +136,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const isHomePage = pathname === '/';
   const isDarkPage = pathname?.startsWith('/dashboard');
+  const isHeroTransparent = isHomePage && !isScrolled;
+  const isNavbarDark = isDarkPage || isHeroTransparent;
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -151,29 +153,39 @@ export default function Navbar() {
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 100, damping: 20 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-slate-950/98 backdrop-blur-xl border-b border-slate-800 shadow-xl'
-          : 'bg-slate-950/92 backdrop-blur-xl border-b border-slate-800/80 shadow-md'
+        isNavbarDark
+          ? isHeroTransparent
+            ? 'bg-slate-950/40 backdrop-blur-md border-b border-white/10'
+            : 'bg-slate-950/85 backdrop-blur-md border-b border-slate-800/60 shadow-md'
+          : 'bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm'
       }`}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+      <nav className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 lg:h-20 gap-2">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
             <B2BLogo className="w-10 h-10" />
             <div className="flex flex-col">
-              <span className="text-lg font-extrabold tracking-tight text-white drop-shadow-sm group-hover:text-emerald-400 transition-colors">
+              <span className={`text-lg font-extrabold tracking-tight transition-colors ${
+                isNavbarDark ? 'text-white drop-shadow-md' : 'text-gray-900'
+              }`}>
                 B2B INDIA
               </span>
-              <span className="text-[10px] font-bold tracking-widest uppercase text-emerald-400">
+              <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${
+                isNavbarDark ? 'text-emerald-300 drop-shadow-sm' : 'text-emerald-700'
+              }`}>
                 Conglomerate Marketplace
               </span>
             </div>
           </Link>
 
           {/* Central Search Bar (Desktop) */}
-          <div className="hidden lg:flex flex-1 max-w-2xl mx-8 relative z-30">
-            <form onSubmit={handleSearch} suppressHydrationWarning className="flex w-full rounded-xl bg-slate-900/90 backdrop-blur-md shadow-sm border border-slate-700/80 focus-within:ring-2 focus-within:ring-brand-500/50 hover:border-slate-500 transition-all card-glow relative group">
+          <div className="hidden lg:flex flex-1 max-w-2xl mx-4 xl:mx-8 relative z-30 min-w-[340px]">
+            <form onSubmit={handleSearch} suppressHydrationWarning className={`flex w-full min-w-0 rounded-xl backdrop-blur-md shadow-sm border transition-all card-glow relative group ${
+              isNavbarDark
+                ? 'bg-white/15 border-white/25 focus-within:ring-2 focus-within:ring-white/40 focus-within:border-white/50 text-white'
+                : 'bg-white border-gray-200 focus-within:ring-2 focus-within:ring-brand-500/50 hover:shadow-md text-gray-900'
+            }`}>
               <div className="absolute inset-0 rounded-xl gradient-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <select
                 id="desktop-category-select"
@@ -181,14 +193,18 @@ export default function Navbar() {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 suppressHydrationWarning
-                className="w-40 px-3 py-2 bg-slate-900 border-r border-slate-700 text-xs text-slate-200 outline-none cursor-pointer font-bold relative z-10 rounded-l-xl"
+                className={`w-36 lg:w-40 px-3 py-2 bg-transparent text-xs outline-none cursor-pointer font-bold relative z-10 rounded-l-xl ${
+                  isNavbarDark
+                    ? 'border-r border-white/20 text-white'
+                    : 'border-r border-gray-200 text-gray-900'
+                }`}
               >
-                <option value="" className="bg-slate-900 text-slate-200">All Categories</option>
-                <option value="building-construction" className="bg-slate-900 text-slate-200">Building & Construction</option>
-                <option value="electronics-electrical" className="bg-slate-900 text-slate-200">Electronics & Electrical</option>
-                <option value="industrial-machinery" className="bg-slate-900 text-slate-200">Industrial Machinery</option>
-                <option value="apparel-garments" className="bg-slate-900 text-slate-200">Apparel & Garments</option>
-                <option value="food-agriculture" className="bg-slate-900 text-slate-200">Food & Agriculture</option>
+                <option value="" className="bg-white text-gray-900">All Categories</option>
+                <option value="building-construction" className="bg-white text-gray-900">Building & Construction</option>
+                <option value="electronics-electrical" className="bg-white text-gray-900">Electronics & Electrical</option>
+                <option value="industrial-machinery" className="bg-white text-gray-900">Industrial Machinery</option>
+                <option value="apparel-garments" className="bg-white text-gray-900">Apparel & Garments</option>
+                <option value="food-agriculture" className="bg-white text-gray-900">Food & Agriculture</option>
               </select>
               <SearchAutocomplete
                 searchQuery={searchQuery}
@@ -197,32 +213,43 @@ export default function Navbar() {
                 setSelectedCategory={setSelectedCategory}
                 onSearch={(q) => handleSearch(null, q)}
                 placeholder="Search products or commodities (e.g. Turmeric)..."
-                theme="dark"
+                theme={isNavbarDark ? "dark" : "light"}
+                containerClassName="min-w-[180px] flex-1"
+                inputClassName={`flex-1 min-w-[160px] px-3.5 py-2 text-sm outline-none bg-transparent font-medium ${
+                  isNavbarDark
+                    ? 'text-white placeholder:text-white/70'
+                    : 'text-gray-900 placeholder:text-gray-400'
+                }`}
               />
               <button
                 type="submit"
                 suppressHydrationWarning
-                className="px-6 py-2 animated-gradient text-white font-bold text-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2 relative z-10 rounded-r-xl flex-shrink-0"
+                className="px-5 py-2 animated-gradient text-white font-bold text-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 relative z-10 rounded-r-xl flex-shrink-0"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                Search
+                <span>Search</span>
               </button>
             </form>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 flex-shrink-0">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
+              let linkClass = '';
+              if (isActive) {
+                linkClass = isNavbarDark ? 'text-white bg-white/20 font-bold' : 'text-gray-950 bg-gray-100 font-extrabold shadow-xs';
+              } else if (isNavbarDark) {
+                linkClass = 'text-white/95 hover:text-white hover:bg-white/10 font-semibold';
+              } else {
+                linkClass = 'text-gray-800 hover:text-gray-950 hover:bg-gray-100 font-semibold';
+              }
+
               return (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                    isActive
-                      ? 'text-white bg-slate-800 border border-slate-700 shadow-xs'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-sm transition-all duration-200 ${linkClass}`}
                 >
                   {link.label}
                 </Link>
@@ -250,7 +277,7 @@ export default function Navbar() {
                       <button
                         onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); setShowUserMenu(false); }}
                         suppressHydrationWarning
-                        className="relative p-2 rounded-lg transition-all text-slate-300 hover:text-white hover:bg-white/10"
+                        className={`relative p-2 rounded-lg transition-all ${isNavbarDark ? 'text-white hover:text-white hover:bg-white/10' : 'text-gray-900 hover:text-black hover:bg-gray-100'}`}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                         {unreadCount > 0 && (
@@ -311,7 +338,7 @@ export default function Navbar() {
                         )}
                       </AnimatePresence>
                     </div>
-                    <Link href="/orders" className="relative p-2 rounded-lg transition-all text-slate-300 hover:text-white hover:bg-white/10" title="My Orders & Receipts">
+                    <Link href="/orders" className={`relative p-2 rounded-lg transition-all ${isNavbarDark ? 'text-white hover:text-white hover:bg-white/10' : 'text-gray-900 hover:text-black hover:bg-gray-100'}`} title="My Orders & Receipts">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     </Link>
                     <div className="relative">
@@ -322,7 +349,7 @@ export default function Navbar() {
                         }}
                         suppressHydrationWarning
                         className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold transition-all ring-2 ring-offset-1 ${
-                          isDark
+                          isNavbarDark
                             ? 'bg-indigo-600 text-white ring-indigo-400/30 ring-offset-slate-950'
                             : 'bg-brand-600 text-white ring-brand-300/30 ring-offset-white'
                         }`}
@@ -378,7 +405,11 @@ export default function Navbar() {
                   <div className="flex items-center gap-2.5 ml-2">
                     <Link
                       href="/login"
-                      className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-slate-800/90 hover:bg-slate-700 border border-slate-600/90 hover:border-slate-400 shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer backdrop-blur-sm"
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                        isNavbarDark
+                          ? 'text-white bg-white/15 hover:bg-white/25 border border-white/40 hover:border-white/60'
+                          : 'text-gray-950 hover:text-black bg-white hover:bg-gray-100 border border-gray-300 hover:border-gray-400'
+                      }`}
                     >
                       Sign In
                     </Link>
@@ -399,7 +430,9 @@ export default function Navbar() {
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             suppressHydrationWarning
-            className="lg:hidden p-2 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800 transition-colors"
+            className={`lg:hidden p-2 rounded-xl transition-colors ${
+              isNavbarDark ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:text-black hover:bg-gray-100'
+            }`}
             aria-label="Toggle menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -422,9 +455,15 @@ export default function Navbar() {
               transition={{ duration: 0.3 }}
               className="lg:hidden overflow-hidden"
             >
-              <div className="bg-slate-900/98 backdrop-blur-2xl rounded-2xl p-4 mb-4 space-y-2 shadow-2xl border border-slate-800 text-white">
+              <div className={`rounded-2xl p-4 mb-4 space-y-2 shadow-2xl border transition-all ${
+                isNavbarDark
+                  ? 'bg-slate-900/98 backdrop-blur-2xl border-slate-800 text-white'
+                  : 'bg-white/98 backdrop-blur-2xl border-gray-200 text-gray-900 shadow-xl'
+              }`}>
                 {/* Mobile Search */}
-                <form onSubmit={handleSearch} suppressHydrationWarning className="flex mb-4 rounded-xl bg-slate-800 border border-slate-700 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all relative z-20">
+                <form onSubmit={handleSearch} suppressHydrationWarning className={`flex mb-4 rounded-xl border transition-all relative z-20 ${
+                  isNavbarDark ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'
+                }`}>
                   <SearchAutocomplete
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
@@ -432,10 +471,12 @@ export default function Navbar() {
                     setSelectedCategory={setSelectedCategory}
                     onSearch={(q) => handleSearch(null, q)}
                     placeholder="Search products (e.g. Turmeric)..."
-                    theme="dark"
+                    theme={isNavbarDark ? "dark" : "light"}
                     isMobile={true}
                   />
-                  <button type="submit" suppressHydrationWarning className="px-4 text-emerald-400 font-bold bg-slate-700/80 hover:bg-slate-700 transition-colors flex items-center justify-center rounded-r-xl flex-shrink-0">
+                  <button type="submit" suppressHydrationWarning className={`px-4 font-bold transition-colors flex items-center justify-center rounded-r-xl flex-shrink-0 ${
+                    isNavbarDark ? 'text-emerald-400 bg-slate-700/80 hover:bg-slate-700' : 'text-brand-600 bg-brand-50 hover:bg-brand-100'
+                  }`}>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </button>
                 </form>
@@ -445,10 +486,10 @@ export default function Navbar() {
                     key={link.label}
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                    className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
                       pathname === link.href
-                        ? 'text-white bg-slate-800 border border-slate-700 font-bold'
-                        : 'text-slate-200 hover:bg-slate-800/80 hover:text-white'
+                        ? isNavbarDark ? 'text-white bg-slate-800 font-bold border border-slate-700' : 'text-gray-950 bg-gray-100 font-extrabold border border-gray-200'
+                        : isNavbarDark ? 'text-white/90 hover:bg-slate-800/80 hover:text-white' : 'text-gray-900 hover:bg-gray-100 hover:text-black font-bold'
                     }`}
                   >
                     {link.label}
@@ -458,11 +499,11 @@ export default function Navbar() {
                 {!loading && user ? (
                   <>
                     {/* User info in mobile menu */}
-                    <div className="px-4 py-3 border-t border-slate-800 mt-2 pt-3">
-                      <p className="text-sm font-bold text-white truncate">
+                    <div className={`px-4 py-3 border-t mt-2 pt-3 ${isNavbarDark ? 'border-slate-800' : 'border-gray-200'}`}>
+                      <p className={`text-sm font-bold truncate ${isNavbarDark ? 'text-white' : 'text-gray-900'}`}>
                         {user.user_metadata?.full_name || user.email}
                       </p>
-                      <p className="text-xs text-slate-400 truncate mt-0.5">
+                      <p className={`text-xs truncate mt-0.5 ${isNavbarDark ? 'text-slate-400' : 'text-gray-500'}`}>
                         {user.email}
                       </p>
                     </div>
@@ -487,13 +528,15 @@ export default function Navbar() {
                         setIsMobileMenuOpen(false);
                         handleSignOut();
                       }}
-                      className="w-full px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors text-left mt-1"
+                      className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left mt-1 ${
+                        isNavbarDark ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50'
+                      }`}
                     >
                       🚪 Sign Out
                     </button>
                   </>
                 ) : (
-                  <div className="space-y-2 pt-3 border-t border-slate-800 mt-2">
+                  <div className={`space-y-2 pt-3 border-t mt-2 ${isNavbarDark ? 'border-slate-800' : 'border-gray-200'}`}>
                     <Link
                       href="/login?mode=signup"
                       onClick={() => setIsMobileMenuOpen(false)}
@@ -504,7 +547,11 @@ export default function Navbar() {
                     <Link
                       href="/login"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 text-center transition-colors shadow-sm"
+                      className={`block w-full px-4 py-2.5 rounded-xl text-sm font-bold text-center transition-colors shadow-xs ${
+                        isNavbarDark
+                          ? 'text-white bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                          : 'text-gray-900 bg-gray-100 hover:bg-gray-200 border border-gray-300'
+                      }`}
                     >
                       Sign In
                     </Link>

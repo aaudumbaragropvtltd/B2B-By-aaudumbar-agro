@@ -178,9 +178,9 @@ export default function SearchAutocomplete({
   const isDark = theme === "dark";
 
   return (
-    <div ref={containerRef} className={`relative flex-1 w-full ${containerClassName}`}>
+    <div ref={containerRef} className={`relative flex-1 w-full min-w-0 ${containerClassName}`}>
       {/* Input container */}
-      <div className="relative flex items-center w-full">
+      <div className="relative flex items-center w-full min-w-0">
         <input
           ref={inputRef}
           type="text"
@@ -203,11 +203,13 @@ export default function SearchAutocomplete({
           spellCheck="false"
           className={
             inputClassName || (
-              isDark
-                ? "w-full bg-transparent border-none text-white placeholder-white/60 focus:outline-none focus:ring-0 text-sm sm:text-base font-medium px-3 py-2"
-                : isMobile
-                ? "w-full px-4 py-3 text-sm text-gray-900 bg-transparent outline-none font-medium placeholder:text-gray-400"
-                : "flex-1 px-4 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 bg-transparent font-medium"
+              isMobile
+                ? `w-full px-4 py-3 text-sm bg-transparent outline-none font-medium ${
+                    isDark ? 'text-white placeholder:text-white/60' : 'text-gray-900 placeholder:text-gray-400'
+                  }`
+                : `flex-1 min-w-0 px-4 py-2 text-sm outline-none bg-transparent font-medium ${
+                    isDark ? 'text-white placeholder:text-white/60' : 'text-gray-900 placeholder:text-gray-400'
+                  }`
             )
           }
         />
