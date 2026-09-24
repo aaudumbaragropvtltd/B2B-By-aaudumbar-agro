@@ -134,10 +134,8 @@ export default function Navbar() {
   }
 
   const pathname = usePathname();
-  const isHomePage = pathname === '/';
   const isDarkPage = pathname?.startsWith('/dashboard');
-  const isHeroTransparent = isHomePage && !isScrolled;
-  const isNavbarDark = isDarkPage || isHeroTransparent;
+  const isNavbarDark = isDarkPage;
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -154,9 +152,7 @@ export default function Navbar() {
       transition={{ type: 'spring', stiffness: 100, damping: 20 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isNavbarDark
-          ? isHeroTransparent
-            ? 'bg-slate-950/40 backdrop-blur-md border-b border-white/10'
-            : 'bg-slate-950/85 backdrop-blur-md border-b border-slate-800/60 shadow-md'
+          ? 'bg-slate-950/85 backdrop-blur-md border-b border-slate-800/60 shadow-md'
           : 'bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm'
       }`}
     >
@@ -405,10 +401,10 @@ export default function Navbar() {
                   <div className="flex items-center gap-2.5 ml-2">
                     <Link
                       href="/login"
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                      className={`px-4 py-2 rounded-xl text-sm font-extrabold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-xs ${
                         isNavbarDark
-                          ? 'text-white bg-white/15 hover:bg-white/25 border border-white/40 hover:border-white/60'
-                          : 'text-gray-950 hover:text-black bg-white hover:bg-gray-100 border border-gray-300 hover:border-gray-400'
+                          ? 'text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600'
+                          : 'text-slate-900 hover:text-black bg-slate-100 hover:bg-slate-200 border border-slate-300 hover:border-slate-400'
                       }`}
                     >
                       Sign In
