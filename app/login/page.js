@@ -27,6 +27,8 @@ export default function LoginPage() {
     email: '',
     password: '',
   });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotStep, setForgotStep] = useState(1); // 1 = Enter Email, 2 = Enter OTP & New Password
   const [forgotEmail, setForgotEmail] = useState('');
@@ -112,6 +114,13 @@ export default function LoginPage() {
     // Check for reserved domains that Supabase GoTrue blocks
     if (emailTrimmed.endsWith('@example.com') || emailTrimmed.endsWith('@test.com') || emailTrimmed.endsWith('@example.org') || emailTrimmed.endsWith('@invalid.com')) {
       setError('Please use an active business email address such as name@company.in or name@gmail.com.');
+      setLoading(false);
+      return;
+    }
+
+    // Mandatory Terms & Conditions acceptance for registration
+    if (!isLogin && !acceptedTerms) {
+      setError('Please read and accept the Terms and Conditions to complete your registration.');
       setLoading(false);
       return;
     }
@@ -239,6 +248,10 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!isLogin && !acceptedTerms) {
+      setError('Please read and accept the Terms and Conditions before registering with Google.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -445,7 +458,7 @@ export default function LoginPage() {
           <p className="text-gray-500 mb-6">
             {isLogin
               ? 'Sign in to access your trade dashboard'
-              : 'Sign up to start trading on B2B India'}
+              : 'Register to start trading on B2B India'}
           </p>
 
           {/* Context Banner if redirected from Buy Now or Checkout */}
@@ -473,7 +486,7 @@ export default function LoginPage() {
 
           {/* Toggle */}
           <div className="flex rounded-xl bg-white border border-border-subtle p-1 mb-8" suppressHydrationWarning>
-            {['Sign In', 'Sign Up'].map((tab) => (
+            {['Sign In', 'Register'].map((tab) => (
               <button
                 key={tab}
                 type="button"
@@ -893,6 +906,78 @@ export default function LoginPage() {
               </motion.div>
             )}
 
+            {/* Mandatory Terms and Conditions Checkbox (Register tab) */}
+            {!isLogin && (
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-3.5 rounded-xl border transition-all duration-200 ${
+                  error && !acceptedTerms && error.toLowerCase().includes('terms')
+                    ? 'bg-red-50/70 border-red-300 ring-2 ring-red-200'
+                    : acceptedTerms
+                    ? 'bg-emerald-50/60 border-emerald-300'
+                    : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    id="acceptTerms"
+                    name="acceptTerms"
+                    checked={acceptedTerms}
+                    onChange={(e) => {
+                      setAcceptedTerms(e.target.checked);
+                      if (error && error.toLowerCase().includes('terms')) setError('');
+                    }}
+                    required={!isLogin}
+                    className="mt-0.5 w-4 h-4 rounded text-brand-600 border-gray-300 focus:ring-brand-500 focus:ring-offset-0 cursor-pointer accent-brand-600"
+                  />
+                  <div className="text-xs text-gray-700 leading-relaxed flex-1">
+                    <span>I have read, understood, and accept the </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="font-bold text-brand-700 hover:text-brand-900 underline decoration-brand-400 hover:decoration-brand-700 underline-offset-2 transition-colors cursor-pointer"
+                    >
+                      Terms and Conditions
+                    </button>
+                    <span> and </span>
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-brand-700 hover:text-brand-900 underline decoration-brand-400 hover:decoration-brand-700 underline-offset-2 transition-colors inline-flex items-center gap-0.5"
+                    >
+                      Privacy Policy
+                      <span className="text-[10px]">↗</span>
+                    </Link>
+                    <span className="text-red-500 font-bold ml-1" title="Mandatory acceptance required">*</span>
+
+                    {/* Quick Read / New Tab Options */}
+                    <div className="mt-2 flex items-center gap-3 text-[11px] pt-1.5 border-t border-gray-200/60">
+                      <button
+                        type="button"
+                        onClick={() => setShowTermsModal(true)}
+                        className="text-brand-600 hover:text-brand-800 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+                      >
+                        <span>📖</span> Quick Read Terms
+                      </button>
+                      <span className="text-gray-300">•</span>
+                      <Link
+                        href="/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-600 hover:text-brand-700 flex items-center gap-1 hover:underline font-medium"
+                      >
+                        <span>Open Full Page</span>
+                        <span className="text-[10px]">↗</span>
+                      </Link>
+                    </div>
+                  </div>
+                </label>
+              </motion.div>
+            )}
+
             {/* Submit */}
             <button
               type="submit"
@@ -911,7 +996,7 @@ export default function LoginPage() {
               ) : isLogin ? (
                 'Sign In to Dashboard'
               ) : (
-                'Sign Up Free →'
+                'Register Account →'
               )}
             </button>
 
@@ -948,6 +1033,136 @@ export default function LoginPage() {
           </p>
         </motion.div>
       </div>
+
+      {/* Terms and Conditions Reading Modal */}
+      <AnimatePresence>
+        {showTermsModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm"
+            onClick={() => setShowTermsModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 flex flex-col max-h-[85vh] overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50 via-white to-gray-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center text-xl shadow-xs">
+                    📜
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground">Terms and Conditions of Trade</h3>
+                    <p className="text-xs text-gray-500">
+                      B2B India (Aaudumbar Agro Pvt. Ltd.) • Platform Trade Governance
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(false)}
+                  className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 flex items-center justify-center text-base font-bold transition-all cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Action Banner inside Modal */}
+              <div className="px-6 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center justify-between text-xs text-blue-800">
+                <span>Want to inspect the complete legal agreement?</span>
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-brand-600 hover:text-brand-800 flex items-center gap-1 underline underline-offset-2"
+                >
+                  Open /terms Page in New Tab ↗
+                </Link>
+              </div>
+
+              {/* Modal Scrollable Content */}
+              <div className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs text-gray-600 leading-relaxed max-h-[55vh]">
+                <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 space-y-1">
+                  <div className="font-bold text-xs flex items-center gap-1.5">
+                    <span>🛡️</span> Summary of Key Platform Trade Terms
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    By registering on B2B India, you agree to comply with our commercial trade guidelines, GST verification standards, and milestone-based escrow mechanism.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">1. Eligibility &amp; Registration</h4>
+                    <p>You must be at least 18 years of age and represent a legally registered business entity. A valid GSTIN (Goods and Services Tax Identification Number) is mandatory to list products, create supplier profiles, and execute commercial transactions.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">2. Escrow Payment Mechanism (10% Advance + 90% Dock Settlement)</h4>
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1.5">
+                      <p>• <strong>10% Non-Refundable Advance Deposit:</strong> Locks the quotation rate, schedules packaging, and allocates godown inventory.</p>
+                      <p>• <strong>90% Remaining Dock Payment:</strong> Payable strictly at the time of loading goods onto transport vehicles at the supplier godown after physical inspection.</p>
+                      <p>• <strong>Quality Guarantee:</strong> Full 100% advance refund if goods fail agreed visual or weighbridge inspection at the loading dock.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">3. Buyer &amp; Supplier Obligations</h4>
+                    <p>• <strong>Buyers:</strong> Must submit genuine RFQs, honour accepted bids, and inspect shipments promptly.</p>
+                    <p>• <strong>Suppliers:</strong> Must provide authentic tax invoices compliant with GST guidelines, accurate specifications, and honour dispatch deadlines.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">4. Payment Processing &amp; Gateway Fees</h4>
+                    <p>All online digital payments are processed through Razorpay, an RBI-licensed payment aggregator. Standard gateway processing charges (2.5% + 18% GST) apply across UPI, debit/credit cards, and netbanking.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">5. Dispute Mediation &amp; Jurisdiction</h4>
+                    <p>In the event of trade discrepancies, B2B India acts as a neutral mediator. Legal jurisdiction is strictly governed by the laws of India with seat at Chhatrapati Sambhajinagar, Maharashtra.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 sm:p-5 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-gray-600 hover:text-brand-600 font-medium flex items-center gap-1"
+                >
+                  Read Full Unabridged Terms (15 Sections) ↗
+                </Link>
+                <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(false)}
+                    className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-100 transition-all cursor-pointer"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAcceptedTerms(true);
+                      if (error && error.toLowerCase().includes('terms')) setError('');
+                      setShowTermsModal(false);
+                    }}
+                    className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white text-xs font-bold shadow-md hover:from-brand-500 hover:to-brand-600 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    ✓ I Accept Terms &amp; Conditions
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

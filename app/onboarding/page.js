@@ -639,6 +639,17 @@ export default function OnboardingPage() {
                   })}
                 </div>
 
+                <p className="text-center text-xs text-gray-500 my-4">
+                  By completing registration, you confirm compliance with B2B India&apos;s{' '}
+                  <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline hover:text-brand-800 font-medium">
+                    Terms of Service ↗
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline hover:text-brand-800 font-medium">
+                    Privacy Policy ↗
+                  </Link>.
+                </p>
+
                 <div className="flex gap-3">
                   <button
                     onClick={prevStep}
