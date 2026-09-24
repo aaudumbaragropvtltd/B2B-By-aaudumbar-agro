@@ -102,9 +102,8 @@ export default function TermsOfService() {
 
             <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">10. Platform Fees, Memberships &amp; Gateway Charges</h2>
             <ul className="list-disc pl-5 mt-2 space-y-2">
-              <li><strong>Supplier Membership Plans:</strong> Suppliers must maintain an active membership plan to list live product catalogs.
+              <li><strong>Supplier Membership Plan:</strong> Suppliers must maintain an active annual membership plan to list live product catalogs.
                 <ul className="list-circle pl-5 mt-1 space-y-1 text-sm text-gray-700">
-                  <li><strong>Quarterly Plan:</strong> ₹600 + 18% GST (₹108) = ₹708 (Valid for 3 months / 90 days).</li>
                   <li><strong>Annual Plan:</strong> ₹2,000 + 18% GST (₹360) = ₹2,360 (Valid for 12 months / 365 days).</li>
                   <li><strong>Expiry Rule:</strong> When a supplier membership expires, their catalog listings are automatically hidden from the public website until renewal. Upon renewal, all previously uploaded products are restored live instantly.</li>
                 </ul>

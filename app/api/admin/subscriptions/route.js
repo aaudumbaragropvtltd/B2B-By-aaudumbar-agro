@@ -205,7 +205,8 @@ export async function POST(request) {
   try {
     const supabase = getAdminSupabase();
     const body = await request.json();
-    const { action, user_id, email, plan = 'QUARTERLY PLAN', days, payment_id, notes, activated_by = 'admin' } = body;
+    const { action, user_id, email, plan = 'ANNUAL PLAN', days, payment_id, notes, activated_by = 'admin' } = body;
+    const selectedPlan = plan === 'QUARTERLY PLAN' ? 'ANNUAL PLAN' : (plan || 'ANNUAL PLAN');
 
     if (!action) {
       return NextResponse.json({ success: false, error: 'Missing action parameter.' }, { status: 400 });
@@ -215,21 +216,21 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'User ID or Email is required.' }, { status: 400 });
     }
 
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------
     // 1. ACTION: MANUALLY ACTIVATE SUBSCRIPTION
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------
     if (action === 'activate') {
-      const targetDays = days || (plan === 'ANNUAL PLAN' ? 365 : 90);
-      const planAmount = plan === 'ANNUAL PLAN' ? 2000 : 600;
+      const targetDays = days || 365;
+      const planAmount = 2000;
 
       // Update membership store
       const record = manualActivateMembership({
         userId: user_id,
         email,
-        plan,
+        plan: selectedPlan,
         days: targetDays,
         paymentId: payment_id || `MANUAL-${Date.now().toString().slice(-6)}`,
-        notes: notes || `Manual activation by admin (${plan})`,
+        notes: notes || `Manual activation by admin (${selectedPlan})`,
         activatedBy: activated_by
       });
 
@@ -347,12 +348,12 @@ export async function POST(request) {
 
       const membership = getUserMembership(user_id, email);
       const companyName = body.company_name || 'Valued Partner';
-      const targetPlan = body.plan || membership.plan || 'QUARTERLY PLAN';
+      const targetPlan = 'ANNUAL PLAN';
       const deadlineDate = membership.expiresAt 
         ? new Date(membership.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
         : 'Immediate Action Required';
 
-      const planPrice = targetPlan === 'ANNUAL PLAN' ? '₹2,000 + 18% GST' : '₹600 + 18% GST';
+      const planPrice = '₹2,000 + 18% GST (₹2,360.00)';
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://b2bindia.site';
       const renewalUrl = `${siteUrl}/dashboard?tab=membership`;
 

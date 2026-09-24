@@ -28,11 +28,11 @@ export default function AdminPayments() {
   const [manualForm, setManualForm] = useState({
     userId: '',
     orderId: '',
-    amount: '708',
+    amount: '2360',
     paymentMethod: 'NEFT / RTGS Bank Transfer',
     status: 'successful',
     transactionReference: '',
-    paymentType: 'supplier_subscription_quarterly',
+    paymentType: 'supplier_subscription_annual',
     notes: ''
   });
   const [submittingManual, setSubmittingManual] = useState(false);
@@ -83,11 +83,11 @@ export default function AdminPayments() {
       setManualForm({
         userId: '',
         orderId: '',
-        amount: '708',
+        amount: '2360',
         paymentMethod: 'NEFT / RTGS Bank Transfer',
         status: 'successful',
         transactionReference: '',
-        paymentType: 'supplier_subscription_quarterly',
+        paymentType: 'supplier_subscription_annual',
         notes: ''
       });
       fetchPayments();
@@ -482,10 +482,10 @@ export default function AdminPayments() {
                               <span>SUPPLIER SUBSCRIPTION</span>
                             </span>
                             <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1">
-                              <span>{p.plan || 'QUARTERLY PLAN'}</span>
+                              <span>{p.plan || 'ANNUAL PLAN'}</span>
                             </div>
                             <span className="text-[10px] text-slate-500 font-medium">
-                              {p.plan === 'ANNUAL PLAN' ? '12 Months Access Pass' : '3 Months Access Pass'}
+                              12 Months Access Pass
                             </span>
                           </div>
                         ) : (
@@ -605,13 +605,11 @@ export default function AdminPayments() {
                   onChange={(e) => {
                     const val = e.target.value;
                     let autoAmt = manualForm.amount;
-                    if (val === 'supplier_subscription_quarterly') autoAmt = '708';
                     if (val === 'supplier_subscription_annual') autoAmt = '2360';
                     setManualForm({ ...manualForm, paymentType: val, amount: autoAmt });
                   }}
                   className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                 >
-                  <option value="supplier_subscription_quarterly">⭐ Supplier Subscription (Quarterly Plan - ₹708)</option>
                   <option value="supplier_subscription_annual">⭐ Supplier Subscription (Annual Plan - ₹2,360)</option>
                   <option value="advance_10_percent">📦 Trade Order Advance (10% Escrow)</option>
                   <option value="manual_settlement">General Platform Settlement / Commission</option>

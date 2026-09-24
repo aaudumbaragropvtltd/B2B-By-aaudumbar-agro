@@ -799,7 +799,7 @@ function DashboardContent() {
                             </div>
 
                             <button
-                              onClick={() => handleUpgradePlan(membershipInfo?.previousPlan || 'QUARTERLY PLAN')}
+                              onClick={() => handleUpgradePlan(membershipInfo?.previousPlan || 'ANNUAL PLAN')}
                               disabled={upgradingPlan !== null}
                               className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-xl shadow-lg shadow-rose-600/20 transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer disabled:opacity-50 whitespace-nowrap"
                             >
@@ -826,7 +826,7 @@ function DashboardContent() {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 max-w-4xl gap-6">
                           {/* FREE TIER */}
                           <div className={`p-6 rounded-2xl border transition-all ${plan === 'FREE TIER' && !membershipInfo?.isExpired ? 'border-brand-500 bg-brand-50/20 shadow-sm ring-1 ring-brand-500/30' : 'border-gray-200 bg-white opacity-80'}`}>
                             <div className="flex justify-between items-center">
@@ -842,72 +842,6 @@ function DashboardContent() {
                             <button disabled className="w-full py-2.5 bg-gray-200 text-gray-500 font-semibold rounded-xl text-xs">
                               {plan === 'FREE TIER' && !membershipInfo?.isExpired ? 'Current Plan' : 'Free Basic'}
                             </button>
-                          </div>
-
-                          {/* QUARTERLY PLAN */}
-                          <div className={`p-6 rounded-2xl border transition-all ${plan === 'QUARTERLY PLAN' && !membershipInfo?.isExpired ? 'border-emerald-500 bg-emerald-50/30 shadow-md ring-2 ring-emerald-500/40' : 'border-gray-200 bg-white hover:border-brand-300'}`}>
-                            <div className="flex justify-between items-center">
-                              <h3 className="text-lg font-bold">QUARTERLY PLAN</h3>
-                              {plan === 'QUARTERLY PLAN' && !membershipInfo?.isExpired && <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">CURRENT ACTIVE</span>}
-                            </div>
-                            
-                            {/* Price Breakdown */}
-                            <div className="my-3">
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-slate-900 font-mono">
-                                  ₹728.89
-                                </span>
-                                <span className="text-xs text-slate-500 font-medium">all-inclusive / 3 mo</span>
-                              </div>
-                              <div className="text-[11px] text-slate-500 mt-1.5 font-mono space-y-0.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                                <div className="flex justify-between">
-                                  <span>Base Price:</span>
-                                  <span className="font-bold">₹600.00</span>
-                                </div>
-                                <div className="flex justify-between text-emerald-700 font-bold">
-                                  <span>+ 18% GST on Base:</span>
-                                  <span>+₹108.00 (₹708.00)</span>
-                                </div>
-                                <div className="flex justify-between text-slate-600">
-                                  <span>+ Razorpay Fee (2.5% + 18% GST):</span>
-                                  <span>+₹20.89</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <ul className="text-xs text-gray-600 space-y-1.5 mb-4">
-                              <li className="font-bold text-emerald-700">✅ Unlocked Product Uploads</li>
-                              <li>✅ Priority Support & RFQ Alerts</li>
-                              <li>✅ Reduced Platform Commission</li>
-                              <li>✅ Instant Product Activation</li>
-                            </ul>
-
-                            {plan === 'QUARTERLY PLAN' && !membershipInfo?.isExpired ? (
-                              <button 
-                                onClick={() => handleUpgradePlan('QUARTERLY PLAN')}
-                                disabled={upgradingPlan === 'QUARTERLY PLAN'}
-                                className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-                              >
-                                {upgradingPlan === 'QUARTERLY PLAN' ? 'Opening Razorpay...' : '🔄 Renew / Extend 3 Months (₹728.89)'}
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => handleUpgradePlan('QUARTERLY PLAN')} 
-                                disabled={upgradingPlan === 'QUARTERLY PLAN'}
-                                className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all text-xs shadow-md shadow-brand-600/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                              >
-                                {upgradingPlan === 'QUARTERLY PLAN' ? (
-                                  <>
-                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    <span>Opening Razorpay...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>⚡ Pay ₹728.89 (Upgrade to Quarterly)</span>
-                                  </>
-                                )}
-                              </button>
-                            )}
                           </div>
 
                           {/* ANNUAL PLAN */}
@@ -1142,7 +1076,7 @@ function DashboardContent() {
                       </div>
                     </div>
                     <button
-                      onClick={() => handleUpgradePlan(membershipInfo?.previousPlan || 'QUARTERLY PLAN')}
+                      onClick={() => handleUpgradePlan(membershipInfo?.previousPlan || 'ANNUAL PLAN')}
                       className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md whitespace-nowrap cursor-pointer flex-shrink-0"
                     >
                       🔄 Renew Plan & Restore Catalog
@@ -1696,60 +1630,42 @@ function DashboardContent() {
                   Your account is currently on the <strong>FREE TIER</strong>, which does not permit product catalog listings. Upgrade with Razorpay to unlock <strong>unlimited product uploads</strong> and make your products live.
                 </p>
 
-                <div className="my-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-                  {/* Option 1: Quarterly */}
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:border-brand-400 transition-all flex flex-col justify-between">
-                    <div>
-                      <div className="text-xs font-extrabold text-slate-900">QUARTERLY PLAN</div>
-                      <div className="text-xl font-black text-brand-600 font-mono my-1">
-                        ₹728.89
-                      </div>
-                      <div className="text-[10px] text-slate-500 font-mono space-y-0.5 border-t border-slate-200 pt-1 mt-1">
-                        <div className="flex justify-between"><span>Base:</span><span>₹600.00</span></div>
-                        <div className="flex justify-between text-emerald-700 font-bold"><span>+ 18% GST:</span><span>+₹108.00 (₹708.00)</span></div>
-                        <div className="flex justify-between"><span>+ Gateway (2.5% + 18% GST):</span><span>+₹20.89</span></div>
-                      </div>
-                      <ul className="text-[10px] text-slate-600 space-y-1 mt-2.5">
-                        <li>✓ Unlocked Product Uploads</li>
-                        <li>✓ Instant Live Catalog</li>
-                      </ul>
-                    </div>
-                    <button
-                      onClick={() => handleUpgradePlan('QUARTERLY PLAN')}
-                      disabled={upgradingPlan === 'QUARTERLY PLAN'}
-                      className="mt-3 w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-brand-600/20 flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
-                    >
-                      {upgradingPlan === 'QUARTERLY PLAN' ? 'Processing...' : 'Pay ₹728.89 ⚡'}
-                    </button>
-                  </div>
-
-                  {/* Option 2: Annual */}
-                  <div className="p-4 bg-amber-50/50 rounded-2xl border-2 border-amber-400 relative flex flex-col justify-between">
-                    <div className="absolute -top-2.5 right-3 bg-amber-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
-                      BEST VALUE
+                <div className="my-5 max-w-sm mx-auto text-left">
+                  {/* Annual Plan */}
+                  <div className="p-5 bg-gradient-to-br from-amber-50/80 to-white rounded-2xl border-2 border-amber-400 relative shadow-lg shadow-amber-500/10 flex flex-col justify-between">
+                    <div className="absolute -top-3 right-4 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                      1 YEAR ALL-INCLUSIVE
                     </div>
                     <div>
-                      <div className="text-xs font-extrabold text-slate-900">ANNUAL PLAN</div>
-                      <div className="text-xl font-black text-amber-700 font-mono my-1">
+                      <div className="text-sm font-extrabold text-slate-900">ANNUAL PLAN (12 MONTHS)</div>
+                      <div className="text-2xl font-black text-amber-700 font-mono my-2">
                         ₹2,429.62
                       </div>
-                      <div className="text-[10px] text-slate-500 font-mono space-y-0.5 border-t border-amber-200 pt-1 mt-1">
-                        <div className="flex justify-between"><span>Base:</span><span>₹2,000.00</span></div>
-                        <div className="flex justify-between text-emerald-800 font-bold"><span>+ 18% GST:</span><span>+₹360.00 (₹2,360.00)</span></div>
-                        <div className="flex justify-between"><span>+ Gateway (2.5% + 18% GST):</span><span>+₹69.62</span></div>
+                      <div className="text-[11px] text-slate-500 font-mono space-y-1 border-t border-amber-200/80 pt-2 mt-1 bg-amber-50/50 p-2.5 rounded-xl border">
+                        <div className="flex justify-between"><span>Base Price:</span><span className="font-bold">₹2,000.00</span></div>
+                        <div className="flex justify-between text-emerald-800 font-bold"><span>+ 18% GST on Base:</span><span>+₹360.00 (₹2,360.00)</span></div>
+                        <div className="flex justify-between text-slate-600"><span>+ Gateway Fee (2.5% + 18% GST):</span><span>+₹69.62</span></div>
                       </div>
-                      <ul className="text-[10px] text-slate-600 space-y-1 mt-2.5">
-                        <li>✓ Unlimited Product Uploads</li>
-                        <li>✓ Top Ranked Visibility</li>
-                        <li>✓ Dedicated Account Mgr</li>
+                      <ul className="text-xs text-slate-700 space-y-1.5 mt-3.5">
+                        <li className="font-semibold text-emerald-700">✓ Unlimited Product Catalog Uploads</li>
+                        <li>✓ 1 Full Year Active Marketplace Indexing</li>
+                        <li>✓ Direct Buyer Inquiries &amp; Live RFQ Access</li>
+                        <li>✓ Dedicated Account Manager &amp; Priority Support</li>
                       </ul>
                     </div>
                     <button
                       onClick={() => handleUpgradePlan('ANNUAL PLAN')}
                       disabled={upgradingPlan === 'ANNUAL PLAN'}
-                      className="mt-3 w-full py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-amber-600/20 flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                      className="mt-4 w-full py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-black text-sm rounded-xl transition-all shadow-md shadow-amber-600/30 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 btn-shine"
                     >
-                      {upgradingPlan === 'ANNUAL PLAN' ? 'Processing...' : 'Pay ₹2,429.62 ⭐'}
+                      {upgradingPlan === 'ANNUAL PLAN' ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Opening Razorpay...</span>
+                        </>
+                      ) : (
+                        <span>⚡ Pay ₹2,429.62 (Activate 1 Year)</span>
+                      )}
                     </button>
                   </div>
                 </div>

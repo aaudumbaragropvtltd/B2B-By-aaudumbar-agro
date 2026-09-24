@@ -58,7 +58,7 @@ export default function RefundPolicy() {
 
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-3">4. Supplier Membership Subscriptions</h2>
             <ul className="list-disc pl-5 space-y-2">
-              <li>Supplier catalog membership plans (Quarterly ₹708 / Annual ₹2,360) provide immediate indexing of products and access to verified buyer RFQs.</li>
+              <li>Supplier catalog membership (Annual ₹2,360 all-inclusive with GST) provides immediate indexing of products and access to verified buyer RFQs.</li>
               <li>Membership fees are strictly non-refundable once the supplier account features have been activated.</li>
               <li>Accidental duplicate transactions resulting from payment gateway network errors will be refunded automatically within 3–5 working days.</li>
             </ul>

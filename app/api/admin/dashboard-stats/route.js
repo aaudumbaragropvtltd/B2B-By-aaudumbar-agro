@@ -100,13 +100,13 @@ export async function GET() {
     const protectedSupplierPayout = totalGMV - orderProfitEarned;
 
     // 2. SUBSCRIPTION MODEL PROFIT (Supplier & Buyer Memberships)
-    // Quarterly Plans (₹600 / 3-mo) + Annual Plans (₹2,000 / yr) + Gold Supplier badges
+    // Annual Plans (₹2,000 / yr) + Gold Supplier badges
     let liveSubRevenue = 0;
     if (paymentsRecords.length > 0) {
       liveSubRevenue = paymentsRecords.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
     }
     const subscriptionProfitEarned = Math.max(liveSubRevenue, 485000);
-    const activeSubscribersCount = Math.round(subscriptionProfitEarned / 1200); // estimated active members
+    const activeSubscribersCount = Math.round(subscriptionProfitEarned / 2000); // estimated active members
 
     // 3. VALUE ADDED SERVICES & RFQ PROFIT
     const vasProfitEarned = Math.round(orderProfitEarned * 0.07) + 90000;
@@ -137,7 +137,7 @@ export async function GET() {
         icon: '👑',
         color: 'amber',
         badge: 'Recurring SaaS',
-        description: `Quarterly (₹600) & Annual (₹2,000) memberships unlocking verified catalog listing and priority discovery.`,
+        description: `Annual (₹2,000) memberships unlocking verified catalog listing and priority discovery.`,
         link: '/admin/users'
       },
       {

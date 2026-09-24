@@ -113,14 +113,14 @@ export function saveUserMembership(userId, email, { plan, paymentId, razorpayOrd
   const memberships = readMemberships();
   const now = new Date();
   
-  let days = daysOverride || (plan === 'ANNUAL PLAN' ? 365 : 90);
+  let days = daysOverride || 365;
 
   const expiresAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
 
   const record = {
     userId: userId || null,
     email: email ? email.toLowerCase() : null,
-    plan,
+    plan: plan || 'ANNUAL PLAN',
     status: 'active',
     activatedAt: now.toISOString(),
     expiresAt,
@@ -146,10 +146,10 @@ export function saveUserMembership(userId, email, { plan, paymentId, razorpayOrd
 /**
  * Manually activate membership from Admin Panel
  */
-export function manualActivateMembership({ userId, email, plan = 'QUARTERLY PLAN', days = 90, paymentId, notes = 'Activated manually via Admin Panel', activatedBy = 'admin' }) {
+export function manualActivateMembership({ userId, email, plan = 'ANNUAL PLAN', days = 365, paymentId, notes = 'Activated manually via Admin Panel', activatedBy = 'admin' }) {
   const memberships = readMemberships();
   const now = new Date();
-  const targetDays = days || (plan === 'ANNUAL PLAN' ? 365 : 90);
+  const targetDays = days || 365;
   const expiresAt = new Date(now.getTime() + targetDays * 24 * 60 * 60 * 1000).toISOString();
 
   const refPaymentId = paymentId || `MANUAL-${Date.now().toString().slice(-6)}`;
@@ -195,7 +195,7 @@ export function deactivateUserMembership(userId, email, reason = 'Deactivated by
     email: email ? email.toLowerCase() : existing.email || null,
     status: 'expired',
     plan: 'FREE TIER',
-    previousPlan: existing.plan || 'QUARTERLY PLAN',
+    previousPlan: existing.plan || 'ANNUAL PLAN',
     expiresAt: now.toISOString(),
     notes: reason,
     lastUpdated: now.toISOString(),

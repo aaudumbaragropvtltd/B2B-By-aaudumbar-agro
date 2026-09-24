@@ -16,10 +16,9 @@ export async function sendSubscriptionReceiptEmail(subscriptionData, options = {
     }
 
     const companyName = subscriptionData.companyName || subscriptionData.company_name || options.companyName || 'Valued Supplier Partner';
-    const plan = subscriptionData.plan || 'QUARTERLY PLAN';
-    const isAnnual = plan === 'ANNUAL PLAN';
-    const planLabel = isAnnual ? 'Annual Enterprise Plan (12 Months)' : 'Quarterly Growth Plan (3 Months)';
-    const durationDays = subscriptionData.durationDays || (isAnnual ? 365 : 90);
+    const plan = subscriptionData.plan || 'ANNUAL PLAN';
+    const planLabel = 'Annual Supplier Membership (12 Months)';
+    const durationDays = subscriptionData.durationDays || 365;
     
     const paymentId = subscriptionData.paymentId || subscriptionData.payment_id || `PAY-${Date.now().toString().slice(-8)}`;
     const receiptNo = `AAPL/SUB/2026/${(paymentId.replace(/[^0-9a-zA-Z]/g, '')).slice(-6).toUpperCase() || Math.floor(100000 + Math.random() * 900000)}`;
@@ -40,9 +39,9 @@ export async function sendSubscriptionReceiptEmail(subscriptionData, options = {
     });
 
     // Pricing calculation
-    const baseAmount = Number(subscriptionData.baseAmount) || (isAnnual ? 2000 : 600);
+    const baseAmount = Number(subscriptionData.baseAmount) || 2000;
     const gstAmount = Number(subscriptionData.gstAmount) || parseFloat((baseAmount * 0.18).toFixed(2));
-    const gatewayFee = Number(subscriptionData.gatewayFee) || (isAnnual ? 59.00 : 17.70);
+    const gatewayFee = Number(subscriptionData.gatewayFee) || 59.00;
     const totalAmount = Number(subscriptionData.totalAmount) || parseFloat((baseAmount + gstAmount + gatewayFee).toFixed(2));
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://b2bindia.site';

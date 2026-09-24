@@ -21,13 +21,13 @@ export default function AdminSubscriptionsPage() {
   // Filters & Search
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // all | active | expiring_soon | expired | free
-  const [planFilter, setPlanFilter] = useState('all'); // all | QUARTERLY PLAN | ANNUAL PLAN | FREE TIER
+  const [planFilter, setPlanFilter] = useState('all'); // all | ANNUAL PLAN | FREE TIER
 
   // Modals
   const [showGrantModal, setShowGrantModal] = useState(false);
   const [selectedUserForGrant, setSelectedUserForGrant] = useState('');
-  const [grantPlan, setGrantPlan] = useState('QUARTERLY PLAN');
-  const [grantDays, setGrantDays] = useState(90);
+  const [grantPlan, setGrantPlan] = useState('ANNUAL PLAN');
+  const [grantDays, setGrantDays] = useState(365);
   const [grantPaymentId, setGrantPaymentId] = useState('');
   const [grantNotes, setGrantNotes] = useState('');
   const [grantLoading, setGrantLoading] = useState(false);
@@ -74,8 +74,8 @@ export default function AdminSubscriptionsPage() {
     fetchSubscriptions();
   }, [fetchSubscriptions]);
 
-  // Handle 1-Click Manual Activation (Quarterly or Annual)
-  const handleManualActivate = async (sub, planToActivate) => {
+  // Handle 1-Click Manual Activation (Annual)
+  const handleManualActivate = async (sub, planToActivate = 'ANNUAL PLAN') => {
     const targetDays = planToActivate === 'ANNUAL PLAN' ? 365 : 90;
     const subKey = sub.user_id || sub.email;
 
@@ -169,7 +169,7 @@ export default function AdminSubscriptionsPage() {
           user_id: reminderTarget.user_id,
           email: reminderTarget.email,
           company_name: reminderTarget.company_name,
-          plan: reminderTarget.plan !== 'FREE TIER' ? reminderTarget.plan : 'QUARTERLY PLAN'
+          plan: reminderTarget.plan !== 'FREE TIER' ? reminderTarget.plan : 'ANNUAL PLAN'
         })
       });
 
@@ -377,7 +377,7 @@ export default function AdminSubscriptionsPage() {
         <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 shadow-sm col-span-2 sm:col-span-1">
           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active SaaS GMV</div>
           <div className="text-2xl font-black text-amber-400 mt-1">₹{stats.total_revenue.toLocaleString('en-IN')}</div>
-          <div className="text-[10px] text-slate-500 mt-1 font-medium">Annual &amp; Quarterly sum</div>
+          <div className="text-[10px] text-slate-500 mt-1 font-medium">Annual plan membership sum</div>
         </div>
       </div>
 
@@ -425,7 +425,6 @@ export default function AdminSubscriptionsPage() {
             className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-300 focus:outline-none focus:border-orange-500 cursor-pointer"
           >
             <option value="all">All Plans</option>
-            <option value="QUARTERLY PLAN">Quarterly Plan (₹600 / 3 Mo)</option>
             <option value="ANNUAL PLAN">Annual Plan (₹2,000 / 12 Mo)</option>
             <option value="FREE TIER">Free Tier</option>
           </select>
@@ -499,9 +498,9 @@ export default function AdminSubscriptionsPage() {
                             <span>Annual (₹2,000 / 12 Mo)</span>
                           </div>
                         ) : sub.plan === 'QUARTERLY PLAN' ? (
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-extrabold">
-                            <span>⭐</span>
-                            <span>Quarterly (₹600 / 3 Mo)</span>
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[11px] font-extrabold">
+                            <span>⏱️</span>
+                            <span>Legacy Plan (Pending Annual Upgrade)</span>
                           </div>
                         ) : (
                           <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 text-[11px] font-bold">
@@ -580,22 +579,11 @@ export default function AdminSubscriptionsPage() {
                       {/* Actions */}
                       <td className="px-5 py-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
-                          {/* 1-Click Activate Quarterly */}
-                          <button
-                            onClick={() => handleManualActivate(sub, 'QUARTERLY PLAN')}
-                            disabled={!!isActionBusy}
-                            title="Manually activate or extend for 90 Days (Quarterly)"
-                            className="px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 hover:border-amber-500/60 rounded-xl font-black text-[11px] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1"
-                          >
-                            <span>⚡</span>
-                            <span>{isActionBusy === 'activating_QUARTERLY PLAN' ? 'Activating...' : '+90d Quarterly'}</span>
-                          </button>
-
                           {/* 1-Click Activate Annual */}
                           <button
                             onClick={() => handleManualActivate(sub, 'ANNUAL PLAN')}
                             disabled={!!isActionBusy}
-                            title="Manually activate or extend for 365 Days (Annual)"
+                            title="Manually activate or extend for 365 Days (Annual Plan)"
                             className="px-2.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 rounded-xl font-black text-[11px] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1"
                           >
                             <span>🌟</span>
@@ -682,39 +670,18 @@ export default function AdminSubscriptionsPage() {
                   </select>
                 </div>
 
-                {/* Select Plan */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGrantPlan('QUARTERLY PLAN');
-                      setGrantDays(90);
-                    }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                      grantPlan === 'QUARTERLY PLAN'
-                        ? 'bg-amber-500/20 border-amber-500 text-amber-300'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="text-xs font-black">Quarterly Plan</div>
-                    <div className="text-[11px] mt-0.5">₹600 • 90 Days</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGrantPlan('ANNUAL PLAN');
-                      setGrantDays(365);
-                    }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                      grantPlan === 'ANNUAL PLAN'
-                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="text-xs font-black">Annual Plan</div>
-                    <div className="text-[11px] mt-0.5">₹2,000 • 365 Days</div>
-                  </button>
+                {/* Select Plan (Annual Plan Only) */}
+                <div className="w-full">
+                  <div className="p-3.5 rounded-2xl border bg-emerald-500/10 border-emerald-500/40 text-emerald-300">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs font-black flex items-center gap-1.5">
+                        <span>🌟</span>
+                        <span>Annual Plan (12 Months)</span>
+                      </div>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold uppercase">Standard Plan</span>
+                    </div>
+                    <div className="text-[11px] text-slate-300 mt-1">₹2,000 Base + 18% GST • 365 Days Access</div>
+                  </div>
                 </div>
 
                 {/* Days Duration Override */}
@@ -732,7 +699,7 @@ export default function AdminSubscriptionsPage() {
                     required
                   />
                   <span className="text-[10px] text-slate-500 mt-1 block">
-                    Calculated Expiration: {new Date(Date.now() + (parseInt(grantDays) || 90) * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    Calculated Expiration: {new Date(Date.now() + (parseInt(grantDays) || 365) * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>
                 </div>
 

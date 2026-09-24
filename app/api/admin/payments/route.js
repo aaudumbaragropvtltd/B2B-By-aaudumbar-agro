@@ -216,9 +216,9 @@ export async function GET(request) {
                      (record.email && userMap.get(record.email.toLowerCase())) || 
                      null;
 
-        const isAnnual = record.plan === 'ANNUAL PLAN';
-        // Base amount + 18% GST: Quarterly is ₹708 (₹600 + ₹108), Annual is ₹2,360 (₹2,000 + ₹360)
-        const standardAmount = isAnnual ? 2360 : 708;
+        const isAnnual = record.plan !== 'FREE TIER';
+        // Base amount + 18% GST: Annual is ₹2,360 (₹2,000 + ₹360)
+        const standardAmount = 2360;
         const amount = Number(record.amount || standardAmount);
 
         const isRazorpay = record.paymentId?.startsWith('pay_') || record.paymentId?.startsWith('order_');
@@ -394,12 +394,12 @@ export async function POST(request) {
 
     // Check if this is a Subscription Payment
     const isSubscription = paymentType === 'supplier_subscription' || 
-                           paymentType === 'supplier_subscription_quarterly' || 
-                           paymentType === 'supplier_subscription_annual';
+                           paymentType === 'supplier_subscription_annual' ||
+                           paymentType === 'supplier_subscription_quarterly';
 
     if (isSubscription) {
-      const plan = formPlan || (paymentType === 'supplier_subscription_annual' || Number(amount) >= 2000 ? 'ANNUAL PLAN' : 'QUARTERLY PLAN');
-      const days = plan === 'ANNUAL PLAN' ? 365 : 90;
+      const plan = 'ANNUAL PLAN';
+      const days = 365;
 
       // Find user if userId is provided
       let userEmail = cleanUserId && cleanUserId.includes('@') ? cleanUserId : null;

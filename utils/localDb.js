@@ -31,7 +31,7 @@ const initUsersDb = () => {
     const defaultUsers = {
       "demo-supplier-1": {
         id: "demo-supplier-1",
-        plan: "FREE TIER", // FREE TIER, QUARTERLY PLAN, ANNUAL PLAN
+        plan: "FREE TIER", // FREE TIER, ANNUAL PLAN
         uploaded_products: 10
       }
     };

@@ -104,7 +104,7 @@ export async function POST(request) {
         return NextResponse.json({
           error: membership.isExpired 
             ? 'Your supplier subscription has expired. Please renew your membership plan to list new products and restore your catalog.'
-            : 'Active Supplier Membership (Quarterly or Annual) is required to list products on B2B India.',
+            : 'Active Supplier Membership (Annual Plan) is required to list products on B2B India.',
           requiresUpgrade: true,
           plan: membership.plan,
           isExpired: membership.isExpired,

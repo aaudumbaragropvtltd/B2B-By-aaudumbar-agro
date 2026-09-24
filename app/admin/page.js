@@ -114,7 +114,7 @@ export default function AdminDashboard() {
       icon: '👑',
       color: 'amber',
       badge: 'Recurring SaaS',
-      description: `Quarterly (₹600) & Annual (₹2,000) memberships unlocking verified catalog listing and priority discovery.`,
+      description: `Annual (₹2,000) memberships unlocking verified catalog listing and priority discovery.`,
       link: '/admin/users'
     },
     {
