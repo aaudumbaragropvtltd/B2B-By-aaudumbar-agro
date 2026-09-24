@@ -135,9 +135,7 @@ export default function Navbar() {
 
   const pathname = usePathname();
   const isHomePage = pathname === '/';
-  const isHeroTransparent = isHomePage && !isScrolled;
   const isDarkPage = pathname?.startsWith('/dashboard');
-  const isDark = isDarkPage; // Keep dashboard dark theme
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -152,12 +150,10 @@ export default function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isHeroTransparent
-          ? 'bg-transparent border-b border-transparent'
-          : isDark
-          ? 'bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60'
-          : 'bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-slate-950/98 backdrop-blur-xl border-b border-slate-800 shadow-xl'
+          : 'bg-slate-950/92 backdrop-blur-xl border-b border-slate-800/80 shadow-md'
       }`}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -166,14 +162,10 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-3 group">
             <B2BLogo className="w-10 h-10" />
             <div className="flex flex-col">
-              <span className={`text-lg font-extrabold tracking-tight transition-colors ${
-                (isDark || isHeroTransparent) ? 'text-white drop-shadow-md' : 'gradient-text-premium'
-              }`}>
+              <span className="text-lg font-extrabold tracking-tight text-white drop-shadow-sm group-hover:text-emerald-400 transition-colors">
                 B2B INDIA
               </span>
-              <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${
-                (isDark || isHeroTransparent) ? 'text-white/80 drop-shadow-sm' : 'text-brand-600'
-              }`}>
+              <span className="text-[10px] font-bold tracking-widest uppercase text-emerald-400">
                 Conglomerate Marketplace
               </span>
             </div>
@@ -181,7 +173,7 @@ export default function Navbar() {
 
           {/* Central Search Bar (Desktop) */}
           <div className="hidden lg:flex flex-1 max-w-2xl mx-8 relative z-30">
-            <form onSubmit={handleSearch} suppressHydrationWarning className="flex w-full rounded-xl bg-white/90 backdrop-blur-md shadow-sm border border-gray-200 focus-within:ring-2 focus-within:ring-brand-500/50 hover:shadow-md transition-all card-glow relative group">
+            <form onSubmit={handleSearch} suppressHydrationWarning className="flex w-full rounded-xl bg-slate-900/90 backdrop-blur-md shadow-sm border border-slate-700/80 focus-within:ring-2 focus-within:ring-brand-500/50 hover:border-slate-500 transition-all card-glow relative group">
               <div className="absolute inset-0 rounded-xl gradient-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <select
                 id="desktop-category-select"
@@ -189,14 +181,14 @@ export default function Navbar() {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 suppressHydrationWarning
-                className="w-40 px-3 py-2 bg-transparent border-r border-gray-200 text-xs text-gray-700 outline-none cursor-pointer font-bold relative z-10 rounded-l-xl"
+                className="w-40 px-3 py-2 bg-slate-900 border-r border-slate-700 text-xs text-slate-200 outline-none cursor-pointer font-bold relative z-10 rounded-l-xl"
               >
-                <option value="">All Categories</option>
-                <option value="building-construction">Building & Construction</option>
-                <option value="electronics-electrical">Electronics & Electrical</option>
-                <option value="industrial-machinery">Industrial Machinery</option>
-                <option value="apparel-garments">Apparel & Garments</option>
-                <option value="food-agriculture">Food & Agriculture</option>
+                <option value="" className="bg-slate-900 text-slate-200">All Categories</option>
+                <option value="building-construction" className="bg-slate-900 text-slate-200">Building & Construction</option>
+                <option value="electronics-electrical" className="bg-slate-900 text-slate-200">Electronics & Electrical</option>
+                <option value="industrial-machinery" className="bg-slate-900 text-slate-200">Industrial Machinery</option>
+                <option value="apparel-garments" className="bg-slate-900 text-slate-200">Apparel & Garments</option>
+                <option value="food-agriculture" className="bg-slate-900 text-slate-200">Food & Agriculture</option>
               </select>
               <SearchAutocomplete
                 searchQuery={searchQuery}
@@ -205,6 +197,7 @@ export default function Navbar() {
                 setSelectedCategory={setSelectedCategory}
                 onSearch={(q) => handleSearch(null, q)}
                 placeholder="Search products or commodities (e.g. Turmeric)..."
+                theme="dark"
               />
               <button
                 type="submit"
@@ -221,24 +214,15 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
-              const isTransparentLight = isHeroTransparent;
-              
-              let linkClass = '';
-              if (isActive) {
-                linkClass = isDark ? 'text-white bg-slate-800' : 'text-brand-700 bg-brand-50';
-              } else if (isDark) {
-                linkClass = 'text-slate-300 hover:text-white hover:bg-slate-800';
-              } else if (isTransparentLight) {
-                linkClass = 'text-white/90 hover:text-white hover:bg-white/10';
-              } else {
-                linkClass = 'text-gray-600 hover:text-brand-700 hover:bg-gray-100';
-              }
-              
               return (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-all duration-200 ${linkClass}`}
+                  className={`px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    isActive
+                      ? 'text-white bg-slate-800 border border-slate-700 shadow-xs'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -266,7 +250,7 @@ export default function Navbar() {
                       <button
                         onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); setShowUserMenu(false); }}
                         suppressHydrationWarning
-                        className={`relative p-2 rounded-lg transition-all ${isDark ? 'text-slate-300 hover:bg-white/10' : isHeroTransparent ? 'text-white/90 hover:bg-white/10' : 'text-gray-500 hover:bg-gray-100'}`}
+                        className="relative p-2 rounded-lg transition-all text-slate-300 hover:text-white hover:bg-white/10"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                         {unreadCount > 0 && (
@@ -327,7 +311,7 @@ export default function Navbar() {
                         )}
                       </AnimatePresence>
                     </div>
-                    <Link href="/orders" className={`relative p-2 rounded-lg transition-all ${isDark ? 'text-slate-300 hover:bg-white/10' : isHeroTransparent ? 'text-white/90 hover:bg-white/10' : 'text-gray-500 hover:bg-gray-100'}`} title="My Orders & Receipts">
+                    <Link href="/orders" className="relative p-2 rounded-lg transition-all text-slate-300 hover:text-white hover:bg-white/10" title="My Orders & Receipts">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     </Link>
                     <div className="relative">
@@ -391,22 +375,16 @@ export default function Navbar() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 ml-2">
+                  <div className="flex items-center gap-2.5 ml-2">
                     <Link
                       href="/login"
-                      className={`px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                        isDark
-                          ? 'text-slate-300 hover:text-white hover:bg-slate-800'
-                          : isHeroTransparent
-                          ? 'text-white/90 hover:text-white hover:bg-white/10'
-                          : 'text-gray-700 hover:text-brand-700 hover:bg-gray-100'
-                      }`}
+                      className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-slate-800/90 hover:bg-slate-700 border border-slate-600/90 hover:border-slate-400 shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer backdrop-blur-sm"
                     >
                       Sign In
                     </Link>
                     <Link
                       href="/login?mode=signup"
-                      className="px-4 py-2 rounded-xl text-sm font-extrabold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 shadow-md shadow-emerald-900/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 flex-shrink-0 btn-shine"
+                      className="px-4 py-2 rounded-xl text-sm font-extrabold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 shadow-md shadow-emerald-900/40 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 flex-shrink-0 btn-shine"
                     >
                       <span>Sign Up Free</span>
                       <span className="text-xs">→</span>
@@ -421,9 +399,7 @@ export default function Navbar() {
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             suppressHydrationWarning
-            className={`lg:hidden p-2 rounded-xl transition-colors ${
-              isDark ? 'text-slate-300' : isHeroTransparent ? 'text-white' : 'text-gray-800'
-            }`}
+            className="lg:hidden p-2 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800 transition-colors"
             aria-label="Toggle menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -446,9 +422,9 @@ export default function Navbar() {
               transition={{ duration: 0.3 }}
               className="lg:hidden overflow-hidden"
             >
-              <div className="bg-white rounded-2xl p-4 mb-4 space-y-2 shadow-xl border border-gray-200">
+              <div className="bg-slate-900/98 backdrop-blur-2xl rounded-2xl p-4 mb-4 space-y-2 shadow-2xl border border-slate-800 text-white">
                 {/* Mobile Search */}
-                <form onSubmit={handleSearch} suppressHydrationWarning className="flex mb-4 rounded-xl bg-gray-50 border border-gray-200 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all relative z-20">
+                <form onSubmit={handleSearch} suppressHydrationWarning className="flex mb-4 rounded-xl bg-slate-800 border border-slate-700 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all relative z-20">
                   <SearchAutocomplete
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
@@ -456,9 +432,10 @@ export default function Navbar() {
                     setSelectedCategory={setSelectedCategory}
                     onSearch={(q) => handleSearch(null, q)}
                     placeholder="Search products (e.g. Turmeric)..."
+                    theme="dark"
                     isMobile={true}
                   />
-                  <button type="submit" suppressHydrationWarning className="px-4 text-brand-600 font-bold bg-brand-50 hover:bg-brand-100 transition-colors flex items-center justify-center rounded-r-xl flex-shrink-0">
+                  <button type="submit" suppressHydrationWarning className="px-4 text-emerald-400 font-bold bg-slate-700/80 hover:bg-slate-700 transition-colors flex items-center justify-center rounded-r-xl flex-shrink-0">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </button>
                 </form>
@@ -470,8 +447,8 @@ export default function Navbar() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                       pathname === link.href
-                        ? 'text-brand-700 bg-brand-50'
-                        : 'text-gray-700 hover:bg-brand-50 hover:text-brand-700'
+                        ? 'text-white bg-slate-800 border border-slate-700 font-bold'
+                        : 'text-slate-200 hover:bg-slate-800/80 hover:text-white'
                     }`}
                   >
                     {link.label}
@@ -481,11 +458,11 @@ export default function Navbar() {
                 {!loading && user ? (
                   <>
                     {/* User info in mobile menu */}
-                    <div className="px-4 py-3 border-t border-gray-200 mt-2 pt-3">
-                      <p className="text-sm font-bold text-gray-900 truncate">
+                    <div className="px-4 py-3 border-t border-slate-800 mt-2 pt-3">
+                      <p className="text-sm font-bold text-white truncate">
                         {user.user_metadata?.full_name || user.email}
                       </p>
-                      <p className="text-xs text-gray-500 truncate mt-0.5">
+                      <p className="text-xs text-slate-400 truncate mt-0.5">
                         {user.email}
                       </p>
                     </div>
@@ -510,24 +487,24 @@ export default function Navbar() {
                         setIsMobileMenuOpen(false);
                         handleSignOut();
                       }}
-                      className="w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors text-left mt-1"
+                      className="w-full px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors text-left mt-1"
                     >
                       🚪 Sign Out
                     </button>
                   </>
                 ) : (
-                  <div className="space-y-2 pt-3 border-t border-gray-200 mt-2">
+                  <div className="space-y-2 pt-3 border-t border-slate-800 mt-2">
                     <Link
                       href="/login?mode=signup"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 text-center shadow-md shadow-emerald-900/10 transition-all active:scale-95 btn-shine"
+                      className="block w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-600 via-brand-600 to-emerald-700 hover:from-emerald-500 hover:to-brand-500 text-center shadow-md shadow-emerald-900/30 transition-all active:scale-95 btn-shine"
                     >
                       ✨ Sign Up as Buyer / Supplier →
                     </Link>
                     <Link
                       href="/login"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 text-center transition-colors"
+                      className="block w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 text-center transition-colors shadow-sm"
                     >
                       Sign In
                     </Link>
