@@ -14,7 +14,7 @@ async function pingIndexNow() {
     host: HOST,
     key: INDEXNOW_KEY,
     keyLocation: KEY_LOCATION,
-    urlList: urlList.slice(0, 100), // IndexNow batch 1
+    urlList: urlList, // Send all URLs (IndexNow supports up to 10,000 per call)
   };
 
   console.log('Submitting to IndexNow (Bing / Copilot / ChatGPT)...');
