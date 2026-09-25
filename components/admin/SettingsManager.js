@@ -124,7 +124,7 @@ export default function SettingsManager() {
           setSettings(data.settings);
           const initialValues = {};
           Object.entries(data.settings).forEach(([k, item]) => {
-            initialValues[k] = item.value;
+            initialValues[k] = item && typeof item === 'object' && 'value' in item ? item.value : item;
           });
           setFormValues(initialValues);
 
@@ -208,7 +208,14 @@ export default function SettingsManager() {
       const data = await res.json();
       if (res.ok && data.success) {
         showToast('✅ Category fees & business rules updated live across the entire website!');
-        setSettings(data.settings);
+        if (data.settings) {
+          setSettings(data.settings);
+          const refreshedValues = {};
+          Object.entries(data.settings).forEach(([k, item]) => {
+            refreshedValues[k] = item && typeof item === 'object' && 'value' in item ? item.value : item;
+          });
+          setFormValues(refreshedValues);
+        }
         if (typeof window !== 'undefined') {
           localStorage.setItem('b2b_pricing_updated', Date.now().toString());
         }
@@ -248,7 +255,14 @@ export default function SettingsManager() {
       const data = await res.json();
       if (res.ok && data.success) {
         showToast(`✅ Saved Annual Plan Pricing! Base: ₹${baseNum.toLocaleString('en-IN')}, Final User Pays: ₹${subTotalPayable.toFixed(2)}. Live across entire website!`);
-        setSettings(data.settings);
+        if (data.settings) {
+          setSettings(data.settings);
+          const refreshedValues = {};
+          Object.entries(data.settings).forEach(([k, item]) => {
+            refreshedValues[k] = item && typeof item === 'object' && 'value' in item ? item.value : item;
+          });
+          setFormValues(refreshedValues);
+        }
         if (typeof window !== 'undefined') {
           localStorage.setItem('b2b_pricing_updated', Date.now().toString());
         }

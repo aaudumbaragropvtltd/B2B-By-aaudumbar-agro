@@ -115,11 +115,12 @@ export const DEFAULT_PLATFORM_SETTINGS = {
 };
 
 function getSupabaseAdmin() {
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (url && key) {
+    return createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
   }
   return null;
 }
@@ -156,7 +157,7 @@ function writeLocalSettings(settings) {
       fs.writeFileSync(SETTINGS_FILE_PATH, JSON.stringify(settings, null, 2), 'utf8');
       return true;
     } catch (writeErr) {
-      console.error('Error writing local settings file:', writeErr.message);
+      // In serverless environments with read-only filesystems (e.g. Vercel), catch write errors safely
       return false;
     }
   }
@@ -169,6 +170,7 @@ export async function getAllSettings() {
   const local = readLocalSettings();
   const supabase = getSupabaseAdmin();
   if (supabase) {
+    // 1. Try dedicated platform_settings table if it exists
     try {
       const { data, error } = await supabase.from('platform_settings').select('*');
       if (!error && data && data.length > 0) {
@@ -185,7 +187,36 @@ export async function getAllSettings() {
         return dbSettings;
       }
     } catch (e) {
-      // fallback to local
+      // table doesn't exist
+    }
+
+    // 2. Resilient production store: activity_logs platform_settings snapshot
+    try {
+      const { data: logs, error: lErr } = await supabase
+        .from('activity_logs')
+        .select('details, created_at')
+        .eq('action', 'platform_settings')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (!lErr && logs && logs.length > 0 && logs[0].details) {
+        const savedMap = logs[0].details;
+        const merged = { ...local };
+        for (const [k, v] of Object.entries(savedMap)) {
+          if (v && typeof v === 'object' && 'value' in v) {
+            merged[k] = { ...merged[k], ...v };
+          } else {
+            merged[k] = {
+              ...merged[k],
+              value: v,
+              updated_at: logs[0].created_at,
+            };
+          }
+        }
+        return merged;
+      }
+    } catch (logErr) {
+      console.warn('DB settings read from activity_logs notice:', logErr.message);
     }
   }
   return local;
@@ -312,7 +343,7 @@ export async function syncAllProductPricesWithCategoryFees(customCategoryFees = 
  * Update multiple platform settings at once.
  */
 export async function updateSettings(newSettingsMap) {
-  const current = readLocalSettings();
+  const current = await getAllSettings();
   const updated = { ...current };
 
   for (const [key, val] of Object.entries(newSettingsMap)) {
@@ -333,11 +364,13 @@ export async function updateSettings(newSettingsMap) {
     }
   }
 
+  // 1. Write to local file cache (safe on serverless)
   writeLocalSettings(updated);
 
-  // Sync to Supabase if table is present
+  // 2. Sync to Supabase PostgreSQL database
   const supabase = getSupabaseAdmin();
   if (supabase) {
+    // Attempt upsert to platform_settings table if present
     try {
       const upserts = Object.entries(updated).map(([k, item]) => ({
         key: k,
@@ -349,7 +382,30 @@ export async function updateSettings(newSettingsMap) {
       }));
       await supabase.from('platform_settings').upsert(upserts);
     } catch (dbErr) {
-      console.warn('DB settings sync notice:', dbErr.message);
+      // table might not exist in schema
+    }
+
+    // Persist snapshot to activity_logs table (guaranteed available in Supabase)
+    try {
+      await supabase.from('activity_logs').insert([{
+        action: 'platform_settings',
+        details: updated,
+      }]);
+
+      // Prune old snapshots keeping only recent 5 records
+      const { data: oldLogs } = await supabase
+        .from('activity_logs')
+        .select('id')
+        .eq('action', 'platform_settings')
+        .order('created_at', { ascending: false })
+        .range(5, 50);
+
+      if (oldLogs && oldLogs.length > 0) {
+        const ids = oldLogs.map((l) => l.id);
+        await supabase.from('activity_logs').delete().in('id', ids);
+      }
+    } catch (logErr) {
+      console.warn('DB settings snapshot to activity_logs notice:', logErr.message);
     }
   }
 
