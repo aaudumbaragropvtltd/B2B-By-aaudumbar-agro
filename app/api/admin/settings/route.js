@@ -9,10 +9,22 @@ import { NextResponse } from 'next/server';
 import { getAllSettings, updateSettings } from '@/utils/platformSettings';
 import { logPlatformEvent } from '@/utils/platformLogs';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request) {
   try {
     const settings = await getAllSettings();
-    return NextResponse.json({ success: true, settings });
+    return NextResponse.json(
+      { success: true, settings },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching admin settings:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

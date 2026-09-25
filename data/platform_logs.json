@@ -1,5 +1,161 @@
 [
   {
+    "id": "log-1790334677423-zwg8",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "annual_plan_base_price",
+        "annual_plan_original_price",
+        "annual_plan_gst_percent",
+        "annual_plan_gateway_fee_percent"
+      ]
+    },
+    "created_at": "2026-09-25T11:11:17.423Z"
+  },
+  {
+    "id": "log-1790334676593-13z5",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "annual_plan_base_price",
+        "annual_plan_original_price",
+        "annual_plan_gst_percent",
+        "annual_plan_gateway_fee_percent"
+      ]
+    },
+    "created_at": "2026-09-25T11:11:16.593Z"
+  },
+  {
+    "id": "log-1790334675996-md2d",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "annual_plan_base_price",
+        "annual_plan_original_price",
+        "annual_plan_gst_percent",
+        "annual_plan_gateway_fee_percent"
+      ]
+    },
+    "created_at": "2026-09-25T11:11:15.996Z"
+  },
+  {
+    "id": "log-1790334625558-m4w1",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "annual_plan_base_price",
+        "annual_plan_original_price",
+        "annual_plan_gst_percent",
+        "annual_plan_gateway_fee_percent"
+      ]
+    },
+    "created_at": "2026-09-25T11:10:25.558Z"
+  },
+  {
+    "id": "log-1790334622446-f31g",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "annual_plan_base_price",
+        "annual_plan_original_price",
+        "annual_plan_gst_percent",
+        "annual_plan_gateway_fee_percent"
+      ]
+    },
+    "created_at": "2026-09-25T11:10:22.446Z"
+  },
+  {
+    "id": "log-1790333805442-cacu",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency",
+        "annual_plan_original_price",
+        "annual_plan_base_price",
+        "annual_plan_gst_percent",
+        "annual_plan_gateway_fee_percent"
+      ]
+    },
+    "created_at": "2026-09-25T10:56:45.442Z"
+  },
+  {
+    "id": "log-1790333797579-yl3x",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency",
+        "annual_plan_original_price",
+        "annual_plan_base_price",
+        "annual_plan_gst_percent",
+        "annual_plan_gateway_fee_percent"
+      ]
+    },
+    "created_at": "2026-09-25T10:56:37.580Z"
+  },
+  {
+    "id": "log-1790333785392-4faf",
+    "level": "INFO",
+    "service": "admin_settings",
+    "message": "Platform dynamic business rules updated from Admin Panel",
+    "metadata": {
+      "updatedKeys": [
+        "default_platform_fee_percent",
+        "category_platform_fees",
+        "high_value_threshold",
+        "high_value_advance_base",
+        "high_value_upi_fee",
+        "cards_surcharge_rate_percent",
+        "standard_advance_percent",
+        "default_gst_percent",
+        "default_min_order_qty",
+        "escrow_hold_hours",
+        "platform_maintenance_mode",
+        "supported_currency",
+        "annual_plan_original_price",
+        "annual_plan_base_price",
+        "annual_plan_gst_percent",
+        "annual_plan_gateway_fee_percent"
+      ]
+    },
+    "created_at": "2026-09-25T10:56:25.392Z"
+  },
+  {
     "id": "log-1790332777784-c1av",
     "level": "INFO",
     "service": "admin_settings",

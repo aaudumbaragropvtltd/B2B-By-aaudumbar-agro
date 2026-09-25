@@ -131,7 +131,10 @@ function readLocalSettings() {
     }
     if (fs.existsSync(SETTINGS_FILE_PATH)) {
       const data = fs.readFileSync(SETTINGS_FILE_PATH, 'utf8');
-      return { ...DEFAULT_PLATFORM_SETTINGS, ...JSON.parse(data) };
+      if (data && data.trim()) {
+        const parsed = JSON.parse(data);
+        return { ...DEFAULT_PLATFORM_SETTINGS, ...parsed };
+      }
     }
   } catch (err) {
     console.warn('Error reading local settings file:', err.message);
@@ -144,11 +147,18 @@ function writeLocalSettings(settings) {
     if (!fs.existsSync(path.dirname(SETTINGS_FILE_PATH))) {
       fs.mkdirSync(path.dirname(SETTINGS_FILE_PATH), { recursive: true });
     }
-    fs.writeFileSync(SETTINGS_FILE_PATH, JSON.stringify(settings, null, 2), 'utf8');
+    const tempPath = `${SETTINGS_FILE_PATH}.${Date.now()}.tmp`;
+    fs.writeFileSync(tempPath, JSON.stringify(settings, null, 2), 'utf8');
+    fs.renameSync(tempPath, SETTINGS_FILE_PATH);
     return true;
   } catch (err) {
-    console.error('Error writing local settings file:', err.message);
-    return false;
+    try {
+      fs.writeFileSync(SETTINGS_FILE_PATH, JSON.stringify(settings, null, 2), 'utf8');
+      return true;
+    } catch (writeErr) {
+      console.error('Error writing local settings file:', writeErr.message);
+      return false;
+    }
   }
 }
 

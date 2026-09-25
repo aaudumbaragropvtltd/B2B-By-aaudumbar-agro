@@ -149,7 +149,10 @@ function DashboardContent() {
 
   const fetchMembershipStatus = useCallback(async () => {
     try {
-      const res = await fetch('/api/membership');
+      const res = await fetch(`/api/membership?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
       if (res.ok) {
         const json = await res.json();
         if (json.membership) {
@@ -169,6 +172,31 @@ function DashboardContent() {
 
   useEffect(() => {
     fetchMembershipStatus();
+
+    // Cross-tab live sync: when admin saves price in another tab/window, instantly sync!
+    const handleStorage = (e) => {
+      if (e.key === 'b2b_pricing_updated') {
+        fetchMembershipStatus();
+      }
+    };
+    const handleFocus = () => {
+      fetchMembershipStatus();
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchMembershipStatus();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [fetchMembershipStatus, user]);
 
   useEffect(() => {
@@ -831,15 +859,15 @@ function DashboardContent() {
                             <span className="text-xl">💳</span>
                             <div>
                               <div className="text-xs font-black uppercase tracking-wider text-amber-400">
-                                Razorpay Payment & Tax Structure
+                                Razorpay Payment &amp; Tax Structure
                               </div>
                               <p className="text-[11px] text-slate-300 mt-0.5">
-                                Base Plan + <strong>18% GST</strong> + Standard Razorpay Platform Fee of <strong>2.5% + 18% GST on fee</strong> across all payment options (UPI, Cards, NetBanking).
+                                Base Plan (₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}) + <strong>{pricingInfo?.gstRate || 18}% GST</strong> (+₹{(pricingInfo?.gstAmount || 360).toFixed(2)}) + Standard Razorpay Platform Fee of <strong>{pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST on fee</strong> across all payment options.
                               </p>
                             </div>
                           </div>
                           <span className="px-3 py-1 bg-slate-800 text-slate-300 text-[11px] font-mono font-bold rounded-lg border border-slate-700 w-fit">
-                            Fee: 2.5% + 18% GST
+                            Fee: {pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST
                           </span>
                         </div>
 

@@ -56,8 +56,8 @@ export default function AdminSubscriptionsPage() {
       else setRefreshing(true);
       
       const [res, pricingRes] = await Promise.all([
-        fetch('/api/admin/subscriptions'),
-        fetch('/api/membership').catch(() => null)
+        fetch(`/api/admin/subscriptions?_t=${Date.now()}`, { cache: 'no-store' }),
+        fetch(`/api/membership?_t=${Date.now()}`, { cache: 'no-store' }).catch(() => null)
       ]);
       const data = await res.json();
       
@@ -83,6 +83,23 @@ export default function AdminSubscriptionsPage() {
 
   useEffect(() => {
     fetchSubscriptions();
+
+    const handleStorage = (e) => {
+      if (e.key === 'b2b_pricing_updated') {
+        fetchSubscriptions(true);
+      }
+    };
+    const handleFocus = () => {
+      fetchSubscriptions(true);
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [fetchSubscriptions]);
 
   // Handle 1-Click Manual Activation (Annual)

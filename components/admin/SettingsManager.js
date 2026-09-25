@@ -24,6 +24,7 @@ export default function SettingsManager() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [savingAnnualPricing, setSavingAnnualPricing] = useState(false);
 
   // Cloudinary CDN Storage State
   const [cloudinaryStatus, setCloudinaryStatus] = useState(null);
@@ -113,7 +114,10 @@ export default function SettingsManager() {
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/settings');
+      const res = await fetch(`/api/admin/settings?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.settings) {
@@ -205,6 +209,9 @@ export default function SettingsManager() {
       if (res.ok && data.success) {
         showToast('✅ Category fees & business rules updated live across the entire website!');
         setSettings(data.settings);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('b2b_pricing_updated', Date.now().toString());
+        }
       } else {
         showToast(data.error || 'Failed to save settings', 'error');
       }
@@ -213,6 +220,57 @@ export default function SettingsManager() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSaveAnnualPricing = async (e) => {
+    if (e) e.preventDefault();
+    setSavingAnnualPricing(true);
+    try {
+      const baseNum = Number(formValues.annual_plan_base_price !== undefined && formValues.annual_plan_base_price !== '' ? formValues.annual_plan_base_price : 2000);
+      const originalNum = Number(formValues.annual_plan_original_price !== undefined && formValues.annual_plan_original_price !== '' ? formValues.annual_plan_original_price : 20000);
+      const gstNum = Number(formValues.annual_plan_gst_percent !== undefined && formValues.annual_plan_gst_percent !== '' ? formValues.annual_plan_gst_percent : 18);
+      const rzpNum = Number(formValues.annual_plan_gateway_fee_percent !== undefined && formValues.annual_plan_gateway_fee_percent !== '' ? formValues.annual_plan_gateway_fee_percent : 2.5);
+
+      const payload = {
+        ...formValues,
+        annual_plan_base_price: baseNum,
+        annual_plan_original_price: originalNum,
+        annual_plan_gst_percent: gstNum,
+        annual_plan_gateway_fee_percent: rzpNum,
+        category_platform_fees: categoryFees,
+      };
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`✅ Saved Annual Plan Pricing! Base: ₹${baseNum.toLocaleString('en-IN')}, Final User Pays: ₹${subTotalPayable.toFixed(2)}. Live across entire website!`);
+        setSettings(data.settings);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('b2b_pricing_updated', Date.now().toString());
+        }
+      } else {
+        showToast(data.error || 'Failed to save annual pricing', 'error');
+      }
+    } catch (err) {
+      showToast('Network error while saving annual pricing: ' + err.message, 'error');
+    } finally {
+      setSavingAnnualPricing(false);
+    }
+  };
+
+  const handleResetAnnualPricing = () => {
+    setFormValues((prev) => ({
+      ...prev,
+      annual_plan_base_price: settings.annual_plan_base_price?.value ?? 2000,
+      annual_plan_original_price: settings.annual_plan_original_price?.value ?? 20000,
+      annual_plan_gst_percent: settings.annual_plan_gst_percent?.value ?? 18,
+      annual_plan_gateway_fee_percent: settings.annual_plan_gateway_fee_percent?.value ?? 2.5,
+    }));
+    showToast('Reset input fields to currently active saved settings');
   };
 
   const filteredSectors = STATIC_SECTORS.filter((s) =>
@@ -813,6 +871,35 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name`}
                       <span className="text-amber-400">4. Total Amount Charged:</span>
                       <span className="text-amber-400">₹{subTotalPayable.toFixed(2)}</span>
                     </div>
+                  </div>
+                </div>
+
+                {/* In-Card Direct Save & Publish Bar */}
+                <div className="pt-4 border-t border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 text-xs text-amber-300">
+                    <span>💡</span>
+                    <span>
+                      Clicking <strong>Save &amp; Publish</strong> updates the live database instantly across all supplier dashboard views, checkout orders, and Razorpay payment links.
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={handleResetAnnualPricing}
+                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      ↺ Reset Changes
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveAnnualPricing}
+                      disabled={savingAnnualPricing || saving}
+                      className="flex-1 sm:flex-initial px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      <span>{savingAnnualPricing ? '⏳ Saving & Broadcasting...' : `💾 Save & Apply Pricing Live (₹${subTotalPayable.toFixed(2)})`}</span>
+                    </button>
                   </div>
                 </div>
               </div>

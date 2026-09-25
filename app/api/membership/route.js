@@ -8,6 +8,9 @@ import { sendSubscriptionReceiptEmail } from '@/services/subscriptionReceiptServ
 
 import { getLiveMembershipPricing, calculateDynamicMembershipPricing } from '@/utils/platformSettings';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function calculateMembershipPricing(plan = 'ANNUAL PLAN', paymentMethod = 'all') {
   return await getLiveMembershipPricing(paymentMethod);
 }
@@ -20,11 +23,20 @@ export async function GET(request) {
 
     const membership = getUserMembership(user?.id || 'demo-supplier-1', user?.email || 'supplier@b2bindia.site');
     const pricing = await getLiveMembershipPricing('all');
-    return NextResponse.json({
-      success: true,
-      membership,
-      pricing,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        membership,
+        pricing,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching membership:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
