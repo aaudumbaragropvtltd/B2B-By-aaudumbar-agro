@@ -132,6 +132,20 @@ function DashboardContent() {
   const [upgradeSuccessModal, setUpgradeSuccessModal] = useState(null);
   const [showUpgradeGateModal, setShowUpgradeGateModal] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(10);
+  const [pricingInfo, setPricingInfo] = useState({
+    originalPrice: 20000,
+    baseAmount: 2000,
+    discountPercent: 90,
+    savingsAmount: 18000,
+    gstRate: 18,
+    gstAmount: 360,
+    subtotalWithGst: 2360,
+    gatewayFeePercent: 2.5,
+    gatewayFee: 59,
+    gstOnGatewayFee: 10.62,
+    totalGatewaySurcharge: 69.62,
+    totalPayable: 2429.62,
+  });
 
   const fetchMembershipStatus = useCallback(async () => {
     try {
@@ -143,6 +157,9 @@ function DashboardContent() {
           if (json.membership.plan) {
             setPlan(json.membership.plan);
           }
+        }
+        if (json.pricing) {
+          setPricingInfo(json.pricing);
         }
       }
     } catch (e) {
@@ -846,7 +863,9 @@ function DashboardContent() {
 
                           {/* ANNUAL PLAN */}
                           <div className={`p-6 rounded-2xl border relative transition-all ${plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired ? 'border-amber-500 bg-amber-50/30 shadow-md ring-2 ring-amber-500/40' : 'border-amber-300 bg-gradient-to-br from-amber-50/60 to-white hover:border-amber-400'}`}>
-                            <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-[10px] font-black px-2.5 py-1 rounded-bl-xl rounded-tr-xl tracking-wider">BEST VALUE</div>
+                            <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-[10px] font-black px-2.5 py-1 rounded-bl-xl rounded-tr-xl tracking-wider">
+                              {pricingInfo?.discountPercent ? `${pricingInfo.discountPercent}% OFF` : 'BEST VALUE'}
+                            </div>
                             <div className="flex justify-between items-center">
                               <h3 className="text-lg font-bold text-slate-900">ANNUAL PLAN</h3>
                               {plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired && <span className="text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded-full mr-16">CURRENT ACTIVE</span>}
@@ -854,24 +873,46 @@ function DashboardContent() {
 
                             {/* Price Breakdown */}
                             <div className="my-3">
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-brand-900 font-mono">
-                                  ₹2,429.62
+                              {/* Strikethrough Original Price & Selling Price Badge */}
+                              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                                <span className="text-sm font-bold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono" title="Original List Price">
+                                  ₹{(pricingInfo?.originalPrice || 20000).toLocaleString('en-IN')}
+                                </span>
+                                <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-300">
+                                  Selling Price: ₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}
+                                </span>
+                                {pricingInfo?.discountPercent > 0 && (
+                                  <span className="text-[10px] font-black text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
+                                    Save {pricingInfo.discountPercent}%
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* All-Inclusive Total */}
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="text-2xl sm:text-3xl font-black text-brand-900 font-mono tracking-tight">
+                                  ₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)}
                                 </span>
                                 <span className="text-xs text-slate-500 font-medium">all-inclusive / 12 mo</span>
                               </div>
-                              <div className="text-[11px] text-slate-500 mt-1.5 font-mono space-y-0.5 bg-amber-50/80 p-2.5 rounded-xl border border-amber-200">
+
+                              {/* Dynamic Fee Breakdown */}
+                              <div className="text-[11px] text-slate-600 mt-2 font-mono space-y-1 bg-amber-50/90 p-3 rounded-xl border border-amber-200 shadow-2xs">
                                 <div className="flex justify-between">
-                                  <span>Base Price:</span>
-                                  <span className="font-bold">₹2,000.00</span>
+                                  <span>Selling Base Price:</span>
+                                  <span className="font-bold text-slate-900">₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}.00</span>
                                 </div>
                                 <div className="flex justify-between text-emerald-800 font-bold">
-                                  <span>+ 18% GST on Base:</span>
-                                  <span>+₹360.00 (₹2,360.00)</span>
+                                  <span>+ {pricingInfo?.gstRate || 18}% GST on Base:</span>
+                                  <span>+₹{(pricingInfo?.gstAmount || 360).toFixed(2)} (₹{(pricingInfo?.subtotalWithGst || 2360).toFixed(2)})</span>
                                 </div>
                                 <div className="flex justify-between text-slate-600">
-                                  <span>+ Razorpay Fee (2.5% + 18% GST):</span>
-                                  <span>+₹69.62</span>
+                                  <span>+ Razorpay Fee ({pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST):</span>
+                                  <span>+₹{(pricingInfo?.totalGatewaySurcharge || 69.62).toFixed(2)}</span>
+                                </div>
+                                <div className="border-t border-amber-300/60 pt-1 mt-1 flex justify-between font-black text-slate-900">
+                                  <span>Total All-Inclusive:</span>
+                                  <span className="text-brand-900 font-mono">₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)}</span>
                                 </div>
                               </div>
                             </div>
@@ -880,7 +921,7 @@ function DashboardContent() {
                               <li className="font-bold text-emerald-700">✅ Unlocked Product Uploads</li>
                               <li>✅ Premium Visibility (Top Ranked)</li>
                               <li>✅ Dedicated Account Manager</li>
-                              <li>✅ Best Value (Save ₹485/yr)</li>
+                              <li>✅ Best Value (Save ₹{((pricingInfo?.originalPrice || 20000) - (pricingInfo?.baseAmount || 2000)).toLocaleString('en-IN')}/yr)</li>
                             </ul>
 
                             {plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired ? (
@@ -889,7 +930,7 @@ function DashboardContent() {
                                 disabled={upgradingPlan === 'ANNUAL PLAN'}
                                 className="w-full py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                               >
-                                {upgradingPlan === 'ANNUAL PLAN' ? 'Opening Razorpay...' : '⭐ Renew / Extend 1 Year (₹2,429.62)'}
+                                {upgradingPlan === 'ANNUAL PLAN' ? 'Opening Razorpay...' : `⭐ Renew / Extend 1 Year (₹${(pricingInfo?.totalPayable || 2429.62).toFixed(2)})`}
                               </button>
                             ) : (
                               <button 
@@ -904,7 +945,7 @@ function DashboardContent() {
                                   </>
                                 ) : (
                                   <>
-                                    <span>⭐ Pay ₹2,429.62 (Upgrade to Annual)</span>
+                                    <span>⭐ Pay ₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)} (Upgrade to Annual)</span>
                                   </>
                                 )}
                               </button>
@@ -1634,17 +1675,39 @@ function DashboardContent() {
                   {/* Annual Plan */}
                   <div className="p-5 bg-gradient-to-br from-amber-50/80 to-white rounded-2xl border-2 border-amber-400 relative shadow-lg shadow-amber-500/10 flex flex-col justify-between">
                     <div className="absolute -top-3 right-4 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                      1 YEAR ALL-INCLUSIVE
+                      {pricingInfo?.discountPercent ? `${pricingInfo.discountPercent}% OFF` : '1 YEAR ALL-INCLUSIVE'}
                     </div>
                     <div>
                       <div className="text-sm font-extrabold text-slate-900">ANNUAL PLAN (12 MONTHS)</div>
-                      <div className="text-2xl font-black text-amber-700 font-mono my-2">
-                        ₹2,429.62
+                      
+                      {/* Strikethrough & Selling Price */}
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <span className="text-sm font-bold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono">
+                          ₹{(pricingInfo?.originalPrice || 20000).toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-300">
+                          Selling Price: ₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}
+                        </span>
                       </div>
+
+                      <div className="text-2xl font-black text-amber-700 font-mono my-1.5">
+                        ₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)}
+                        <span className="text-xs font-normal text-slate-500 ml-1.5 font-sans">all-inclusive</span>
+                      </div>
+
                       <div className="text-[11px] text-slate-500 font-mono space-y-1 border-t border-amber-200/80 pt-2 mt-1 bg-amber-50/50 p-2.5 rounded-xl border">
-                        <div className="flex justify-between"><span>Base Price:</span><span className="font-bold">₹2,000.00</span></div>
-                        <div className="flex justify-between text-emerald-800 font-bold"><span>+ 18% GST on Base:</span><span>+₹360.00 (₹2,360.00)</span></div>
-                        <div className="flex justify-between text-slate-600"><span>+ Gateway Fee (2.5% + 18% GST):</span><span>+₹69.62</span></div>
+                        <div className="flex justify-between">
+                          <span>Selling Base Price:</span>
+                          <span className="font-bold">₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}.00</span>
+                        </div>
+                        <div className="flex justify-between text-emerald-800 font-bold">
+                          <span>+ {pricingInfo?.gstRate || 18}% GST on Base:</span>
+                          <span>+₹{(pricingInfo?.gstAmount || 360).toFixed(2)} (₹{(pricingInfo?.subtotalWithGst || 2360).toFixed(2)})</span>
+                        </div>
+                        <div className="flex justify-between text-slate-600">
+                          <span>+ Gateway Fee ({pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST):</span>
+                          <span>+₹{(pricingInfo?.totalGatewaySurcharge || 69.62).toFixed(2)}</span>
+                        </div>
                       </div>
                       <ul className="text-xs text-slate-700 space-y-1.5 mt-3.5">
                         <li className="font-semibold text-emerald-700">✓ Unlimited Product Catalog Uploads</li>
@@ -1664,7 +1727,7 @@ function DashboardContent() {
                           <span>Opening Razorpay...</span>
                         </>
                       ) : (
-                        <span>⚡ Pay ₹2,429.62 (Activate 1 Year)</span>
+                        <span>⚡ Pay ₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)} (Activate 1 Year)</span>
                       )}
                     </button>
                   </div>

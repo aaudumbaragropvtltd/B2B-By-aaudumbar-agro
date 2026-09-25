@@ -9,6 +9,7 @@ import {
   recordReminderSent 
 } from '@/services/membershipStore';
 import { sendSubscriptionReceiptEmail } from '@/services/subscriptionReceiptService';
+import { getLiveMembershipPricing } from '@/utils/platformSettings';
 
 export const dynamic = 'force-dynamic';
 
@@ -353,7 +354,8 @@ export async function POST(request) {
         ? new Date(membership.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
         : 'Immediate Action Required';
 
-      const planPrice = '₹2,000 + 18% GST (₹2,360.00)';
+      const pricing = await getLiveMembershipPricing();
+      const planPrice = `₹${pricing.baseAmount.toLocaleString('en-IN')} + ${pricing.gstRate}% GST (₹${pricing.subtotalWithGst.toFixed(2)}) — ₹${pricing.totalPayable.toFixed(2)} All-Inclusive`;
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://b2bindia.site';
       const renewalUrl = `${siteUrl}/dashboard?tab=membership`;
 

@@ -49,10 +49,11 @@ export function getCredentials() {
   keySecret = keySecret || process.env.RAZORPAY_KEY_SECRET?.trim() || '';
   webhookSecret = webhookSecret || process.env.RAZORPAY_WEBHOOK_SECRET?.trim() || '';
 
-  // Synchronize process.env
-  process.env.RAZORPAY_KEY_ID = keyId;
-  process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID = keyId;
-  process.env.RAZORPAY_KEY_SECRET = keySecret;
+  // Synchronize process.env without triggering Next.js DefinePlugin inline replacement
+  try {
+    process.env['RAZORPAY_KEY_ID'] = keyId;
+    process.env['RAZORPAY_KEY_SECRET'] = keySecret;
+  } catch (e) {}
 
   return { keyId, keySecret, webhookSecret };
 }

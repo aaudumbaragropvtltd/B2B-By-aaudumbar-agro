@@ -87,6 +87,30 @@ export const DEFAULT_PLATFORM_SETTINGS = {
     category: 'system',
     label: 'Base Platform Currency',
     description: 'Primary trading currency for settlement ledgers and Razorpay gateway',
+  },
+  annual_plan_original_price: {
+    value: 20000,
+    category: 'commercial',
+    label: 'Annual Plan Original / Strikethrough Price (₹)',
+    description: 'Original list price shown with strikethrough (e.g. ₹20,000) on annual membership cards',
+  },
+  annual_plan_base_price: {
+    value: 2000,
+    category: 'commercial',
+    label: 'Annual Plan Selling Base Price (₹)',
+    description: 'Net selling base price for 12 months supplier membership before GST and gateway charges',
+  },
+  annual_plan_gst_percent: {
+    value: 18,
+    category: 'commercial',
+    label: 'Annual Plan GST Rate (%)',
+    description: 'Goods & Services Tax rate applied to annual membership base price (default 18%)',
+  },
+  annual_plan_gateway_fee_percent: {
+    value: 2.5,
+    category: 'commercial',
+    label: 'Annual Plan Razorpay Gateway Fee (%)',
+    description: 'Payment gateway surcharge percentage applied on subtotal with GST (default 2.5%)',
   }
 };
 
@@ -329,3 +353,74 @@ export async function updateSettings(newSettingsMap) {
 
   return updated;
 }
+
+/**
+ * Pure calculation function for Annual Plan membership based on settings or defaults.
+ */
+export function calculateDynamicMembershipPricing(settingsMap = {}, paymentMethod = 'all') {
+  const originalPrice = Number(settingsMap?.annual_plan_original_price?.value ?? settingsMap?.annual_plan_original_price ?? 20000);
+  const baseAmount = Number(settingsMap?.annual_plan_base_price?.value ?? settingsMap?.annual_plan_base_price ?? 2000);
+  const gstRate = Number(settingsMap?.annual_plan_gst_percent?.value ?? settingsMap?.annual_plan_gst_percent ?? 18);
+  const gatewayFeePercent = Number(settingsMap?.annual_plan_gateway_fee_percent?.value ?? settingsMap?.annual_plan_gateway_fee_percent ?? 2.5);
+
+  const durationDays = 365;
+  const planLabel = 'Annual Plan (12 Months)';
+  const activePlan = 'ANNUAL PLAN';
+
+  // 1. GST on Base Subscription (e.g. ₹2,000 * 18% = ₹360.00)
+  const gstAmount = parseFloat((baseAmount * (gstRate / 100)).toFixed(2));
+  const subtotalWithGst = parseFloat((baseAmount + gstAmount).toFixed(2));
+
+  // 2. Razorpay Gateway Fee (e.g. 2.5% on ₹2,360 = ₹59.00)
+  const gatewayFee = parseFloat((subtotalWithGst * (gatewayFeePercent / 100)).toFixed(2));
+  
+  // 3. GST on Razorpay Fee (e.g. 18% on ₹59.00 = ₹10.62)
+  const gstOnGatewayFee = parseFloat((gatewayFee * (gstRate / 100)).toFixed(2));
+  const totalGatewaySurcharge = parseFloat((gatewayFee + gstOnGatewayFee).toFixed(2));
+
+  // 4. Total Final Amount to Pay (e.g. ₹2,360 + ₹69.62 = ₹2,429.62)
+  const totalPayable = parseFloat((subtotalWithGst + totalGatewaySurcharge).toFixed(2));
+  const amountPaise = Math.round(totalPayable * 100);
+
+  const discountPercent = originalPrice > baseAmount ? Math.round(((originalPrice - baseAmount) / originalPrice) * 100) : 0;
+  const savingsAmount = originalPrice > baseAmount ? originalPrice - baseAmount : 0;
+
+  return {
+    plan: activePlan,
+    planLabel,
+    durationDays,
+    paymentMethod,
+    originalPrice,
+    baseAmount,
+    discountPercent,
+    savingsAmount,
+    gstRate,
+    gstAmount,
+    subtotalWithGst,
+    gatewayFeePercent,
+    gatewayFee,
+    gstOnGatewayFee,
+    totalGatewaySurcharge,
+    totalPayable,
+    amountPaise,
+    formatted: {
+      original: `₹${originalPrice.toLocaleString('en-IN')}`,
+      base: `₹${baseAmount.toLocaleString('en-IN')}`,
+      gst: `₹${gstAmount.toFixed(2)}`,
+      subtotalWithGst: `₹${subtotalWithGst.toFixed(2)}`,
+      gatewayFee: `₹${gatewayFee.toFixed(2)} (${gatewayFeePercent}%)`,
+      gstOnGatewayFee: `₹${gstOnGatewayFee.toFixed(2)} (${gstRate}% GST on fee)`,
+      totalGatewaySurcharge: `₹${totalGatewaySurcharge.toFixed(2)}`,
+      totalPayable: `₹${totalPayable.toFixed(2)}`,
+    }
+  };
+}
+
+/**
+ * Fetch current platform settings and calculate dynamic membership pricing.
+ */
+export async function getLiveMembershipPricing(paymentMethod = 'all') {
+  const all = await getAllSettings();
+  return calculateDynamicMembershipPricing(all, paymentMethod);
+}
+

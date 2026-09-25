@@ -46,13 +46,19 @@ export default function AdminSubscriptionsPage() {
     setTimeout(() => setToast(null), 4500);
   };
 
+  // Live Pricing
+  const [currentPricing, setCurrentPricing] = useState(null);
+
   // Fetch subscriptions from backend
   const fetchSubscriptions = useCallback(async (isSilent = false) => {
     try {
       if (!isSilent) setLoading(true);
       else setRefreshing(true);
       
-      const res = await fetch('/api/admin/subscriptions');
+      const [res, pricingRes] = await Promise.all([
+        fetch('/api/admin/subscriptions'),
+        fetch('/api/membership').catch(() => null)
+      ]);
       const data = await res.json();
       
       if (data.success) {
@@ -60,6 +66,11 @@ export default function AdminSubscriptionsPage() {
         if (data.stats) setStats(data.stats);
       } else {
         showToast(data.error || 'Failed to load subscription data', true);
+      }
+
+      if (pricingRes && pricingRes.ok) {
+        const pricingData = await pricingRes.json();
+        if (pricingData.pricing) setCurrentPricing(pricingData.pricing);
       }
     } catch (err) {
       console.error('Error fetching subscriptions:', err);
@@ -334,6 +345,44 @@ export default function AdminSubscriptionsPage() {
             </button>
           </div>
         </div>
+
+        {/* Dynamic Pricing Info Bar with direct link to Settings */}
+        <div className="mt-5 p-4 bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">💰</span>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-black text-white uppercase tracking-wider">
+                  Active Annual Supplier Plan Pricing:
+                </span>
+                <span className="text-xs font-bold text-slate-500 line-through font-mono">
+                  ₹{(currentPricing?.originalPrice || 20000).toLocaleString('en-IN')}
+                </span>
+                <span className="text-xs font-black text-emerald-400 font-mono">
+                  Selling Base: ₹{(currentPricing?.baseAmount || 2000).toLocaleString('en-IN')}
+                </span>
+                <span className="text-xs font-mono text-slate-400">
+                  + {currentPricing?.gstRate || 18}% GST
+                </span>
+                <span className="text-xs font-mono text-slate-400">
+                  + {currentPricing?.gatewayFeePercent || 2.5}% RZP Fee
+                </span>
+                <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-black text-xs">
+                  = ₹{(currentPricing?.totalPayable || 2429.62).toFixed(2)} All-Inclusive
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                GST and gateway surcharge recalculate dynamically when the selling price is updated in Admin Settings.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/settings"
+            className="px-4 py-2 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap self-start sm:self-auto cursor-pointer"
+          >
+            <span>⚙️ Change Pricing in Admin Settings →</span>
+          </Link>
+        </div>
       </div>
 
       {/* KPI Metrics Cards */}
@@ -425,7 +474,7 @@ export default function AdminSubscriptionsPage() {
             className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-300 focus:outline-none focus:border-orange-500 cursor-pointer"
           >
             <option value="all">All Plans</option>
-            <option value="ANNUAL PLAN">Annual Plan (₹2,000 / 12 Mo)</option>
+            <option value="ANNUAL PLAN">Annual Plan (₹{(currentPricing?.baseAmount || 2000).toLocaleString('en-IN')} / 12 Mo)</option>
             <option value="FREE TIER">Free Tier</option>
           </select>
         </div>
@@ -680,7 +729,7 @@ export default function AdminSubscriptionsPage() {
                       </div>
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold uppercase">Standard Plan</span>
                     </div>
-                    <div className="text-[11px] text-slate-300 mt-1">₹2,000 Base + 18% GST • 365 Days Access</div>
+                    <div className="text-[11px] text-slate-300 mt-1">₹{(currentPricing?.baseAmount || 2000).toLocaleString('en-IN')} Base + {currentPricing?.gstRate || 18}% GST (₹{(currentPricing?.totalPayable || 2429.62).toFixed(2)} All-Inclusive) • 365 Days Access</div>
                   </div>
                 </div>
 

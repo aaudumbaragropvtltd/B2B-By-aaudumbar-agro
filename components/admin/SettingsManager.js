@@ -221,8 +221,22 @@ export default function SettingsManager() {
   );
 
   const currentTabKeys = Object.keys(settings).filter(
-    (k) => settings[k]?.category === activeTab && k !== 'category_platform_fees'
+    (k) => settings[k]?.category === activeTab && k !== 'category_platform_fees' && !k.startsWith('annual_plan_')
   );
+
+  // Live Subscription Plan Pricing Simulation
+  const subBasePrice = Number(formValues.annual_plan_base_price !== undefined ? formValues.annual_plan_base_price : 2000);
+  const subOriginalPrice = Number(formValues.annual_plan_original_price !== undefined ? formValues.annual_plan_original_price : 20000);
+  const subGstRate = Number(formValues.annual_plan_gst_percent !== undefined ? formValues.annual_plan_gst_percent : 18);
+  const subGatewayRate = Number(formValues.annual_plan_gateway_fee_percent !== undefined ? formValues.annual_plan_gateway_fee_percent : 2.5);
+
+  const subGstAmount = parseFloat((subBasePrice * (subGstRate / 100)).toFixed(2));
+  const subWithGst = parseFloat((subBasePrice + subGstAmount).toFixed(2));
+  const subGatewayFee = parseFloat((subWithGst * (subGatewayRate / 100)).toFixed(2));
+  const subGstOnFee = parseFloat((subGatewayFee * (subGstRate / 100)).toFixed(2));
+  const subTotalGateway = parseFloat((subGatewayFee + subGstOnFee).toFixed(2));
+  const subTotalPayable = parseFloat((subWithGst + subTotalGateway).toFixed(2));
+  const subDiscountPercent = subOriginalPrice > subBasePrice ? Math.round(((subOriginalPrice - subBasePrice) / subOriginalPrice) * 100) : 0;
 
   return (
     <div className="p-6 sm:p-8 space-y-8 max-w-6xl mx-auto">
@@ -642,6 +656,169 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name`}
       ) : (
         /* ─── STANDARD SETTINGS TABS ─── */
         <form onSubmit={handleSave} className="space-y-6">
+          {/* If on commercial tab, show dedicated Annual Membership Pricing & Live Simulation Card */}
+          {activeTab === 'commercial' && (
+            <div className="p-6 bg-gradient-to-br from-slate-900 via-amber-950/20 to-slate-900 border-2 border-amber-500/40 rounded-3xl space-y-6 shadow-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-500/20 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">⭐</span>
+                    <h2 className="text-base sm:text-lg font-black text-white">
+                      Annual Supplier Membership Plan Pricing &amp; GST Engine
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-black uppercase tracking-wider">
+                      Live Dynamic Sync
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Change the Selling Base Price, Original Strikethrough Price, GST rate, or Razorpay Fee. The final all-inclusive payable amount recalculates automatically for buyers/suppliers and Razorpay checkout orders.
+                  </p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <span className="text-[10px] text-slate-500 font-mono block">Current User Pays</span>
+                  <span className="text-xl font-black text-amber-400 font-mono">₹{subTotalPayable.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* 4 Input Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Selling Base Price */}
+                <div className="p-4 bg-slate-950/80 border border-amber-500/30 rounded-2xl space-y-1.5 focus-within:ring-2 focus-within:ring-amber-500 transition-all">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-black text-amber-300 uppercase tracking-wider">
+                      Selling Price (Base)
+                    </label>
+                    <span className="text-[10px] font-mono text-slate-400">₹</span>
+                  </div>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formValues.annual_plan_base_price !== undefined ? formValues.annual_plan_base_price : 2000}
+                    onChange={(e) => handleChange('annual_plan_base_price', e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-transparent text-lg font-mono font-black text-white outline-none"
+                    placeholder="2000"
+                  />
+                  <p className="text-[10px] text-slate-400">Net selling price before taxes &amp; fees</p>
+                </div>
+
+                {/* Original Strikethrough Price */}
+                <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-1.5 focus-within:ring-2 focus-within:ring-brand-500 transition-all">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-black text-slate-300 uppercase tracking-wider">
+                      Original Price (Strikethrough)
+                    </label>
+                    <span className="text-[10px] font-mono text-slate-400">₹</span>
+                  </div>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formValues.annual_plan_original_price !== undefined ? formValues.annual_plan_original_price : 20000}
+                    onChange={(e) => handleChange('annual_plan_original_price', e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-transparent text-lg font-mono font-black text-white outline-none"
+                    placeholder="20000"
+                  />
+                  <p className="text-[10px] text-slate-400">Crossed-out list price shown to user</p>
+                </div>
+
+                {/* GST Rate */}
+                <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-1.5 focus-within:ring-2 focus-within:ring-emerald-500 transition-all">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-black text-emerald-300 uppercase tracking-wider">
+                      Membership GST Rate
+                    </label>
+                    <span className="text-[10px] font-mono text-slate-400">%</span>
+                  </div>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formValues.annual_plan_gst_percent !== undefined ? formValues.annual_plan_gst_percent : 18}
+                    onChange={(e) => handleChange('annual_plan_gst_percent', e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-transparent text-lg font-mono font-black text-white outline-none"
+                    placeholder="18"
+                  />
+                  <p className="text-[10px] text-slate-400">GST on base selling price</p>
+                </div>
+
+                {/* Razorpay Gateway Fee */}
+                <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-1.5 focus-within:ring-2 focus-within:ring-sky-500 transition-all">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-black text-sky-300 uppercase tracking-wider">
+                      Razorpay Gateway Fee
+                    </label>
+                    <span className="text-[10px] font-mono text-slate-400">%</span>
+                  </div>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formValues.annual_plan_gateway_fee_percent !== undefined ? formValues.annual_plan_gateway_fee_percent : 2.5}
+                    onChange={(e) => handleChange('annual_plan_gateway_fee_percent', e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-transparent text-lg font-mono font-black text-white outline-none"
+                    placeholder="2.5"
+                  />
+                  <p className="text-[10px] text-slate-400">Surcharge on (Base + GST) + GST on fee</p>
+                </div>
+              </div>
+
+              {/* Real-Time Live Calculation & User Display Preview */}
+              <div className="p-5 bg-slate-950/90 border border-amber-500/30 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <span>⚡</span> Live Recalculation Preview (What User Sees on Dashboard &amp; Checkout)
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400 font-mono">
+                    Instant mathematical sync
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Left: Simulated Visual Card */}
+                  <div className="p-4 bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/40 rounded-xl space-y-2">
+                    <div className="text-[10px] uppercase font-black text-amber-500 tracking-wider">ANNUAL PLAN (12 MO)</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-slate-500 line-through decoration-rose-500 decoration-2 font-mono">
+                        ₹{subOriginalPrice.toLocaleString('en-IN')}
+                      </span>
+                      <span className="text-[11px] font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                        Selling Price: ₹{subBasePrice.toLocaleString('en-IN')}
+                      </span>
+                      {subDiscountPercent > 0 && (
+                        <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
+                          {subDiscountPercent}% OFF
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-baseline gap-2 pt-1">
+                      <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">
+                        ₹{subTotalPayable.toFixed(2)}
+                      </span>
+                      <span className="text-xs text-slate-400 font-medium">all-inclusive / 12 mo</span>
+                    </div>
+                  </div>
+
+                  {/* Right: Step-by-Step Breakdown */}
+                  <div className="p-4 bg-slate-900/80 border border-slate-800 rounded-xl font-mono text-xs space-y-1.5 text-slate-300">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">1. Selling Base Price:</span>
+                      <span className="font-bold text-white">₹{subBasePrice.toLocaleString('en-IN')}.00</span>
+                    </div>
+                    <div className="flex justify-between text-emerald-400 font-medium">
+                      <span>2. + {subGstRate}% GST on Base:</span>
+                      <span>+₹{subGstAmount.toFixed(2)} (Subtotal: ₹{subWithGst.toFixed(2)})</span>
+                    </div>
+                    <div className="flex justify-between text-sky-400">
+                      <span>3. + Razorpay Fee ({subGatewayRate}% + {subGstRate}% GST):</span>
+                      <span>+₹{subTotalGateway.toFixed(2)} (Fee: ₹{subGatewayFee.toFixed(2)}, GST: ₹{subGstOnFee.toFixed(2)})</span>
+                    </div>
+                    <div className="border-t border-slate-800 pt-1.5 mt-1 flex justify-between font-black text-white text-sm">
+                      <span className="text-amber-400">4. Total Amount Charged:</span>
+                      <span className="text-amber-400">₹{subTotalPayable.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {currentTabKeys.map((key) => {
               const item = settings[key];

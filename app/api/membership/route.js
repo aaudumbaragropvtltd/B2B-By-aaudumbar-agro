@@ -6,63 +6,11 @@ import { getUserMembership, saveUserMembership } from '@/services/membershipStor
 import { resolveAuthenticatedUser } from '@/utils/userResolver';
 import { sendSubscriptionReceiptEmail } from '@/services/subscriptionReceiptService';
 
-export function calculateMembershipPricing(plan = 'ANNUAL PLAN', paymentMethod = 'all') {
-  const baseAmount = 2000;
-  const durationDays = 365;
-  const planLabel = 'Annual Plan (12 Months)';
-  const activePlan = 'ANNUAL PLAN';
+import { getLiveMembershipPricing, calculateDynamicMembershipPricing } from '@/utils/platformSettings';
 
-  // 18% GST on Base Subscription (₹2,000 * 18% = ₹360)
-  const gstRate = 18;
-  const gstAmount = parseFloat((baseAmount * 0.18).toFixed(2)); // ₹360.00
-  const subtotalWithGst = parseFloat((baseAmount + gstAmount).toFixed(2)); // ₹2,360.00
-
-  // Razorpay Gateway Fee: 2.5% across ALL transactions + 18% GST on fee
-  const gatewayFeePercent = 2.5;
-  const gatewayFee = parseFloat((subtotalWithGst * (gatewayFeePercent / 100)).toFixed(2)); // ₹59.00
-  
-  // 18% GST on Razorpay Fee
-  const gstOnGatewayFee = parseFloat((gatewayFee * 0.18).toFixed(2)); // ₹10.62
-  const totalGatewaySurcharge = parseFloat((gatewayFee + gstOnGatewayFee).toFixed(2)); // ₹69.62
-
-  // Total Final Amount to Pay: ₹2,429.62
-  const totalPayable = parseFloat((subtotalWithGst + totalGatewaySurcharge).toFixed(2)); // ₹2,429.62
-  const amountPaise = Math.round(totalPayable * 100);
-
-  return {
-    plan: activePlan,
-    planLabel,
-    durationDays,
-    paymentMethod,
-    baseAmount,
-    gstRate,
-    gstAmount,
-    subtotalWithGst,
-    gatewayFeePercent,
-    gatewayFee,
-    gstOnGatewayFee,
-    totalGatewaySurcharge,
-    totalPayable,
-    amountPaise,
-    formatted: {
-      base: `₹${baseAmount.toLocaleString('en-IN')}`,
-      gst: `₹${gstAmount.toFixed(2)}`,
-      subtotalWithGst: `₹${subtotalWithGst.toFixed(2)}`,
-      gatewayFee: `₹${gatewayFee.toFixed(2)} (2.5%)`,
-      gstOnGatewayFee: `₹${gstOnGatewayFee.toFixed(2)} (18% GST on fee)`,
-      totalGatewaySurcharge: `₹${totalGatewaySurcharge.toFixed(2)} (2.5% + 18% GST)`,
-      totalPayable: `₹${totalPayable.toFixed(2)}`,
-    }
-  };
+export async function calculateMembershipPricing(plan = 'ANNUAL PLAN', paymentMethod = 'all') {
+  return await getLiveMembershipPricing(paymentMethod);
 }
-
-const PLAN_PRICES = {
-  'ANNUAL PLAN': {
-    amount: 2000,
-    label: 'Annual Plan (12 Months)',
-    durationDays: 365,
-  },
-};
 
 // GET — Fetch current membership status
 export async function GET(request) {
@@ -71,9 +19,11 @@ export async function GET(request) {
     const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: {} }));
 
     const membership = getUserMembership(user?.id || 'demo-supplier-1', user?.email || 'supplier@b2bindia.site');
+    const pricing = await getLiveMembershipPricing('all');
     return NextResponse.json({
       success: true,
       membership,
+      pricing,
     });
   } catch (error) {
     console.error('Error fetching membership:', error);
@@ -154,8 +104,9 @@ export async function POST(request) {
       const planConfig = PLAN_PRICES[activePlan] || { amount: 2000, label: 'Annual Plan (12 Months)', durationDays: 365 };
 
       // Dispatch official Payment Receipt & Activation Confirmation Email
+      let pricing = null;
       try {
-        const pricing = calculateMembershipPricing(activePlan);
+        pricing = await getLiveMembershipPricing();
         await sendSubscriptionReceiptEmail({
           email: user.email || profile?.registered_email,
           companyName: profile?.company_name || profile?.full_name || user.email,
@@ -188,7 +139,7 @@ export async function POST(request) {
       try {
         await supabaseAdmin.from('platform_ledger').insert([{
           entry_type: 'platform_commission',
-          amount: planConfig.amount,
+          amount: pricing?.baseAmount || 2000,
           from_entity_id: profile?.id || null,
           payment_reference: razorpay_payment_id,
           description: `Supplier Membership Upgrade: ${plan} (Paid via Razorpay: ${razorpay_payment_id})`,
@@ -232,7 +183,7 @@ export async function POST(request) {
     const { plan = 'ANNUAL PLAN', paymentMethod = 'upi' } = body;
     const selectedPlan = 'ANNUAL PLAN';
 
-    const pricing = calculateMembershipPricing(selectedPlan, paymentMethod);
+    const pricing = await getLiveMembershipPricing(paymentMethod);
     const receiptId = `sub-${Date.now().toString().slice(-8)}`;
 
     let razorpayOrderId = null;

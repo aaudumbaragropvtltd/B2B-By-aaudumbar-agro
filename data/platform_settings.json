@@ -4,7 +4,7 @@
     "category": "commercial",
     "label": "Default Wholesale Platform Fee (%)",
     "description": "Fallback platform commission fee applied when category-specific fee is not defined",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "category_platform_fees": {
     "value": {
@@ -50,76 +50,104 @@
     "category": "commercial",
     "label": "Category-Wise Platform Fees (%)",
     "description": "Individual platform fee percentages for all 38 industry sectors applied across RFQs, product additions, and checkout",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "high_value_threshold": {
     "value": 1000000,
     "category": "commercial",
     "label": "High-Value Deal Threshold (₹)",
     "description": "Contract value threshold (₹10,00,000) at or above which flat advance rules apply",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "high_value_advance_base": {
     "value": 97640,
     "category": "commercial",
     "label": "High-Value Base Advance (₹)",
     "description": "Base advance locked for wholesale deals >= ₹10,00,000",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "high_value_upi_fee": {
     "value": 2360,
     "category": "commercial",
     "label": "High-Value UPI Platform Fee (₹)",
     "description": "Flat UPI platform surcharge (making total ₹1,00,000 for UPI checkout)",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "cards_surcharge_rate_percent": {
     "value": 2.5,
     "category": "commercial",
     "label": "Cards & NetBanking Surcharge (%)",
     "description": "Razorpay processing fee for Credit/Debit Cards and NetBanking",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "standard_advance_percent": {
     "value": 10,
     "category": "commercial",
     "label": "Standard Deal Advance Rate (%)",
     "description": "Advance percentage required for orders below ₹10,00,000",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "default_gst_percent": {
     "value": 5,
     "category": "tax",
     "label": "Default GST Rate (%)",
     "description": "Standard Goods & Services Tax rate applicable across general commodities",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "default_min_order_qty": {
     "value": 1000,
     "category": "guardrails",
     "label": "Default Minimum Order Quantity (MOQ)",
     "description": "Standard fallback minimum wholesale quantity for new product listings",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "escrow_hold_hours": {
     "value": 72,
     "category": "guardrails",
     "label": "Escrow Price Lock Window (Hours)",
     "description": "Duration for which supplier price and allocation is guaranteed after advance booking",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.977Z"
   },
   "platform_maintenance_mode": {
     "value": false,
     "category": "system",
     "label": "Platform Maintenance Mode",
     "description": "When enabled, displays maintenance banner to non-admin visitors",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.978Z"
   },
   "supported_currency": {
     "value": "INR",
     "category": "system",
     "label": "Base Platform Currency",
     "description": "Primary trading currency for settlement ledgers and Razorpay gateway",
-    "updated_at": "2026-09-12T18:36:59.978Z"
+    "updated_at": "2026-09-25T10:39:25.978Z"
+  },
+  "annual_plan_original_price": {
+    "value": 20000,
+    "category": "commercial",
+    "label": "Annual Plan Original / Strikethrough Price (₹)",
+    "description": "Original list price shown with strikethrough (e.g. ₹20,000) on annual membership cards",
+    "updated_at": "2026-09-25T10:39:25.978Z"
+  },
+  "annual_plan_base_price": {
+    "value": 2000,
+    "category": "commercial",
+    "label": "Annual Plan Selling Base Price (₹)",
+    "description": "Net selling base price for 12 months supplier membership before GST and gateway charges",
+    "updated_at": "2026-09-25T15:50:00.000Z"
+  },
+  "annual_plan_gst_percent": {
+    "value": 18,
+    "category": "commercial",
+    "label": "Annual Plan GST Rate (%)",
+    "description": "Goods & Services Tax rate applied to annual membership base price (default 18%)",
+    "updated_at": "2026-09-25T10:39:25.978Z"
+  },
+  "annual_plan_gateway_fee_percent": {
+    "value": 2.5,
+    "category": "commercial",
+    "label": "Annual Plan Razorpay Gateway Fee (%)",
+    "description": "Payment gateway surcharge percentage applied on subtotal with GST (default 2.5%)",
+    "updated_at": "2026-09-25T10:39:25.978Z"
   }
 }
