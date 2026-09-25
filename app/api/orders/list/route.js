@@ -189,11 +189,11 @@ export async function GET(request) {
         console.warn('Error fetching Supabase trade orders for user:', e.message);
       }
 
-      // Filter direct orders strictly for the user
+      // Filter direct orders strictly for the user (using verified email or requested email)
       let userDirectOrders = [];
-      if (verifiedEmail) {
+      if (effectiveEmail) {
         userDirectOrders = allDirectOrders.filter(o => 
-          o.buyer_email && o.buyer_email.toLowerCase() === verifiedEmail
+          o.buyer_email && o.buyer_email.toLowerCase() === effectiveEmail
         );
       } else if (searchParam && searchParam.length >= 4) {
         // Specific guest lookup by exact transaction_id, tracking_number, or id
@@ -203,7 +203,7 @@ export async function GET(request) {
           (o.id && o.id.toLowerCase() === searchParam)
         );
       } else {
-        // Unauthenticated with no specific search -> return empty array (STRICT ISOLATION)
+        // Unauthenticated with no email or search -> return empty array (STRICT ISOLATION)
         userDirectOrders = [];
       }
 
@@ -271,14 +271,14 @@ export async function GET(request) {
 
     // Strict multi-tenant isolation guard:
     // When an authenticated user is requesting orders, NEVER allow any other account's order to leak!
-    if (verifiedEmail) {
+    if (effectiveEmail) {
       combined = combined.filter(o => {
         const orderEmail = o.buyer_email?.toLowerCase();
         const orderBuyerId = o.buyer_id;
-        return (orderEmail && orderEmail === verifiedEmail) || (orderBuyerId && orderBuyerId === verifiedBuyerId);
+        return (orderEmail && orderEmail === effectiveEmail) || (orderBuyerId && orderBuyerId === verifiedBuyerId);
       });
     } else if (!searchParam) {
-      // Unauthenticated caller with no search query gets zero orders
+      // Unauthenticated caller with no email and no search query gets zero orders
       combined = [];
     }
 

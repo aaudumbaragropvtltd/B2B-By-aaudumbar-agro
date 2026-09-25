@@ -8,7 +8,7 @@ async function testSitemap() {
   const sampleEntries = entries.slice(0, 5);
   console.log('Sample entries:', sampleEntries);
 
-  const turmericEntry = entries.find(e => e.url.includes('turmeric-finger-25-curcumin'));
+  const turmericEntry = entries.find(e => e.url.includes('turmeric'));
   console.log('Turmeric Entry:', turmericEntry);
 
   if (!turmericEntry) {

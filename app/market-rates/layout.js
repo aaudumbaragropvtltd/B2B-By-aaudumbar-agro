@@ -3,7 +3,7 @@ import { getSiteUrl, generateMarketRatesJsonLd } from '@/utils/seoUtils';
 const baseUrl = getSiteUrl();
 
 export const metadata = {
-  title: 'Live Mandi Rates Today India — APMC Commodity Prices | b2bindia.site',
+  title: 'Live Mandi Rates Today India — APMC Commodity Prices',
   description:
     'Real-time APMC Mandi commodity rates today across India on b2bindia.site. Track live wholesale mandi bhav for turmeric, jeera, cardamom, soybean, wheat, and pulses with AI market intelligence.',
   keywords: [

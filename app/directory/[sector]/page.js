@@ -20,6 +20,9 @@ import {
   generateSectorJsonLd,
   generateBreadcrumbJsonLd,
   generateFaqJsonLd,
+  generateSectorAnswerCapsule,
+  getSectorReversePromptFaqs,
+  getSectorRegulatoryEntities,
   formatInrPrice,
   SITE_URL,
 } from '@/utils/seoUtils';
@@ -67,6 +70,11 @@ export default async function SectorPage({ params }) {
     );
   });
 
+  // Sector AEO & GEO Engine
+  const sectorAnswerCapsule = generateSectorAnswerCapsule(sectorInfo, products);
+  const sectorFaqs = getSectorReversePromptFaqs(sectorInfo);
+  const regulatoryEntities = getSectorRegulatoryEntities(sectorInfo);
+
   // Schema.org Structured Data
   const sectorJsonLd = generateSectorJsonLd(sectorInfo, products);
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
@@ -74,21 +82,6 @@ export default async function SectorPage({ params }) {
     { name: 'Directory', url: '/directory' },
     { name: sectorInfo.name, url: `/directory/${sectorInfo.slug}` },
   ]);
-
-  const sectorFaqs = [
-    {
-      question: `How to buy wholesale ${sectorInfo.name} in bulk on B2B India?`,
-      answer: `You can browse verified Indian manufacturers and distributors in ${sectorInfo.name}, compare real-time wholesale price quotes, check Minimum Order Quantities (MOQ), and initiate direct RFQs or escrow-secured orders with full GST invoices.`,
-    },
-    {
-      question: `Are suppliers in ${sectorInfo.name} GST verified and certified?`,
-      answer: `Yes, all suppliers on B2B India undergo strict business credential verification including active GSTIN registration, manufacturing unit verification, and relevant industry certifications (ISO, BIS, CE, FSSAI).`,
-    },
-    {
-      question: `What payment protection is provided for bulk orders in ${sectorInfo.name}?`,
-      answer: `B2B India provides an automated Escrow Clearing mechanism. Funds are held safely in escrow and only released to the supplier once you receive and verify the goods at your warehouse.`,
-    },
-  ];
   const faqJsonLd = generateFaqJsonLd(sectorFaqs);
 
   return (
@@ -133,6 +126,51 @@ export default async function SectorPage({ params }) {
             <p className="text-white/85 mt-2 text-sm sm:text-base max-w-3xl leading-relaxed">
               {sectorInfo.subtitle}
             </p>
+          </div>
+        </div>
+
+        {/* RAG Extractable Answer Capsule (Top 30% DOM Anchor for LLM Retrieval) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          <div 
+            id="rag-answer-capsule" 
+            data-rag-anchor="sector-overview"
+            className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-indigo-50/90 via-slate-50 to-emerald-50/50 border border-indigo-100 shadow-xs"
+          >
+            <div className="flex items-center justify-between gap-3 mb-2.5">
+              <div className="flex items-center gap-2">
+                <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-900 bg-indigo-100/80 px-2.5 py-0.5 rounded-full border border-indigo-200/70">
+                  RAG Verified Sector Capsule
+                </span>
+              </div>
+              <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline">
+                Top 30% Zero-Shot Grounding
+              </span>
+            </div>
+
+            <p className="text-sm sm:text-base font-medium text-slate-800 leading-relaxed">
+              {sectorAnswerCapsule}
+            </p>
+
+            {/* Micro Key-Data Bar */}
+            <div className="mt-4 pt-3.5 border-t border-indigo-100/70 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+              <div className="bg-white/90 p-2.5 rounded-xl border border-slate-200/60 shadow-xs">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase">Category Scope</div>
+                <div className="font-bold text-slate-900 truncate">{sectorInfo.name}</div>
+              </div>
+              <div className="bg-white/90 p-2.5 rounded-xl border border-slate-200/60 shadow-xs">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase">Verified Specs</div>
+                <div className="font-bold text-slate-900">{products.length} Active Catalogs</div>
+              </div>
+              <div className="bg-white/90 p-2.5 rounded-xl border border-slate-200/60 shadow-xs">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase">Price Benchmark</div>
+                <div className="font-bold text-emerald-700">Mandi & Ex-Factory</div>
+              </div>
+              <div className="bg-white/90 p-2.5 rounded-xl border border-slate-200/60 shadow-xs">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase">Payment Terms</div>
+                <div className="font-bold text-indigo-700">10% Advance Escrow</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -253,23 +291,84 @@ export default async function SectorPage({ params }) {
             </div>
           )}
 
-          {/* Industry SEO Guide & Procurement FAQs */}
-          <div className="mt-16 bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              B2B Sourcing Guide for {sectorInfo.name} in India
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-sm sm:text-base mb-8">
-              B2B India provides an end-to-end digital procurement highway for {sectorInfo.name}. Directly connect with verified domestic manufacturers, tier-1 suppliers, and exporters across India. Eliminate middlemen margins, receive 100% compliant GST input tax credit invoices, and protect capital with milestone-based escrow clearing.
+          {/* Regulatory Co-Occurrence & Knowledge Graph Entities */}
+          <div 
+            id="regulatory-entities" 
+            data-rag-anchor="regulatory-knowledge-graph"
+            className="mt-12 bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm"
+          >
+            <div className="flex items-center justify-between mb-3.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🏛️</span>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Regulatory Framework & Knowledge Graph Entities for {sectorInfo.name}
+                </h3>
+              </div>
+              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                Government & Trade Standards
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mb-4">
+              Statutory authorities, quality inspection frameworks, and regulatory benchmarks governing verified commercial trade in this sector across India:
             </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {regulatoryEntities.map((ent, idx) => (
+                <div key={idx} className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100 flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                    ✓
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-gray-900 truncate">{ent.name}</div>
+                    <div className="text-[11px] text-gray-500 leading-snug">{ent.role}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions (FAQs)
-            </h3>
+          {/* The 4-Way Reverse-Prompt Q&A Matrix (AEO/GEO Engine) */}
+          <div 
+            id="reverse-prompt-matrix" 
+            data-rag-anchor="reverse-prompt-matrix"
+            className="mt-8 bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 shadow-sm"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+              <div>
+                <h2 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
+                  <span className="text-brand-600">⚡</span>
+                  The 4-Way Procurement Q&A Matrix for {sectorInfo.name}
+                </h2>
+                <p className="text-xs text-gray-500 mt-1">
+                  Direct natural language answers formulated for procurement directors & AI search engines
+                </p>
+              </div>
+              <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                Perplexity • SGE • Copilot Grounded
+              </span>
+            </div>
+
             <div className="space-y-4">
               {sectorFaqs.map((faq, idx) => (
-                <div key={idx} className="p-4 rounded-xl bg-gray-50 border border-gray-100">
-                  <h4 className="font-bold text-gray-900 text-base mb-1.5">{faq.question}</h4>
-                  <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
+                <div 
+                  key={idx} 
+                  itemScope 
+                  itemProp="mainEntity" 
+                  itemType="https://schema.org/Question"
+                  className="p-5 rounded-xl bg-gray-50/80 border border-gray-100 hover:border-brand-200 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-brand-100 text-brand-800 px-2 py-0.5 rounded">
+                      {faq.intent || 'Procurement Intent'}
+                    </span>
+                  </div>
+                  <h3 itemProp="name" className="font-bold text-gray-900 text-base mb-2">
+                    {faq.question}
+                  </h3>
+                  <div itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
+                    <p itemProp="text" className="text-sm text-gray-700 leading-relaxed font-normal">
+                      {faq.answer}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>

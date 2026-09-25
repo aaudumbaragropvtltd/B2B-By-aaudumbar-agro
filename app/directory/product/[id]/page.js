@@ -30,6 +30,8 @@ import {
   generateBreadcrumbJsonLd,
   generateFaqJsonLd,
   getProductFaqs,
+  generateProductAnswerCapsule,
+  getRegulatoryKnowledgeGraphEntities,
   formatInrPrice,
   SITE_URL,
 } from '@/utils/seoUtils';
@@ -194,6 +196,8 @@ export default async function ProductDetailPage({ params }) {
 
   const productFaqs = getProductFaqs(product);
   const faqJsonLd = generateFaqJsonLd(productFaqs);
+  const answerCapsule = generateProductAnswerCapsule(product);
+  const regulatoryEntities = getRegulatoryKnowledgeGraphEntities(product);
 
   const supplierLocation = [product.supplier_id?.city, product.supplier_id?.state].filter(Boolean).join(', ') || 'India';
   const supplierId = product.supplier_id?.id || 'demo-supplier-1';
@@ -300,6 +304,49 @@ export default async function ProductDetailPage({ params }) {
                 </div>
                 <div className="flex items-center gap-1.5 text-purple-700 bg-purple-50 px-3 py-1 rounded-lg border border-purple-100 font-semibold">
                   <span>🚚</span> Pan-India Logistics
+                </div>
+              </div>
+
+              {/* RAG Extractable Answer Capsule (Top 30% DOM Anchor for LLM Retrieval) */}
+              <div 
+                id="rag-answer-capsule" 
+                data-rag-anchor="primary-overview"
+                className="mt-6 p-5 rounded-2xl bg-gradient-to-br from-indigo-50/80 via-slate-50 to-emerald-50/50 border border-indigo-100/90 shadow-xs relative overflow-hidden"
+              >
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-900 bg-indigo-100/80 px-2.5 py-0.5 rounded-full border border-indigo-200/70">
+                      RAG Verified Answer Capsule
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline">
+                    Top 30% Zero-Shot Grounding
+                  </span>
+                </div>
+
+                <p className="text-sm sm:text-[15px] font-medium text-slate-800 leading-relaxed">
+                  {answerCapsule}
+                </p>
+
+                {/* Micro Key-Data Bar */}
+                <div className="mt-3.5 pt-3 border-t border-indigo-100/70 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <div className="bg-white/90 p-2 rounded-lg border border-slate-200/60 shadow-xs">
+                    <div className="text-[10px] text-slate-500 font-semibold uppercase">HSN Code</div>
+                    <div className="font-bold text-slate-900">{product.hsn_code || 'Standard HSN'}</div>
+                  </div>
+                  <div className="bg-white/90 p-2 rounded-lg border border-slate-200/60 shadow-xs">
+                    <div className="text-[10px] text-slate-500 font-semibold uppercase">Tax Slab</div>
+                    <div className="font-bold text-slate-900">{gstDetails.label}</div>
+                  </div>
+                  <div className="bg-white/90 p-2 rounded-lg border border-slate-200/60 shadow-xs">
+                    <div className="text-[10px] text-slate-500 font-semibold uppercase">Ex-Factory Base</div>
+                    <div className="font-bold text-emerald-700">₹{formatInrPrice(product.base_price_per_unit || product.price)}/{product.unit_label || 'unit'}</div>
+                  </div>
+                  <div className="bg-white/90 p-2 rounded-lg border border-slate-200/60 shadow-xs">
+                    <div className="text-[10px] text-slate-500 font-semibold uppercase">Protection</div>
+                    <div className="font-bold text-indigo-700">10% Advance Escrow</div>
+                  </div>
                 </div>
               </div>
 
@@ -437,6 +484,41 @@ export default async function ProductDetailPage({ params }) {
               </div>
             </div>
 
+            {/* Knowledge Graph Entities & Regulatory Standards */}
+            <div 
+              id="regulatory-entities" 
+              data-rag-anchor="regulatory-knowledge-graph"
+              className="lg:col-span-2 order-5 bg-white p-6 rounded-2xl shadow-sm border border-gray-200"
+            >
+              <div className="flex items-center justify-between mb-3.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🏛️</span>
+                  <h3 className="text-base font-bold text-gray-900">
+                    Regulatory Co-Occurrence & Knowledge Graph Entities
+                  </h3>
+                </div>
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  Government & Trade Alignment
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">
+                Statutory authorities, quality inspection frameworks, and regulatory benchmarks governing verified commercial trade of this commodity in India:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {regulatoryEntities.map((ent, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-slate-50/80 border border-slate-100 flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                      ✓
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-gray-900 truncate">{ent.name}</div>
+                      <div className="text-[11px] text-gray-500 leading-snug">{ent.role}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Supplier Verification Profile Card */}
             <div className="lg:col-span-2 order-6 bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 text-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-700/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="flex-1">
@@ -476,21 +558,49 @@ export default async function ProductDetailPage({ params }) {
               </Link>
             </div>
 
-            {/* Procurement FAQs for Google Rich Snippets */}
-            <div className="lg:col-span-2 order-7 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span className="text-brand-600">❓</span>
-                Frequently Asked Procurement Questions about {product.title}
-              </h2>
+            {/* The 4-Way Reverse-Prompt Q&A Matrix (AEO/GEO Engine) */}
+            <div 
+              id="reverse-prompt-matrix" 
+              data-rag-anchor="reverse-prompt-matrix"
+              className="lg:col-span-2 order-7 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                <div>
+                  <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+                    <span className="text-brand-600">⚡</span>
+                    The 4-Way Procurement Q&A Matrix (AEO / GEO Engine)
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Direct natural language answers formulated for procurement directors & AI search engines
+                  </p>
+                </div>
+                <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                  Perplexity • SGE • Copilot Grounded
+                </span>
+              </div>
+
               <div className="space-y-4">
                 {productFaqs.map((faq, index) => (
-                  <div key={index} className="p-4 rounded-xl bg-gray-50 border border-gray-100">
-                    <h3 className="font-bold text-gray-900 text-base mb-2">
+                  <div 
+                    key={index} 
+                    itemScope 
+                    itemProp="mainEntity" 
+                    itemType="https://schema.org/Question"
+                    className="p-5 rounded-xl bg-gray-50/80 border border-gray-100 hover:border-brand-200 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider bg-brand-100 text-brand-800 px-2 py-0.5 rounded">
+                        {faq.intent || 'Procurement Intent'}
+                      </span>
+                    </div>
+                    <h3 itemProp="name" className="font-bold text-gray-900 text-base mb-2">
                       {faq.question}
                     </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      {faq.answer}
-                    </p>
+                    <div itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
+                      <p itemProp="text" className="text-sm text-gray-700 leading-relaxed font-normal">
+                        {faq.answer}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -511,32 +511,206 @@ export function generateFaqJsonLd(faqs) {
 }
 
 /**
- * Generate Standard Product Procurement FAQs
+ * RAG Extractable "Answer Capsule" (Top 30% Page Anchor)
+ * 55-65 word factual, entity-dense statement formatted for zero-shot LLM retrieval
+ * (Google AI Overviews/SGE, Perplexity AI, ChatGPT Search, Claude, Copilot).
+ */
+export function generateProductAnswerCapsule(product) {
+  const title = product.title || product.name || 'Commercial Product';
+  const price = formatInrPrice(product.base_price_per_unit || product.price);
+  const unit = product.unit_label || product.unit || 'unit';
+  const moq = product.bulk_minimum_order || product.moq || '10 units';
+  const hsnCode = product.hsn_code || 'Standard HSN';
+  const gstRate = product.gst_percentage !== undefined ? `${product.gst_percentage}%` : 'Standard B2B';
+  const supplierCity = product.supplier_id?.city || 'Industrial Clusters';
+  const supplierState = product.supplier_id?.state || 'India';
+  const hub = [supplierCity, supplierState].filter(Boolean).join(', ');
+
+  const gradeInfo = product.quality_grade ? `Grade ${product.quality_grade}` : 'standard commercial specifications';
+  const packaging = product.packaging_options || 'standard palletized vacuum bags, bulk containers, or wooden crates';
+  const inspectionBody = product.inspection_agency || 'authorized testing agencies (SGS/BIS/Agmark)';
+
+  return `${title} is classified under HSN ${hsnCode} (${gstRate} GST), sourced from verified manufacturing clusters in ${hub}. Standard procurement specifies ${gradeInfo} containerized in ${packaging}. Ex-factory rates trade from ₹${price}/${unit} with a ${moq} baseline MOQ, backed by 10% advance escrow protection and ${inspectionBody} pre-dispatch verification on b2bindia.site.`;
+}
+
+/**
+ * The 4-Way Reverse-Prompt Q&A Matrix (AEO/GEO Engine)
+ * High-probability procurement prompts with immediate, high-density answers under 50 words each.
  */
 export function getProductFaqs(product) {
   const title = product.title || product.name || 'this product';
   const price = formatInrPrice(product.base_price_per_unit || product.price);
   const unit = product.unit_label || product.unit || 'unit';
   const moq = product.bulk_minimum_order || product.moq || '10 units';
-  const supplierName = product.supplier_id?.company_name || product.supplierName || 'our verified suppliers';
+  const supplierCity = product.supplier_id?.city || 'industrial hubs';
+  const supplierState = product.supplier_id?.state || 'India';
+  const hub = [supplierCity, supplierState].filter(Boolean).join(', ');
+  const hsn = product.hsn_code || 'Standard HSN';
+  const gstRate = product.gst_percentage !== undefined ? `${product.gst_percentage}%` : 'applicable GST';
+  const packaging = product.packaging_options || 'standard palletized vacuum bags, bulk containers, or wooden crates';
 
   return [
     {
-      question: `What is the wholesale price and minimum order quantity (MOQ) for ${title}?`,
-      answer: `The current wholesale base price for ${title} is ₹${price} per ${unit} with a Minimum Order Quantity (MOQ) of ${moq}. Bulk volume discounts are available for large container or multi-tonnage orders through B2B India.`,
+      intent: 'Sourcing & Origin',
+      question: `Where are the verified direct manufacturers or aggregators of bulk ${title} in India?`,
+      answer: `Direct manufacturers and aggregators of ${title} operate across ${hub}. Verified suppliers on b2bindia.site possess active GSTIN, IEC, and regulatory trade credentials, supplying factory-direct volume lots with traceable origin documentation.`,
     },
     {
-      question: `How does B2B India ensure quality and payment security for ${title}?`,
-      answer: `Every transaction on B2B India is backed by our automated Escrow clearing mechanism. Payment is securely held until you inspect and verify the physical goods upon delivery. Suppliers like ${supplierName} are verified with active GSTIN and quality compliance certifications.`,
+      intent: 'Pricing, Tariff & HSN',
+      question: `What is the current ex-factory price range, GST, and HSN code for wholesale ${title}?`,
+      answer: `Wholesale ${title} is offered at ex-factory base rates of ₹${price} per ${unit} under official HSN code ${hsn} (${gstRate} GST). Pricing benchmarks synchronize with verified factory floor and APMC mandi spot indices on b2bindia.site.`,
     },
     {
-      question: `What are the delivery timelines and shipping coverage across India?`,
-      answer: `We provide pan-India delivery across all major states and industrial corridors. Standard dispatch takes 24 to 72 hours, with road freight transit typically arriving within 3 to 7 business days depending on delivery pincode.`,
+      intent: 'Export Compliance & Quality',
+      question: `What lab certificates, packaging, and inspection standards apply to purchasing or exporting ${title} from India?`,
+      answer: `Consignments require Certificate of Analysis (COA) test parameters, commercial packaging in ${packaging}, and pre-shipment dock inspection by recognized agencies (BIS, Agmark, SGS, or Spices Board) with export clearance.`,
     },
     {
-      question: `Can I get a GST Tax Invoice and formal quotation for ${title}?`,
-      answer: `Yes, 100% of orders come with standard B2B GST tax invoices for full input tax credit (ITC) claim. You can also request instant PDF quotations or raise RFQs directly on the product page.`,
+      intent: 'Payment Security & Escrow',
+      question: `How can a buyer safely purchase bulk ${title} from Indian suppliers with advance payment protection?`,
+      answer: `Purchases on b2bindia.site utilize institutional 10% Advance Escrow Protection. Buyer funds remain secured in trust and are released only upon independent dockside lab inspection receipt and verified bill of lading issuance.`,
     },
+  ];
+}
+
+/**
+ * Knowledge Graph Entities & Regulatory Standards
+ * Establishes entity co-occurrence authority for Google SGE, Bing Index, and LLM latent vectors.
+ */
+export function getRegulatoryKnowledgeGraphEntities(product) {
+  const category = (product.sector_id?.name || product.category || '').toLowerCase();
+  const isAgriOrSpices = category.includes('agri') || category.includes('food') || category.includes('spice');
+  const isMachinery = category.includes('machine') || category.includes('metal') || category.includes('steel');
+
+  const baseEntities = [
+    { name: 'DGFT (Directorate General of Foreign Trade)', role: 'IEC Licensing & Export Policy Enforcement' },
+    { name: 'GST Council of India', role: 'Harmonized System of Nomenclature (HSN) Tax Compliance' },
+    { name: 'SGS / Intertek Pre-Shipment Inspection', role: 'Accredited Dockside Lab Verification' },
+    { name: 'ISO 9001:2015', role: 'Quality Management System Compliance' },
+    { name: 'FIEO (Federation of Indian Export Organisations)', role: 'Verified Merchant Exporter Network' },
+  ];
+
+  if (isAgriOrSpices) {
+    return [
+      { name: 'Spices Board of India / APMC', role: 'Mandatory Commodity Lab Standards & Mandi Spot Benchmark' },
+      { name: 'FSSAI (Food Safety & Standards Authority)', role: 'Food Grade & Quality Tolerance Enforcement' },
+      { name: 'AGMARK', role: 'Agricultural Produce Grading and Marking Act' },
+      ...baseEntities,
+    ];
+  }
+
+  if (isMachinery) {
+    return [
+      { name: 'Bureau of Indian Standards (BIS)', role: 'National Industrial Tolerance & Safety Specifications' },
+      { name: 'EEPC India', role: 'Engineering Export Promotion Council Compliance' },
+      ...baseEntities,
+    ];
+  }
+
+  return [
+    { name: 'Bureau of Indian Standards (BIS)', role: 'National Commercial Standards Body' },
+    ...baseEntities,
+  ];
+}
+
+/**
+ * Generate Sector RAG Extractable Answer Capsule (Top 30% DOM Anchor for LLM Retrieval)
+ * Factual 55-65 word encyclopedia-grade summary of wholesale trade in this sector.
+ */
+export function generateSectorAnswerCapsule(sectorData, products = []) {
+  const sectorName = sectorData.name || 'Industrial Commodities';
+  const productCount = products.length > 0 ? `${products.length}+ verified product specifications` : 'active wholesale catalogs';
+
+  return `b2bindia.site provides direct B2B wholesale procurement for ${sectorName}, featuring ${productCount} from verified Indian manufacturers and processors across Maharashtra, Gujarat, Tamil Nadu, and regional industrial hubs. Sourcing protocols integrate 10% Advance Escrow Protection, pre-shipment dockside lab verification (BIS, FSSAI, or ISO standards), verified Mandi/factory benchmark pricing, and 100% compliant GST input tax credit documentation.`;
+}
+
+/**
+ * The 4-Way Reverse-Prompt Q&A Matrix for Industry Sectors (AEO & GEO Engine)
+ * Natural language Q&A mapped to procurement intents for Google SGE, Perplexity, and Copilot.
+ */
+export function getSectorReversePromptFaqs(sectorData) {
+  const sectorName = sectorData.name || 'Industrial Commodities';
+
+  return [
+    {
+      intent: 'Sourcing & Industrial Hubs',
+      question: `Where are the primary verified manufacturing and wholesale clusters for ${sectorName} in India?`,
+      answer: `Direct manufacturers, processors, and industrial aggregators for ${sectorName} operate across major Indian manufacturing belts including Maharashtra, Gujarat, Tamil Nadu, Karnataka, and NCR. On b2bindia.site, institutional buyers source directly from verified factory floors with active GSTIN credentials, verified MOQs, and tier-1 production audits.`,
+    },
+    {
+      intent: 'Pricing, Tariff & Benchmark Indices',
+      question: `How are wholesale bulk prices, GST tax rates, and HSN codes determined for ${sectorName}?`,
+      answer: `Wholesale transactions in ${sectorName} on b2bindia.site reflect transparent ex-factory base pricing indexed against regional benchmark indices and real-time raw material mandis. Commercial invoices include statutory GST slabs (5%, 12%, 18%, or 28%) and official 4-to-8 digit HSN codes for 100% Input Tax Credit (ITC) reconciliation.`,
+    },
+    {
+      intent: 'Statutory Standards & Export Compliance',
+      question: `What regulatory certifications and pre-shipment inspections apply to bulk ${sectorName} trade?`,
+      answer: `Suppliers undergo verification against statutory Indian standards including Bureau of Indian Standards (BIS), DGFT export licensing, and industry export promotion councils (APEDA, Spices Board, EEPC, CHEMEXCIL). Pre-shipment batch testing (COA, Phytosanitary, SGS/Intertek) is available prior to dispatch.`,
+    },
+    {
+      intent: 'Payment Security & Escrow Protection',
+      question: `What escrow and capital protection mechanisms secure bulk B2B purchases in ${sectorName}?`,
+      answer: `Transactions are protected by b2bindia.site's 10% Advance Escrow Protection. Buyer funds are held in secure trust and released to manufacturers only upon verified pre-dispatch dock receipt, bill of lading issuance, and independent quality inspection approval.`,
+    },
+  ];
+}
+
+/**
+ * Sector Regulatory Knowledge Graph Entities
+ * Returns statutory bodies and standards governing trade in this industry.
+ */
+export function getSectorRegulatoryEntities(sectorData) {
+  const slug = (sectorData.slug || '').toLowerCase();
+  const name = (sectorData.name || '').toLowerCase();
+
+  const baseEntities = [
+    { name: 'DGFT (Directorate General of Foreign Trade)', role: 'IEC Licensing & Export-Import Policy' },
+    { name: 'GST Council of India', role: 'Harmonized System of Nomenclature (HSN) Tax Framework' },
+    { name: 'SGS / Intertek Pre-Shipment Inspection', role: 'Accredited Dockside Lab Verification' },
+    { name: 'FIEO (Federation of Indian Export Organisations)', role: 'Verified Merchant Exporter Network' },
+  ];
+
+  if (slug.includes('agri') || slug.includes('food') || name.includes('agriculture') || name.includes('food')) {
+    return [
+      { name: 'APEDA', role: 'Agricultural & Processed Food Products Export Development Authority' },
+      { name: 'FSSAI', role: 'Food Safety & Standards Authority of India' },
+      { name: 'Spices Board of India / APMC', role: 'Mandatory Commodity Lab Standards & Mandi Spot Benchmark' },
+      { name: 'AGMARK', role: 'Agricultural Produce Grading and Marking Act' },
+      ...baseEntities,
+    ];
+  }
+
+  if (slug.includes('chemical') || name.includes('chemical') || slug.includes('pharma') || name.includes('pharma')) {
+    return [
+      { name: 'CHEMEXCIL / Pharmexcil', role: 'Basic Chemicals & Pharmaceuticals Export Promotion Council' },
+      { name: 'Central Pollution Control Board (CPCB)', role: 'Industrial Environmental Standards & Waste Disposal' },
+      { name: 'Bureau of Indian Standards (BIS)', role: 'Chemical Quality & Assay Verification' },
+      ...baseEntities,
+    ];
+  }
+
+  if (slug.includes('textile') || slug.includes('apparel') || name.includes('textile') || name.includes('garment')) {
+    return [
+      { name: 'TEXPROCIL', role: 'Cotton Textiles Export Promotion Council' },
+      { name: 'Ministry of Textiles', role: 'National Fiber & Fabric Quality Benchmark' },
+      { name: 'Bureau of Indian Standards (BIS)', role: 'Tensile & Color Fastness Specifications' },
+      ...baseEntities,
+    ];
+  }
+
+  if (slug.includes('machin') || slug.includes('auto') || slug.includes('steel') || slug.includes('metal')) {
+    return [
+      { name: 'EEPC India', role: 'Engineering Export Promotion Council of India' },
+      { name: 'Bureau of Indian Standards (BIS)', role: 'Metallurgical & Machinery Tolerance Standards' },
+      { name: 'Ministry of Heavy Industries', role: 'Industrial Capital Goods Framework' },
+      ...baseEntities,
+    ];
+  }
+
+  return [
+    { name: 'Bureau of Indian Standards (BIS)', role: 'National Commercial Standards Body' },
+    { name: 'Quality Council of India (QCI)', role: 'National Accreditation Board' },
+    ...baseEntities,
   ];
 }
 

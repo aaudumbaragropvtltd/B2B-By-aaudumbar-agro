@@ -42,6 +42,10 @@ export default function ProductViewTracker({
             productId,
             productTitle: productTitle || null,
             category: category || null,
+            price: Number(price) || 0,
+            unit: unit || 'unit',
+            image: image || null,
+            slug: slug || null,
             userId: profile?.id || null,
             email: profile?.registered_email || user?.email || null,
             phone: profile?.corporate_phone || profile?.phone_number || null,
@@ -59,7 +63,7 @@ export default function ProductViewTracker({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [productId, productTitle, category, user, profile]);
+  }, [productId, productTitle, category, price, unit, image, slug, user, profile]);
 
   return null; // Invisible component
 }
