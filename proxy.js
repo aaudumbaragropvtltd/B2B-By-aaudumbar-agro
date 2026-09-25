@@ -15,6 +15,18 @@ import { createClient } from '@supabase/supabase-js';
 export async function proxy(request) {
   const pathname = request.nextUrl.pathname;
 
+  // Immediately bypass proxy for public SEO and metadata endpoints
+  if (
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt' ||
+    pathname === '/llms.txt' ||
+    pathname === '/llms-full.txt' ||
+    pathname.endsWith('.xml') ||
+    pathname.endsWith('.txt')
+  ) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next();
 
   const supabase = createServerClient(
@@ -148,9 +160,9 @@ export async function proxy(request) {
   return response;
 }
 
-// Next.js 16 matcher: explicitly exclude API routes, static files, and images
+// Next.js 16 matcher: explicitly exclude API routes, static files, XML/TXT SEO files, and images
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|txt|webmanifest)$).*)',
   ],
 };

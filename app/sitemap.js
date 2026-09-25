@@ -8,8 +8,7 @@
 import { getAllProducts, getAllSectors, getProductSlug } from '../utils/catalogResolver.js';
 import { getSiteUrl } from '../utils/seoUtils.js';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 3600; // Revalidate sitemap hourly
+export const revalidate = 43200; // 12-hour Edge ISR caching for instant sub-50ms crawler delivery
 
 export default async function sitemap() {
   const baseUrl = getSiteUrl();

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import sitemap from '@/app/sitemap';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 43200;
 
 /**
  * Dynamic XML Sitemap endpoint at /api/sitemap.xml
