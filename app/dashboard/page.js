@@ -757,231 +757,243 @@ function DashboardContent() {
                       </div>
                     </div>
 
-                    {/* Price Tracker (For Buyers) */}
-                    {role === 'buyer' && (
-                      <div className="mt-4">
-                        <PriceTrackerWidget />
-                      </div>
-                    )}
-
-                    {/* Premium Subscription Plans Grid (For Suppliers) */}
-                    {role === 'supplier' && (
-                      <div className="mt-6 pt-6 border-t border-gray-100">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                          <div>
-                            <h2 className="text-xl font-bold text-foreground">Supplier Membership Plans</h2>
-                            <p className="text-xs text-gray-500">Pay securely with Razorpay to unlock unlimited product catalog listings & premium buyer discovery.</p>
-                          </div>
-                          {plan !== 'FREE TIER' && !membershipInfo?.isExpired && (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-black rounded-full border border-emerald-300 w-fit">
-                              ✓ {plan} Active
-                            </span>
-                          )}
-                          {membershipInfo?.isExpired && (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-100 text-rose-800 text-xs font-black rounded-full border border-rose-300 w-fit">
-                              🔴 Expired ({membershipInfo?.previousPlan || 'Plan'})
-                            </span>
-                          )}
-                        </div>
-
-                        {/* ── Dynamic Renewal & Expiry Status Banner ── */}
-                        {membershipInfo?.daysLeft > 0 && !membershipInfo?.isExpired && (
-                          <div className={`mb-6 p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs ${
-                            membershipInfo?.isExpiringSoon 
-                              ? 'bg-amber-50 border-amber-300' 
-                              : 'bg-emerald-50/80 border-emerald-300'
-                          }`}>
-                            <div className="flex items-start gap-3">
-                              <span className="text-2xl mt-0.5">{membershipInfo?.isExpiringSoon ? '⚠️' : '⏳'}</span>
-                              <div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span className={`text-sm font-extrabold ${membershipInfo?.isExpiringSoon ? 'text-amber-900' : 'text-emerald-900'}`}>
-                                    {membershipInfo?.daysLeft} Days Remaining to Renew
-                                  </span>
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                    membershipInfo?.isExpiringSoon 
-                                      ? 'bg-amber-200 text-amber-900' 
-                                      : 'bg-emerald-200 text-emerald-900'
-                                  }`}>
-                                    Valid until {membershipInfo?.expiresAtFormatted}
-                                  </span>
-                                </div>
-                                <p className={`text-xs mt-1 ${membershipInfo?.isExpiringSoon ? 'text-amber-800' : 'text-emerald-700'}`}>
-                                  {membershipInfo?.isExpiringSoon 
-                                    ? `Renew before ${membershipInfo?.expiresAtFormatted} to prevent your products from being temporarily hidden from buyers.`
-                                    : `All your product listings are live and visible to verified enterprise buyers across India.`}
-                                </p>
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={() => handleUpgradePlan(plan === 'ANNUAL PLAN' ? 'ANNUAL PLAN' : 'ANNUAL PLAN')}
-                              disabled={upgradingPlan !== null}
-                              className={`px-4 py-2 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer disabled:opacity-50 ${
-                                membershipInfo?.isExpiringSoon
-                                  ? 'bg-amber-600 hover:bg-amber-700 animate-pulse'
-                                  : 'bg-emerald-700 hover:bg-emerald-800'
-                              }`}
-                            >
-                              <span>🔄</span> Extend / Renew Plan
-                            </button>
-                          </div>
-                        )}
-
-                        {/* ── Expired Subscription Alert Banner ── */}
-                        {membershipInfo?.isExpired && (
-                          <div className="mb-6 p-4.5 bg-rose-50 border-2 border-rose-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                            <div className="flex items-start gap-3">
-                              <span className="text-2xl mt-0.5">🔴</span>
-                              <div>
-                                <span className="text-sm font-black text-rose-900">
-                                  Subscription Expired on {membershipInfo?.expiresAtFormatted || 'Recent Date'}
-                                </span>
-                                <p className="text-xs text-rose-700 mt-1 leading-relaxed">
-                                  Your products are currently <strong>hidden from the website</strong>. Renew your membership now to immediately restore all your existing product catalog listings live!
-                                </p>
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={() => handleUpgradePlan(membershipInfo?.previousPlan || 'ANNUAL PLAN')}
-                              disabled={upgradingPlan !== null}
-                              className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-xl shadow-lg shadow-rose-600/20 transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer disabled:opacity-50 whitespace-nowrap"
-                            >
-                              <span>🔄</span> Renew Now & Restore Products
-                            </button>
-                          </div>
-                        )}
-
-                        {/* Payment Fee Policy Notice */}
-                        <div className="mb-6 p-4 bg-slate-900 text-white rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800 shadow-md">
-                          <div className="flex items-center gap-3">
-                            <span className="text-xl">💳</span>
+                    {/* ── SUPPLIER MEMBERSHIP PLANS (Visible in both Buying Hub & Selling Hub) ── */}
+                    {(() => {
+                      const membershipSection = (
+                        <div className="mt-8 pt-6 border-t border-gray-100">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                             <div>
-                              <div className="text-xs font-black uppercase tracking-wider text-amber-400">
-                                Razorpay Payment &amp; Tax Structure
-                              </div>
-                              <p className="text-[11px] text-slate-300 mt-0.5">
-                                Base Plan (₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}) + <strong>{pricingInfo?.gstRate || 18}% GST</strong> (+₹{(pricingInfo?.gstAmount || 360).toFixed(2)}) + Standard Razorpay Platform Fee of <strong>{pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST on fee</strong> across all payment options.
-                              </p>
+                              <h2 className="text-xl font-bold text-foreground">Supplier Membership Plans</h2>
+                              <p className="text-xs text-gray-500">Pay securely with Razorpay to unlock unlimited product catalog listings &amp; premium buyer discovery.</p>
                             </div>
-                          </div>
-                          <span className="px-3 py-1 bg-slate-800 text-slate-300 text-[11px] font-mono font-bold rounded-lg border border-slate-700 w-fit">
-                            Fee: {pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 max-w-4xl gap-6">
-                          {/* FREE TIER */}
-                          <div className={`p-6 rounded-2xl border transition-all ${plan === 'FREE TIER' && !membershipInfo?.isExpired ? 'border-brand-500 bg-brand-50/20 shadow-sm ring-1 ring-brand-500/30' : 'border-gray-200 bg-white opacity-80'}`}>
-                            <div className="flex justify-between items-center">
-                              <h3 className="text-lg font-bold">FREE TIER</h3>
-                              {plan === 'FREE TIER' && !membershipInfo?.isExpired && <span className="text-[10px] bg-slate-900 text-white font-bold px-2 py-0.5 rounded-full">ACTIVE</span>}
-                            </div>
-                            <p className="text-2xl font-extrabold my-3">₹0</p>
-                            <ul className="text-sm text-gray-600 space-y-2 mb-4">
-                              <li className="text-rose-600 font-medium">❌ No Product Uploads (Upgrade required)</li>
-                              <li>✅ Basic Visibility</li>
-                              <li>✅ Escrow Supported</li>
-                            </ul>
-                            <button disabled className="w-full py-2.5 bg-gray-200 text-gray-500 font-semibold rounded-xl text-xs">
-                              {plan === 'FREE TIER' && !membershipInfo?.isExpired ? 'Current Plan' : 'Free Basic'}
-                            </button>
-                          </div>
-
-                          {/* ANNUAL PLAN */}
-                          <div className={`p-6 rounded-2xl border relative transition-all ${plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired ? 'border-amber-500 bg-amber-50/30 shadow-md ring-2 ring-amber-500/40' : 'border-amber-300 bg-gradient-to-br from-amber-50/60 to-white hover:border-amber-400'}`}>
-                            <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-[10px] font-black px-2.5 py-1 rounded-bl-xl rounded-tr-xl tracking-wider">
-                              {pricingInfo?.discountPercent ? `${pricingInfo.discountPercent}% OFF` : 'BEST VALUE'}
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <h3 className="text-lg font-bold text-slate-900">ANNUAL PLAN</h3>
-                              {plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired && <span className="text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded-full mr-16">CURRENT ACTIVE</span>}
-                            </div>
-
-                            {/* Price Breakdown */}
-                            <div className="my-3">
-                              {/* Strikethrough Original Price & Selling Price Badge */}
-                              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                                <span className="text-sm font-bold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono" title="Original List Price">
-                                  ₹{(pricingInfo?.originalPrice || 20000).toLocaleString('en-IN')}
-                                </span>
-                                <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-300">
-                                  Selling Price: ₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}
-                                </span>
-                                {pricingInfo?.discountPercent > 0 && (
-                                  <span className="text-[10px] font-black text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
-                                    Save {pricingInfo.discountPercent}%
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* All-Inclusive Total */}
-                              <div className="flex items-baseline gap-1.5">
-                                <span className="text-2xl sm:text-3xl font-black text-brand-900 font-mono tracking-tight">
-                                  ₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)}
-                                </span>
-                                <span className="text-xs text-slate-500 font-medium">all-inclusive / 12 mo</span>
-                              </div>
-
-                              {/* Dynamic Fee Breakdown */}
-                              <div className="text-[11px] text-slate-600 mt-2 font-mono space-y-1 bg-amber-50/90 p-3 rounded-xl border border-amber-200 shadow-2xs">
-                                <div className="flex justify-between">
-                                  <span>Selling Base Price:</span>
-                                  <span className="font-bold text-slate-900">₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}.00</span>
-                                </div>
-                                <div className="flex justify-between text-emerald-800 font-bold">
-                                  <span>+ {pricingInfo?.gstRate || 18}% GST on Base:</span>
-                                  <span>+₹{(pricingInfo?.gstAmount || 360).toFixed(2)} (₹{(pricingInfo?.subtotalWithGst || 2360).toFixed(2)})</span>
-                                </div>
-                                <div className="flex justify-between text-slate-600">
-                                  <span>+ Razorpay Fee ({pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST):</span>
-                                  <span>+₹{(pricingInfo?.totalGatewaySurcharge || 69.62).toFixed(2)}</span>
-                                </div>
-                                <div className="border-t border-amber-300/60 pt-1 mt-1 flex justify-between font-black text-slate-900">
-                                  <span>Total All-Inclusive:</span>
-                                  <span className="text-brand-900 font-mono">₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <ul className="text-xs text-gray-600 space-y-1.5 mb-4">
-                              <li className="font-bold text-emerald-700">✅ Unlocked Product Uploads</li>
-                              <li>✅ Premium Visibility (Top Ranked)</li>
-                              <li>✅ Dedicated Account Manager</li>
-                              <li>✅ Best Value (Save ₹{((pricingInfo?.originalPrice || 20000) - (pricingInfo?.baseAmount || 2000)).toLocaleString('en-IN')}/yr)</li>
-                            </ul>
-
-                            {plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired ? (
-                              <button 
-                                onClick={() => handleUpgradePlan('ANNUAL PLAN')}
-                                disabled={upgradingPlan === 'ANNUAL PLAN'}
-                                className="w-full py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-                              >
-                                {upgradingPlan === 'ANNUAL PLAN' ? 'Opening Razorpay...' : `⭐ Renew / Extend 1 Year (₹${(pricingInfo?.totalPayable || 2429.62).toFixed(2)})`}
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => handleUpgradePlan('ANNUAL PLAN')} 
-                                disabled={upgradingPlan === 'ANNUAL PLAN'}
-                                className="w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black rounded-xl transition-all text-xs shadow-md shadow-orange-600/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                              >
-                                {upgradingPlan === 'ANNUAL PLAN' ? (
-                                  <>
-                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    <span>Opening Razorpay...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>⭐ Pay ₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)} (Upgrade to Annual)</span>
-                                  </>
-                                )}
-                              </button>
+                            {plan !== 'FREE TIER' && !membershipInfo?.isExpired && (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-black rounded-full border border-emerald-300 w-fit">
+                                ✓ {plan} Active
+                              </span>
+                            )}
+                            {membershipInfo?.isExpired && (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-100 text-rose-800 text-xs font-black rounded-full border border-rose-300 w-fit">
+                                🔴 Expired ({membershipInfo?.previousPlan || 'Plan'})
+                              </span>
                             )}
                           </div>
+
+                          {/* ── Dynamic Renewal & Expiry Status Banner ── */}
+                          {membershipInfo?.daysLeft > 0 && !membershipInfo?.isExpired && (
+                            <div className={`mb-6 p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs ${
+                              membershipInfo?.isExpiringSoon 
+                                ? 'bg-amber-50 border-amber-300' 
+                                : 'bg-emerald-50/80 border-emerald-300'
+                            }`}>
+                              <div className="flex items-start gap-3">
+                                <span className="text-2xl mt-0.5">{membershipInfo?.isExpiringSoon ? '⚠️' : '⏳'}</span>
+                                <div>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className={`text-sm font-extrabold ${membershipInfo?.isExpiringSoon ? 'text-amber-900' : 'text-emerald-900'}`}>
+                                      {membershipInfo?.daysLeft} Days Remaining to Renew
+                                    </span>
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                      membershipInfo?.isExpiringSoon 
+                                        ? 'bg-amber-200 text-amber-900' 
+                                        : 'bg-emerald-200 text-emerald-900'
+                                    }`}>
+                                      Valid until {membershipInfo?.expiresAtFormatted}
+                                    </span>
+                                  </div>
+                                  <p className={`text-xs mt-1 ${membershipInfo?.isExpiringSoon ? 'text-amber-800' : 'text-emerald-700'}`}>
+                                    {membershipInfo?.isExpiringSoon 
+                                      ? `Renew before ${membershipInfo?.expiresAtFormatted} to prevent your products from being temporarily hidden from buyers.`
+                                      : `All your product listings are live and visible to verified enterprise buyers across India.`}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => handleUpgradePlan(plan === 'ANNUAL PLAN' ? 'ANNUAL PLAN' : 'ANNUAL PLAN')}
+                                disabled={upgradingPlan !== null}
+                                className={`px-4 py-2 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer disabled:opacity-50 ${
+                                  membershipInfo?.isExpiringSoon
+                                    ? 'bg-amber-600 hover:bg-amber-700 animate-pulse'
+                                    : 'bg-emerald-700 hover:bg-emerald-800'
+                                }`}
+                              >
+                                <span>🔄</span> Extend / Renew Plan
+                              </button>
+                            </div>
+                          )}
+
+                          {/* ── Expired Subscription Alert Banner ── */}
+                          {membershipInfo?.isExpired && (
+                            <div className="mb-6 p-4.5 bg-rose-50 border-2 border-rose-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                              <div className="flex items-start gap-3">
+                                <span className="text-2xl mt-0.5">🔴</span>
+                                <div>
+                                  <span className="text-sm font-black text-rose-900">
+                                    Subscription Expired on {membershipInfo?.expiresAtFormatted || 'Recent Date'}
+                                  </span>
+                                  <p className="text-xs text-rose-700 mt-1 leading-relaxed">
+                                    Your products are currently <strong>hidden from the website</strong>. Renew your membership now to immediately restore all your existing product catalog listings live!
+                                  </p>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => handleUpgradePlan(membershipInfo?.previousPlan || 'ANNUAL PLAN')}
+                                disabled={upgradingPlan !== null}
+                                className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-xl shadow-lg shadow-rose-600/20 transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                              >
+                                <span>🔄</span> Renew Now &amp; Restore Products
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Payment Fee Policy Notice */}
+                          <div className="mb-6 p-4 bg-slate-900 text-white rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800 shadow-md">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">💳</span>
+                              <div>
+                                <div className="text-xs font-black uppercase tracking-wider text-amber-400">
+                                  Razorpay Payment &amp; Tax Structure
+                                </div>
+                                <p className="text-[11px] text-slate-300 mt-0.5">
+                                  Base Plan (₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}) + <strong>{pricingInfo?.gstRate || 18}% GST</strong> (+₹{(pricingInfo?.gstAmount || 360).toFixed(2)}) + Standard Razorpay Platform Fee of <strong>{pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST on fee</strong> across all payment options.
+                                </p>
+                              </div>
+                            </div>
+                            <span className="px-3 py-1 bg-slate-800 text-slate-300 text-[11px] font-mono font-bold rounded-lg border border-slate-700 w-fit">
+                              Fee: {pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 max-w-4xl gap-6">
+                            {/* FREE TIER */}
+                            <div className={`p-6 rounded-2xl border transition-all ${plan === 'FREE TIER' && !membershipInfo?.isExpired ? 'border-brand-500 bg-brand-50/20 shadow-sm ring-1 ring-brand-500/30' : 'border-gray-200 bg-white opacity-80'}`}>
+                              <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-bold">FREE TIER</h3>
+                                {plan === 'FREE TIER' && !membershipInfo?.isExpired && <span className="text-[10px] bg-slate-900 text-white font-bold px-2 py-0.5 rounded-full">ACTIVE</span>}
+                              </div>
+                              <p className="text-2xl font-extrabold my-3">₹0</p>
+                              <ul className="text-sm text-gray-600 space-y-2 mb-4">
+                                <li className="text-rose-600 font-medium">❌ No Product Uploads (Upgrade required)</li>
+                                <li>✅ Basic Visibility</li>
+                                <li>✅ Escrow Supported</li>
+                              </ul>
+                              <button disabled className="w-full py-2.5 bg-gray-200 text-gray-500 font-semibold rounded-xl text-xs">
+                                {plan === 'FREE TIER' && !membershipInfo?.isExpired ? 'Current Plan' : 'Free Basic'}
+                              </button>
+                            </div>
+
+                            {/* ANNUAL PLAN */}
+                            <div className={`p-6 rounded-2xl border relative transition-all ${plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired ? 'border-amber-500 bg-amber-50/30 shadow-md ring-2 ring-amber-500/40' : 'border-amber-300 bg-gradient-to-br from-amber-50/60 to-white hover:border-amber-400'}`}>
+                              <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-[10px] font-black px-2.5 py-1 rounded-bl-xl rounded-tr-xl tracking-wider">
+                                {pricingInfo?.discountPercent ? `${pricingInfo.discountPercent}% OFF` : 'BEST VALUE'}
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-bold text-slate-900">ANNUAL PLAN</h3>
+                                {plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired && <span className="text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded-full mr-16">CURRENT ACTIVE</span>}
+                              </div>
+
+                              {/* Price Breakdown */}
+                              <div className="my-3">
+                                {/* Strikethrough Original Price & Selling Price Badge */}
+                                <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                                  <span className="text-sm font-bold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono" title="Original List Price">
+                                    ₹{(pricingInfo?.originalPrice || 20000).toLocaleString('en-IN')}
+                                  </span>
+                                  <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-300">
+                                    Selling Price: ₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}
+                                  </span>
+                                  {pricingInfo?.discountPercent > 0 && (
+                                    <span className="text-[10px] font-black text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
+                                      Save {pricingInfo.discountPercent}%
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* All-Inclusive Total */}
+                                <div className="flex items-baseline gap-1.5">
+                                  <span className="text-2xl sm:text-3xl font-black text-brand-900 font-mono tracking-tight">
+                                    ₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)}
+                                  </span>
+                                  <span className="text-xs text-slate-500 font-medium">all-inclusive / 12 mo</span>
+                                </div>
+
+                                {/* Dynamic Fee Breakdown */}
+                                <div className="text-[11px] text-slate-600 mt-2 font-mono space-y-1 bg-amber-50/90 p-3 rounded-xl border border-amber-200 shadow-2xs">
+                                  <div className="flex justify-between">
+                                    <span>Selling Base Price:</span>
+                                    <span className="font-bold text-slate-900">₹{(pricingInfo?.baseAmount || 2000).toLocaleString('en-IN')}.00</span>
+                                  </div>
+                                  <div className="flex justify-between text-emerald-800 font-bold">
+                                    <span>+ {pricingInfo?.gstRate || 18}% GST on Base:</span>
+                                    <span>+₹{(pricingInfo?.gstAmount || 360).toFixed(2)} (₹{(pricingInfo?.subtotalWithGst || 2360).toFixed(2)})</span>
+                                  </div>
+                                  <div className="flex justify-between text-slate-600">
+                                    <span>+ Razorpay Fee ({pricingInfo?.gatewayFeePercent || 2.5}% + {pricingInfo?.gstRate || 18}% GST):</span>
+                                    <span>+₹{(pricingInfo?.totalGatewaySurcharge || 69.62).toFixed(2)}</span>
+                                  </div>
+                                  <div className="border-t border-amber-300/60 pt-1 mt-1 flex justify-between font-black text-slate-900">
+                                    <span>Total All-Inclusive:</span>
+                                    <span className="text-brand-900 font-mono">₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <ul className="text-xs text-gray-600 space-y-1.5 mb-4">
+                                <li className="font-bold text-emerald-700">✅ Unlocked Product Uploads</li>
+                                <li>✅ Premium Visibility (Top Ranked)</li>
+                                <li>✅ Dedicated Account Manager</li>
+                                <li>✅ Best Value (Save ₹{((pricingInfo?.originalPrice || 20000) - (pricingInfo?.baseAmount || 2000)).toLocaleString('en-IN')}/yr)</li>
+                              </ul>
+
+                              {plan === 'ANNUAL PLAN' && !membershipInfo?.isExpired ? (
+                                <button 
+                                  onClick={() => handleUpgradePlan('ANNUAL PLAN')}
+                                  disabled={upgradingPlan === 'ANNUAL PLAN'}
+                                  className="w-full py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                                >
+                                  {upgradingPlan === 'ANNUAL PLAN' ? 'Opening Razorpay...' : `⭐ Renew / Extend 1 Year (₹${(pricingInfo?.totalPayable || 2429.62).toFixed(2)})`}
+                                </button>
+                              ) : (
+                                <button 
+                                  onClick={() => handleUpgradePlan('ANNUAL PLAN')} 
+                                  disabled={upgradingPlan === 'ANNUAL PLAN'}
+                                  className="w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black rounded-xl transition-all text-xs shadow-md shadow-orange-600/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                >
+                                  {upgradingPlan === 'ANNUAL PLAN' ? (
+                                    <>
+                                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                      <span>Opening Razorpay...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>⭐ Pay ₹{(pricingInfo?.totalPayable || 2429.62).toFixed(2)} (Upgrade to Annual)</span>
+                                    </>
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+
+                      if (role === 'buyer') {
+                        return (
+                          <>
+                            {/* In Buying Hub: Membership Plans displayed directly ABOVE Live Mandi Commodity Rates */}
+                            {membershipSection}
+
+                            {/* Live Mandi Commodity Rates */}
+                            <div className="mt-8">
+                              <PriceTrackerWidget />
+                            </div>
+                          </>
+                        );
+                      }
+
+                      // In Selling Hub: Membership Plans displayed
+                      return membershipSection;
+                    })()}
                   </div>
                 </div>
               </motion.div>
