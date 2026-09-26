@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">B2B India</string>
+    <string name="app_tagline">Verified Wholesale Marketplace in India</string>
+    <string name="offline_title">No Internet Connection</string>
+    <string name="offline_desc">Please verify your mobile data or Wi-Fi connection and tap Retry to access live wholesale catalogs and mandi rates.</string>
+    <string name="retry">Retry Connection</string>
+    <string name="loading">Connecting to B2B India…</string>
+    <string name="permission_camera">Camera permission is required to photograph products and documents.</string>
+    <string name="permission_storage">Storage access is required to upload and download trade invoices.</string>
+</resources>
