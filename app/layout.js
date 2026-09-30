@@ -163,7 +163,7 @@ export default function RootLayout({ children }) {
         },
         image: `${baseUrl}/logo.png`,
         sameAs: [
-          'https://www.facebook.com/b2bindia.site',
+          'https://www.facebook.com/profile.php?id=61594704789504',
           'https://www.instagram.com/b2bindia.site',
         ],
         contactPoint: {
@@ -211,7 +211,7 @@ export default function RootLayout({ children }) {
           },
         ],
         sameAs: [
-          'https://www.facebook.com/b2bindia.site',
+          'https://www.facebook.com/profile.php?id=61594704789504',
           'https://www.instagram.com/b2bindia.site',
         ],
       },

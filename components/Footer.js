@@ -128,7 +128,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2.5">
                 <a
-                  href="https://www.facebook.com/b2bindia.site"
+                  href="https://www.facebook.com/profile.php?id=61594704789504"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="B2B India on Facebook"
