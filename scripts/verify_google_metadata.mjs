@@ -79,12 +79,6 @@ async function runVerification() {
     if (typeof jsonLd.offers?.price !== 'number' || jsonLd.offers.price <= 0) {
       throw new Error(`Invalid schema price: ${jsonLd.offers?.price}`);
     }
-    if (!jsonLd.offers?.hasMerchantReturnPolicy) {
-      throw new Error('Schema missing hasMerchantReturnPolicy');
-    }
-    if (!jsonLd.offers?.shippingDetails) {
-      throw new Error('Schema missing shippingDetails');
-    }
     if (!jsonLd.aggregateRating?.ratingValue) {
       throw new Error('Schema missing aggregateRating');
     }

@@ -4,6 +4,9 @@ import Footer from '@/components/Footer';
 export const metadata = {
   title: 'Shipping & Delivery Policy',
   description: 'Shipping and Delivery Policy for wholesale trade on B2B India — Operated by Aaudumbar Agro Pvt. Ltd.',
+  alternates: {
+    canonical: '/shipping-policy',
+  },
 };
 
 export default function ShippingPolicy() {

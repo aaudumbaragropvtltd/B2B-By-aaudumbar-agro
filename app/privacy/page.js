@@ -4,6 +4,9 @@ import Footer from '@/components/Footer';
 export const metadata = {
   title: 'Privacy Policy',
   description: 'Privacy Policy for B2B India — Learn how we collect, use, and protect your data on India\'s cross-industry B2B marketplace.',
+  alternates: {
+    canonical: '/privacy',
+  },
 };
 
 export default function PrivacyPolicy() {

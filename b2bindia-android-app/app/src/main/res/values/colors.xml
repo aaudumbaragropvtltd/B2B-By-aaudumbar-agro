@@ -1,13 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#006AFF</color>
-    <color name="primary_dark">#0052CC</color>
-    <color name="primary_light">#E6F0FF</color>
+    <!-- ─── Primary Brand Palette — Deep Navy to Royal Blue ─── -->
+    <color name="primary">#1A56DB</color>
+    <color name="primary_dark">#0E3A9C</color>
+    <color name="primary_light">#EEF4FF</color>
+    <color name="primary_mid">#2563EB</color>
+
+    <!-- ─── Accent Colors ─── -->
+    <color name="accent_gold">#F59E0B</color>
+    <color name="accent_gold_light">#FEF3C7</color>
     <color name="accent_emerald">#10B981</color>
-    <color name="accent_amber">#F59E0B</color>
-    <color name="background">#FFFFFF</color>
-    <color name="surface">#F8FAFC</color>
+    <color name="accent_emerald_light">#D1FAE5</color>
+    <color name="accent_purple">#7C3AED</color>
+    <color name="accent_rose">#F43F5E</color>
+
+    <!-- ─── Dark Premium Surfaces ─── -->
+    <color name="bg_dark">#060B1A</color>
+    <color name="bg_dark_secondary">#0D1425</color>
+    <color name="surface_dark">#111827</color>
+    <color name="surface_dark_card">#1E2A3B</color>
+    <color name="surface_dark_elevated">#253347</color>
+
+    <!-- ─── Light Mode Surfaces ─── -->
+    <color name="background">#F0F4FF</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_card">#FFFFFF</color>
+
+    <!-- ─── Text ─── -->
     <color name="text_primary">#0F172A</color>
-    <color name="text_secondary">#64748B</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_dark_primary">#F1F5F9</color>
+    <color name="text_dark_secondary">#94A3B8</color>
+
+    <!-- ─── Borders / Dividers ─── -->
     <color name="divider">#E2E8F0</color>
+    <color name="divider_dark">#1E2D42</color>
+    <color name="border_glow">#3B82F6</color>
+
+    <!-- ─── Toolbar gradient colors ─── -->
+    <color name="toolbar_start">#0A1628</color>
+    <color name="toolbar_end">#1A3560</color>
+
+    <!-- ─── Bottom Nav ─── -->
+    <color name="bottom_nav_bg">#FFFFFF</color>
+    <color name="bottom_nav_selected">#1A56DB</color>
+    <color name="bottom_nav_unselected">#94A3B8</color>
+
+    <!-- ─── Status / Badges ─── -->
+    <color name="badge_live">#22C55E</color>
+    <color name="badge_live_bg">#F0FDF4</color>
+    <color name="badge_escrow">#F59E0B</color>
+    <color name="badge_escrow_bg">#FFFBEB</color>
+
+    <!-- ─── Splash ─── -->
+    <color name="splash_bg_start">#060B1A</color>
+    <color name="splash_bg_end">#0D1F3C</color>
+    <color name="splash_title_color">#FFFFFF</color>
+    <color name="splash_subtitle_color">#8DB4E2</color>
 </resources>

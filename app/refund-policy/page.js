@@ -4,6 +4,9 @@ import Footer from '@/components/Footer';
 export const metadata = {
   title: 'Cancellation & Refund Policy',
   description: 'Cancellation and Refund Policy for B2B India marketplace — Operated by Aaudumbar Agro Pvt. Ltd.',
+  alternates: {
+    canonical: '/refund-policy',
+  },
 };
 
 export default function RefundPolicy() {

@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.DownloadListener;
 import android.webkit.GeolocationPermissions;
@@ -23,20 +24,26 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.core.widget.NestedScrollView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -44,18 +51,30 @@ import java.util.Locale;
 /**
  * MainActivity
  * Full-featured, native Android shell for B2B India (b2bindia.site).
- * Supports UPI intents, file/camera uploads, offline caching, and native bridge.
+ * Integrates:
+ * - Native Material Toolbar with WhatsApp and Helpline Call actions
+ * - Native Bottom Navigation Bar for instant 1-tap tab switching
+ * - Two-way deep linking & URL synchronization
+ * - Native Offline Trade Dashboard
+ * - Native JS Bridge, Camera & Storage File Chooser, and UPI intents
  */
 public class MainActivity extends AppCompatActivity {
 
     public static final String TARGET_URL = "https://www.b2bindia.site";
     public static final String DOMAIN_HOST = "b2bindia.site";
+    public static final String HELPLINE_PHONE = "+918408841998";
 
+    private MaterialToolbar mTopToolbar;
     private WebView mWebView;
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefresh;
-    private LinearLayout mLayoutOffline;
-    private Button mBtnRetry;
+    private NestedScrollView mLayoutOfflineDashboard;
+    private BottomNavigationView mBottomNavigation;
+
+    // Offline Dashboard buttons
+    private MaterialButton mBtnRetry;
+    private MaterialButton mBtnOfflineCall;
+    private MaterialButton mBtnOfflineWhatsapp;
 
     // File Upload / Camera State
     private ValueCallback<Uri[]> mFilePathCallback;
@@ -63,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> mFileChooserLauncher;
 
     private long mLastBackPressTime = 0;
+    private boolean mIsNavigatingFromTab = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initViews();
+        setupToolbar();
+        setupBottomNavigation();
         setupFileChooserLauncher();
         setupWebView();
         setupSwipeRefresh();
@@ -84,21 +106,129 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        mTopToolbar = findViewById(R.id.topToolbar);
         mWebView = findViewById(R.id.webView);
         mProgressBar = findViewById(R.id.progressBar);
         mSwipeRefresh = findViewById(R.id.swipeRefresh);
-        mLayoutOffline = findViewById(R.id.layoutOffline);
+        mLayoutOfflineDashboard = findViewById(R.id.layoutOfflineDashboard);
+        mBottomNavigation = findViewById(R.id.bottomNavigation);
+
         mBtnRetry = findViewById(R.id.btnRetry);
+        mBtnOfflineCall = findViewById(R.id.btnOfflineCall);
+        mBtnOfflineWhatsapp = findViewById(R.id.btnOfflineWhatsapp);
 
         mBtnRetry.setOnClickListener(v -> {
             if (isNetworkAvailable()) {
-                mLayoutOffline.setVisibility(View.GONE);
-                mWebView.setVisibility(View.VISIBLE);
+                mLayoutOfflineDashboard.setVisibility(View.GONE);
+                mSwipeRefresh.setVisibility(View.VISIBLE);
                 mWebView.reload();
             } else {
-                Toast.makeText(this, "Still offline. Please check your internet connection.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Still offline. Please check your mobile data or Wi-Fi.", Toast.LENGTH_SHORT).show();
             }
         });
+
+        mBtnOfflineCall.setOnClickListener(v -> triggerCallIntent(HELPLINE_PHONE));
+        mBtnOfflineWhatsapp.setOnClickListener(v -> triggerWhatsappIntent(HELPLINE_PHONE, "Hi B2B India Support, I need assistance with wholesale trade inquiries."));
+    }
+
+    private void setupToolbar() {
+        // ── Collision fix: title only, no subtitle on small screens ──
+        mTopToolbar.setTitle("B2B India");
+        mTopToolbar.setSubtitle(null);
+
+        mTopToolbar.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.action_whatsapp) {
+                triggerWhatsappIntent(HELPLINE_PHONE, "Hi B2B India Support, I have an inquiry regarding wholesale products.");
+                return true;
+            } else if (itemId == R.id.action_call) {
+                triggerCallIntent(HELPLINE_PHONE);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void setupBottomNavigation() {
+        mBottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            mIsNavigatingFromTab = true;
+
+            if (itemId == R.id.nav_home) {
+                loadUrl(TARGET_URL + "/");
+                return true;
+            } else if (itemId == R.id.nav_directory) {
+                loadUrl(TARGET_URL + "/directory");
+                return true;
+            } else if (itemId == R.id.nav_mandi) {
+                loadUrl(TARGET_URL + "/market-rates");
+                return true;
+            } else if (itemId == R.id.nav_orders) {
+                loadUrl(TARGET_URL + "/dashboard/orders");
+                return true;
+            } else if (itemId == R.id.nav_support) {
+                loadUrl(TARGET_URL + "/support");
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void updateBottomNavSelection(String url) {
+        if (mBottomNavigation == null || url == null) return;
+
+        try {
+            Uri uri = Uri.parse(url);
+            String path = uri.getPath();
+            if (path == null) path = "";
+
+            int targetItemId = -1;
+            if (path.isEmpty() || path.equals("/")) {
+                targetItemId = R.id.nav_home;
+            } else if (path.startsWith("/directory") || path.startsWith("/categories")) {
+                targetItemId = R.id.nav_directory;
+            } else if (path.startsWith("/market-rates") || path.startsWith("/mandi")) {
+                targetItemId = R.id.nav_mandi;
+            } else if (path.startsWith("/dashboard") || path.startsWith("/orders")) {
+                targetItemId = R.id.nav_orders;
+            } else if (path.startsWith("/support") || path.startsWith("/contact")) {
+                targetItemId = R.id.nav_support;
+            }
+
+            if (targetItemId != -1 && mBottomNavigation.getSelectedItemId() != targetItemId) {
+                mBottomNavigation.getMenu().findItem(targetItemId).setChecked(true);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void triggerWhatsappIntent(String phone, String message) {
+        try {
+            String cleanPhone = phone.replaceAll("[^0-9]", "");
+            String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8.name());
+            String whatsappUrl = "https://api.whatsapp.com/send?phone=" + cleanPhone + "&text=" + encodedMessage;
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(whatsappUrl));
+            intent.setPackage("com.whatsapp");
+            startActivity(intent);
+        } catch (Exception e) {
+            try {
+                // Fallback to browser or non-packaged intent
+                String cleanPhone = phone.replaceAll("[^0-9]", "");
+                String whatsappUrl = "https://api.whatsapp.com/send?phone=" + cleanPhone;
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(whatsappUrl)));
+            } catch (Exception ex) {
+                Toast.makeText(this, "WhatsApp is not installed on this device.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void triggerCallIntent(String phone) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, "Cannot initiate telephone call.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -118,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setGeolocationEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        // Append custom user agent identifier for B2B India app metrics
+        // Custom User Agent identifier
         String defaultUserAgent = settings.getUserAgentString();
         settings.setUserAgentString(defaultUserAgent + " B2BIndiaApp/1.0.0 (Android)");
 
@@ -132,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
         // Native JavaScript Interface Bridge
         mWebView.addJavascriptInterface(new WebAppInterface(this), "AndroidBridge");
 
-        // Download Listener for trade invoices and inspection documents
+        // Download Listener
         mWebView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
@@ -151,14 +281,13 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Downloading file to Downloads folder...", Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
-                    // Fallback to opening in external browser
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(intent);
                 }
             }
         });
 
-        // WebChromeClient for Progress, Geolocation & File Uploads
+        // WebChromeClient for Progress & File Uploads
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
@@ -191,8 +320,7 @@ public class MainActivity extends AppCompatActivity {
                         takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCameraPhotoUri);
                     }
-                } catch (IOException ex) {
-                    // Handle photo capture file creation failure
+                } catch (IOException ignored) {
                 }
 
                 Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -218,7 +346,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // WebViewClient for Navigation & External Protocol Interceptions
+        // WebViewClient
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -231,14 +359,19 @@ public class MainActivity extends AppCompatActivity {
                 super.onPageFinished(view, url);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefresh.setRefreshing(false);
+
+                if (!mIsNavigatingFromTab) {
+                    updateBottomNavSelection(url);
+                }
+                mIsNavigatingFromTab = false;
             }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
                 if (request.isForMainFrame() && !isNetworkAvailable()) {
-                    mWebView.setVisibility(View.GONE);
-                    mLayoutOffline.setVisibility(View.VISIBLE);
+                    mSwipeRefresh.setVisibility(View.GONE);
+                    mLayoutOfflineDashboard.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -258,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // 2. WhatsApp Direct Supplier Inquiries
+                // 2. WhatsApp Direct Inquiries
                 if (url.startsWith("whatsapp://") || url.contains("api.whatsapp.com") || url.contains("wa.me")) {
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -270,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // 3. Telephone calls
+                // 3. Phone calls
                 if (url.startsWith("tel:")) {
                     Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
                     startActivity(intent);
@@ -284,14 +417,14 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
 
-                // 5. Internal B2B India Platform Navigation
+                // 5. Internal Platform Navigation
                 Uri uri = request.getUrl();
                 String host = uri.getHost();
                 if (host != null && (host.endsWith(DOMAIN_HOST) || host.contains("localhost"))) {
-                    return false; // Load inside WebView
+                    return false;
                 }
 
-                // 6. External URLs (Google OAuth, external partners)
+                // 6. External URLs
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
@@ -304,19 +437,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupSwipeRefresh() {
-        mSwipeRefresh.setColorSchemeResources(R.color.primary, R.color.accent_emerald, R.color.accent_amber);
+        // Premium brand color scheme for pull-to-refresh indicator
+        mSwipeRefresh.setColorSchemeResources(
+            R.color.primary,
+            R.color.accent_gold,
+            R.color.accent_emerald,
+            R.color.accent_purple
+        );
+        mSwipeRefresh.setProgressBackgroundColorSchemeResource(R.color.surface);
         mSwipeRefresh.setOnRefreshListener(() -> {
             if (isNetworkAvailable()) {
-                mLayoutOffline.setVisibility(View.GONE);
-                mWebView.setVisibility(View.VISIBLE);
+                mLayoutOfflineDashboard.setVisibility(View.GONE);
+                mSwipeRefresh.setVisibility(View.VISIBLE);
                 mWebView.reload();
             } else {
                 mSwipeRefresh.setRefreshing(false);
-                Toast.makeText(MainActivity.this, "Offline. Cannot refresh.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Offline. Cannot refresh live data.", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Ensure SwipeRefresh only triggers when WebView is scrolled to top
         mWebView.getViewTreeObserver().addOnScrollChangedListener(() -> {
             mSwipeRefresh.setEnabled(mWebView.getScrollY() == 0);
         });
@@ -370,12 +509,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadUrl(String url) {
         if (isNetworkAvailable()) {
-            mLayoutOffline.setVisibility(View.GONE);
-            mWebView.setVisibility(View.VISIBLE);
+            mLayoutOfflineDashboard.setVisibility(View.GONE);
+            mSwipeRefresh.setVisibility(View.VISIBLE);
             mWebView.loadUrl(url);
         } else {
-            mWebView.setVisibility(View.GONE);
-            mLayoutOffline.setVisibility(View.VISIBLE);
+            mSwipeRefresh.setVisibility(View.GONE);
+            mLayoutOfflineDashboard.setVisibility(View.VISIBLE);
         }
     }
 

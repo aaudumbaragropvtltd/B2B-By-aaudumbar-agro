@@ -1,64 +1,94 @@
-# B2B India — Official Android App
+# B2B India — Official Native Android App
 
-Official native Android application for [b2bindia.site](https://www.b2bindia.site), operated by **Aaudumbar Agro Pvt. Ltd.**
+Official native Android application for **[b2bindia.site](https://www.b2bindia.site)**, operated by **Aaudumbar Agro Pvt. Ltd.**
+
+This project is completely isolated inside `b2bindia-android-app/` and does **not** alter or affect the web marketplace code.
 
 ---
 
-## 📱 App Highlights
-- **1:1 Complete Parity with Website**: Exact same catalog, 38 industry sectors, 10% advance escrow protection, and real-time APMC Mandi Bhav.
-- **Native UPI & Razorpay Support**: Automatic deep-linking into Google Pay, PhonePe, Paytm, and BHIM for escrow checkout.
-- **Direct WhatsApp & Phone Integration**: Instant 1-tap buyer-supplier chats (`whatsapp://`) and phone inquiries (`tel:`).
-- **Document & Lab Photo Uploads**: Hardware camera and file picker for COA, Phytosanitary, and GST invoices via Android `FileProvider`.
-- **Pull-To-Refresh & Offline Protection**: Branded offline recovery view and seamless pull-to-refresh.
-- **Fast Startup & Native Splash**: Branded splash screen loading in <1.5 seconds.
+## 📱 Custom Native Screens & Features
+
+### 1. 🧭 Native Material Bottom Navigation Bar
+- Pinned at the bottom with 5 native navigation tabs:
+  - **Home**: Main wholesale homepage (`/`)
+  - **Directory**: 38 Industry Sectors (`/directory`)
+  - **Mandi Bhav**: Real-time APMC Mandi Rates (`/market-rates`)
+  - **Orders**: Escrow-protected orders & buyer dashboard (`/dashboard/orders`)
+  - **Support**: 24x7 Trade Help Desk (`/support`)
+- **Two-Way URL Synchronization**: Tapping a bottom tab navigates immediately. When navigating inside the platform, the bottom navigation bar automatically updates its active tab state.
+
+### 2. ⚡ Native Top App Bar (MaterialToolbar)
+- Displays **B2B India** branding and verified wholesale network subtitle.
+- **WhatsApp Direct Action**: One-tap launch into official WhatsApp trade chat (`whatsapp://send?phone=918408841998`).
+- **Helpline Dialer**: One-tap phone dialer to B2B India's official trade desk (`tel:+918408841998`).
+
+### 3. 🛡️ Native Offline Trade Dashboard
+- When internet connectivity is lost, the app replaces the web view with a custom native card dashboard:
+  - **Direct Wholesale Helpline**: Call or WhatsApp even when offline.
+  - **100% Escrow Guarantee Details**: Verification notes on escrow protection and buyer quality checks.
+  - **APMC Mandi Bhav Support**: Direct desk contact for spot mandi rates across 500+ Indian APMCs.
+  - **1-Tap Reconnect Button**: Re-checks network connectivity and resumes live shopping seamlessly.
+
+### 4. 💳 Indian Payment Gateway & Hardware Capabilities
+- **UPI Deep Linking**: Seamless one-tap redirect to Google Pay, PhonePe, Paytm, and BHIM.
+- **Hardware Camera & Document Upload**: Native file chooser for COA, Phytosanitary, and GST invoices via `FileProvider`.
+- **Swipe-To-Refresh**: Native pull-to-refresh tied to top scroll position.
+- **Download Manager**: Automated PDF invoice and test report downloads to device Downloads folder.
 
 ---
 
 ## 🛠️ Project Structure
 ```
-android/
+b2bindia-android-app/
 ├── build.gradle                   # Top-level Gradle build configuration
 ├── settings.gradle                # Project modules (:app)
 ├── gradle.properties              # JVM & AndroidX optimization
+├── local.properties               # Configured SDK path (C:\Users\rsevm\AppData\Local\Android\Sdk)
 └── app/
-    ├── build.gradle               # App SDK targets (compileSdk 34, minSdk 24)
+    ├── build.gradle               # compileSdk 34, minSdk 24, targetSdk 34
     ├── proguard-rules.pro         # ProGuard / R8 optimization rules
     └── src/main/
-        ├── AndroidManifest.xml    # Permissions, activities, deep link schemes
+        ├── AndroidManifest.xml    # Permissions, deep links (b2bindia:// and b2bindia.site)
         ├── java/site/b2bindia/app/
         │   ├── SplashActivity.java    # Native branding startup
-        │   ├── MainActivity.java      # Advanced WebView & intent routing
+        │   ├── MainActivity.java      # Native Toolbar, BottomNav, Offline Dashboard & Bridge
         │   └── WebAppInterface.java   # JavaScript bridge (window.AndroidBridge)
         └── res/
-            ├── layout/            # activity_main.xml, activity_splash.xml
-            ├── values/            # strings.xml, colors.xml, styles.xml
-            ├── drawable/          # ic_splash_logo, progress_bar, ic_offline
-            └── mipmap-*/          # App launcher icons across all screen densities
+            ├── layout/
+            │   ├── activity_main.xml       # Native Toolbar + WebView + Offline Dashboard + BottomNav
+            │   └── activity_splash.xml     # Native Splash layout
+            ├── menu/
+            │   ├── bottom_nav_menu.xml     # 5-tab menu
+            │   └── top_toolbar_menu.xml    # WhatsApp & Call action items
+            ├── color/
+            │   └── bottom_nav_colors.xml   # Active/inactive tint selector
+            ├── values/
+            │   ├── strings.xml             # All localized strings
+            │   ├── colors.xml              # Brand palette (Primary #006AFF, Emerald #10B981)
+            │   └── styles.xml              # DayNight themes
+            ├── drawable/                   # Vector icons for tabs, WhatsApp, call, shield & offline
+            └── mipmap-*/                   # Launcher icons for all device densities
 ```
 
 ---
 
-## 🚀 How to Build & Run
+## 🚀 How to Open & Build in Android Studio
 
-### Option 1: Open in Android Studio (Recommended)
-1. Launch **Android Studio**.
-2. Select **Open an Existing Project** and browse to this directory: `d:\b2b-bharat\android`.
-3. Allow Gradle to sync.
-4. Connect an Android phone via USB (with USB Debugging enabled) or start an Android Virtual Device (AVD).
-5. Click the green **Run (▶)** button or press `Shift + F10`.
+1. **Open Android Studio**:
+   - In Android Studio's welcome screen (or from **File** → **Open...**), navigate to:
+     ```
+     D:\b2b-bharat\b2bindia-android-app
+     ```
+   - Click **OK**.
 
-### Option 2: Build APK via Command Line
-Run in the `android/` directory:
-```bash
-# Debug APK
-./gradlew assembleDebug
+2. **Sync Project with Gradle Files**:
+   - Android Studio will automatically recognize the project and download the Gradle distribution and dependencies.
+   - If prompted, click **Sync Now**.
 
-# Output APK will be at:
-# android/app/build/outputs/apk/debug/app-debug.apk
-```
+3. **Run on Device or Emulator**:
+   - Connect your Android device via USB (with Developer Options > USB Debugging enabled), or start an Android Emulator (AVD).
+   - Click the green **Run (▶)** button in the top toolbar or press `Shift + F10`.
 
-### Option 3: Generate Signed Production Bundle for Google Play Store
-1. In Android Studio, go to **Build** → **Generate Signed Bundle / APK**.
-2. Select **Android App Bundle (.aab)**.
-3. Choose your release keystore and build `app-release.aab`.
-4. Upload `app-release.aab` directly to the **Google Play Console** under Package Name: `site.b2bindia.app`.
+4. **Build Production APK / AAB**:
+   - In Android Studio menu, click **Build** → **Build Bundle(s) / APK(s)** → **Build APK(s)**.
+   - For Google Play Store submission: **Build** → **Generate Signed Bundle / APK** → select **Android App Bundle (.aab)**.

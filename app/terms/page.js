@@ -4,6 +4,9 @@ import Footer from '@/components/Footer';
 export const metadata = {
   title: 'Terms of Service',
   description: 'Terms of Service for B2B India — Rules governing use of India\'s cross-industry B2B marketplace, escrow, and trade.',
+  alternates: {
+    canonical: '/terms',
+  },
 };
 
 export default function TermsOfService() {

@@ -1,11 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary">
+    android:background="@drawable/bg_splash_gradient">
 
+    <!-- ── Decorative glow orb top-left ── -->
+    <View
+        android:id="@+id/glowOrbTopLeft"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:background="@drawable/bg_glow_orb_blue"
+        android:alpha="0.35"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="-80dp"
+        android:layout_marginTop="-80dp"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- ── Decorative glow orb bottom-right ── -->
+    <View
+        android:id="@+id/glowOrbBottomRight"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:background="@drawable/bg_glow_orb_purple"
+        android:alpha="0.25"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="-100dp"
+        android:layout_marginEnd="-100dp" />
+
+    <!-- ── Center content ── -->
     <LinearLayout
+        android:id="@+id/centerContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -15,48 +43,108 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/splashLogo"
-            android:layout_width="110dp"
-            android:layout_height="110dp"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_splash_logo" />
+        <!-- Logo ring -->
+        <FrameLayout
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_gravity="center">
 
+            <!-- Outer glow ring -->
+            <View
+                android:layout_width="130dp"
+                android:layout_height="130dp"
+                android:background="@drawable/bg_logo_ring_outer"
+                android:layout_gravity="center" />
+
+            <!-- Inner logo container -->
+            <FrameLayout
+                android:layout_width="108dp"
+                android:layout_height="108dp"
+                android:background="@drawable/bg_logo_ring_inner"
+                android:layout_gravity="center">
+
+                <ImageView
+                    android:id="@+id/splashLogo"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/app_name"
+                    android:src="@drawable/ic_splash_logo"
+                    android:scaleType="centerInside" />
+
+            </FrameLayout>
+        </FrameLayout>
+
+        <!-- App Name -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:fontFamily="sans-serif-black"
-            android:letterSpacing="0.05"
-            android:text="@string/app_name"
-            android:textColor="@android:color/white"
-            android:textSize="32sp" />
+            android:letterSpacing="0.06"
+            android:text="B2B INDIA"
+            android:textColor="#FFFFFF"
+            android:textSize="34sp" />
 
+        <!-- Tagline — no collision with title, it's on its own line -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="@string/app_tagline"
-            android:textColor="#CCFFFFFF"
+            android:layout_marginTop="6dp"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:letterSpacing="0.03"
+            android:text="Verified Wholesale Marketplace"
+            android:textColor="#8DB4E2"
             android:textSize="13sp" />
 
+        <!-- Gold badge pill -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_badge_gold"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="6dp">
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:background="@drawable/bg_dot_gold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="10% Escrow · Pan-India Wholesale"
+                android:textColor="#F59E0B"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Loading indicator -->
         <ProgressBar
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_marginTop="32dp"
-            android:indeterminateTint="@android:color/white" />
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginTop="36dp"
+            android:indeterminateTint="#3B82F6" />
 
     </LinearLayout>
 
+    <!-- ── Bottom brand footer ── -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="28dp"
         android:fontFamily="sans-serif"
-        android:text="10% Escrow Protection • Pan-India Wholesale"
-        android:textColor="#99FFFFFF"
-        android:textSize="11sp"
+        android:letterSpacing="0.08"
+        android:text="b2bindia.site"
+        android:textColor="#2D4A70"
+        android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

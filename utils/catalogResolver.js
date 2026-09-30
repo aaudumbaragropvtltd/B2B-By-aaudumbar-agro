@@ -414,24 +414,8 @@ export async function getProductById(idOrSlug) {
     return { ...norm, slug: getProductSlug(norm) };
   }
 
-  // 4. Default Mock Product if ID not found
-  const formattedTitle = cleanId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  return {
-    id: cleanId,
-    slug: targetSlug || cleanId,
-    title: `Wholesale Industrial Product (${formattedTitle})`,
-    description: `High-grade verified product (${formattedTitle}) available for bulk commercial procurement on B2B India. Direct manufacturer pricing and pan-India logistics.`,
-    base_price_per_unit: 4500,
-    unit_label: 'unit',
-    bulk_minimum_order: 10,
-    quality_grade: 'Premium',
-    hero_image_url: 'https://images.unsplash.com/photo-1592982537447-6f2a6a0c8b39?w=800',
-    gallery_image_urls: ['https://images.unsplash.com/photo-1592982537447-6f2a6a0c8b39?w=800'],
-    is_stale: false,
-    is_fallback_mock: true,
-    supplier_id: { id: 's1', company_name: 'Aaudumbar Agro', city: 'Chhatrapati Sambhajinagar', state: 'Maharashtra', geo_lat: 19.8762, geo_lng: 75.3433 },
-    sector_id: { name: 'Building & Construction', slug: 'building-construction' },
-  };
+  // 4. Return null if product is not found in database or static catalog
+  return null;
 }
 
 /**

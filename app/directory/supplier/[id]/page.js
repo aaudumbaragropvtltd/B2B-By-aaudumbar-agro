@@ -7,6 +7,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CommodityImage from '@/components/CommodityImage';
@@ -277,29 +278,29 @@ async function getSupplierInfo(id) {
     // Continue
   }
 
-  return {
-    id: id,
-    name: 'Verified Supplier',
-    location: 'India',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    sector: 'Industrial Manufacturing',
-    tier: 'Gold',
-    yearEstablished: 2020,
-    icon: '🏭',
-    gstVerified: true,
-  };
+  // Return null if supplier is not found
+  return null;
 }
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const supplier = await getSupplierInfo(id);
+  if (!supplier) {
+    return {
+      title: 'Supplier Not Found | B2B India',
+      robots: { index: false, follow: false },
+    };
+  }
   return generateSupplierMetadata(supplier);
 }
 
 export default async function SupplierProfilePage({ params }) {
   const { id } = await params;
   const supplier = await getSupplierInfo(id);
+
+  if (!supplier) {
+    notFound();
+  }
 
   // Fetch all products from this supplier
   const allProducts = await getAllProducts();

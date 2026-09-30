@@ -44,6 +44,17 @@ const nextConfig = {
     ];
   },
 
+  // 301 Permanent Redirects to avoid duplicate supplier URLs
+  async redirects() {
+    return [
+      {
+        source: '/supplier/:id',
+        destination: '/directory/supplier/:id',
+        permanent: true,
+      },
+    ];
+  },
+
   // Performance & Edge Caching Headers for 100% Core Web Vitals & Speed
   async headers() {
     return [

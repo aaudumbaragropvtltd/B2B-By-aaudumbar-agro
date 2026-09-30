@@ -12,61 +12,70 @@ export const revalidate = 43200; // 12-hour Edge ISR caching for instant sub-50m
 
 export default async function sitemap() {
   const baseUrl = getSiteUrl();
-  const now = new Date();
+
+  // Stable baseline modification dates so Google Search Console does not disregard lastmod
+  const POLICY_LAST_MODIFIED = new Date('2026-08-21T00:00:00.000Z');
+  const PLATFORM_LAST_MODIFIED = new Date('2026-09-01T00:00:00.000Z');
+  const SECTOR_LAST_MODIFIED = new Date('2026-08-21T00:00:00.000Z');
+  const SUPPLIER_LAST_MODIFIED = new Date('2026-08-21T00:00:00.000Z');
+
+  // Daily market rates anchor (midnight UTC)
+  const marketRatesDate = new Date();
+  marketRatesDate.setUTCHours(0, 0, 0, 0);
 
   // 1. Static Core Platform Pages (Public, High-Value Indexable Content Only)
   const staticPages = [
     {
       url: `${baseUrl}`,
-      lastModified: now,
+      lastModified: PLATFORM_LAST_MODIFIED,
       changeFrequency: 'daily',
       priority: 1.0,
     },
     {
       url: `${baseUrl}/directory`,
-      lastModified: now,
+      lastModified: PLATFORM_LAST_MODIFIED,
       changeFrequency: 'daily',
       priority: 0.95,
     },
     {
       url: `${baseUrl}/market-rates`,
-      lastModified: now,
+      lastModified: marketRatesDate,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/support`,
-      lastModified: now,
+      lastModified: PLATFORM_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${baseUrl}/terms`,
-      lastModified: now,
+      lastModified: POLICY_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.4,
     },
     {
       url: `${baseUrl}/privacy`,
-      lastModified: now,
+      lastModified: POLICY_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.4,
     },
     {
       url: `${baseUrl}/shipping-policy`,
-      lastModified: now,
+      lastModified: POLICY_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.4,
     },
     {
       url: `${baseUrl}/refund-policy`,
-      lastModified: now,
+      lastModified: POLICY_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.4,
     },
     {
       url: `${baseUrl}/cookie`,
-      lastModified: now,
+      lastModified: POLICY_LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.4,
     },
@@ -76,8 +85,8 @@ export default async function sitemap() {
   const sectors = getAllSectors();
   const sectorPages = sectors.map((sector) => ({
     url: `${baseUrl}/directory/${sector.slug}`,
-    lastModified: now,
-    changeFrequency: 'daily',
+    lastModified: SECTOR_LAST_MODIFIED,
+    changeFrequency: 'weekly',
     priority: 0.85,
   }));
 
@@ -85,8 +94,12 @@ export default async function sitemap() {
   const products = await getAllProducts();
   const productPages = products.map((prod) => ({
     url: `${baseUrl}/directory/product/${getProductSlug(prod)}`,
-    lastModified: prod.updated_at ? new Date(prod.updated_at) : now,
-    changeFrequency: 'daily',
+    lastModified: prod.updated_at
+      ? new Date(prod.updated_at)
+      : prod.created_at
+        ? new Date(prod.created_at)
+        : PLATFORM_LAST_MODIFIED,
+    changeFrequency: 'weekly',
     priority: 0.9,
   }));
 
@@ -117,7 +130,7 @@ export default async function sitemap() {
 
   const supplierPages = verifiedSupplierIds.map((sId) => ({
     url: `${baseUrl}/directory/supplier/${sId}`,
-    lastModified: now,
+    lastModified: SUPPLIER_LAST_MODIFIED,
     changeFrequency: 'weekly',
     priority: 0.75,
   }));

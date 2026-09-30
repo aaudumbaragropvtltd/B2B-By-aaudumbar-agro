@@ -13,7 +13,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CommodityImage from '@/components/CommodityImage';
@@ -45,7 +45,10 @@ export async function generateMetadata({ params }) {
   const { id } = await params;
   const product = await getProductById(id);
   if (!product) {
-    return { title: 'Product Details | B2B India' };
+    return {
+      title: 'Product Not Found | B2B India',
+      robots: { index: false, follow: false },
+    };
   }
   return generateProductMetadata(product);
 }
@@ -97,22 +100,24 @@ export default async function ProductDetailPage({ params }) {
   const { id } = await params;
   const product = await getProductById(id);
 
+  if (!product) {
+    notFound();
+  }
+
   // Canonical slug redirect:
   // If user visits via raw UUID or non-canonical format (e.g. spaces/different casing),
   // redirect immediately to the clean, human-readable product name URL!
-  if (product && !product.is_fallback_mock) {
-    const canonicalSlug = getProductSlug(product);
-    let rawDecoded = id;
-    try {
-      rawDecoded = decodeURIComponent(id);
-    } catch (e) {}
+  const canonicalSlug = getProductSlug(product);
+  let rawDecoded = id;
+  try {
+    rawDecoded = decodeURIComponent(id);
+  } catch (e) {}
 
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawDecoded);
-    const hasSpaces = rawDecoded.includes(' ') || rawDecoded.includes('+');
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawDecoded);
+  const hasSpaces = rawDecoded.includes(' ') || rawDecoded.includes('+');
 
-    if (canonicalSlug && (isUUID || hasSpaces || rawDecoded !== canonicalSlug)) {
-      redirect(`/directory/product/${canonicalSlug}`);
-    }
+  if (canonicalSlug && (isUUID || hasSpaces || rawDecoded !== canonicalSlug)) {
+    redirect(`/directory/product/${canonicalSlug}`);
   }
 
   // Fetch related products for internal linking and crawl optimization

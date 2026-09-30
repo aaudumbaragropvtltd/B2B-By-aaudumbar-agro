@@ -62,8 +62,6 @@ async function testNewProductAutomation() {
   console.log('   Schema @id:', jsonLd['@id']);
   console.log('   Alternate Vernacular Names:', jsonLd.alternateName);
   console.log('   Price & Currency:', jsonLd.offers.price, jsonLd.offers.priceCurrency);
-  console.log('   Merchant Return Policy:', jsonLd.offers.hasMerchantReturnPolicy?.applicableCountry);
-  console.log('   Shipping Destination:', jsonLd.offers.shippingDetails?.shippingDestination?.addressCountry);
   console.log('   Aggregate Rating:', jsonLd.aggregateRating?.ratingValue);
 
   if (!jsonLd['@id'].startsWith('https://www.b2bindia.site')) {

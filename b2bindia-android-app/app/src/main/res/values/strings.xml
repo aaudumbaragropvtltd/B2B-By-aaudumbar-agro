@@ -1,10 +1,16 @@
 <resources>
     <string name="app_name">B2B India</string>
     <string name="app_tagline">Verified Wholesale Marketplace in India</string>
-    <string name="offline_title">No Internet Connection</string>
-    <string name="offline_desc">Please verify your mobile data or Wi-Fi connection and tap Retry to access live wholesale catalogs and mandi rates.</string>
-    <string name="retry">Retry Connection</string>
+    <string name="offline_title">Offline Trade Dashboard</string>
+    <string name="offline_desc">You are currently disconnected from the live network. You can still reach our direct trade desks, APMC mandi helpdesk, and escrow support below.</string>
+    <string name="retry">Check Connection &amp; Reconnect</string>
     <string name="loading">Connecting to B2B India…</string>
     <string name="permission_camera">Camera permission is required to photograph products and documents.</string>
     <string name="permission_storage">Storage access is required to upload and download trade invoices.</string>
+    <string name="helpline_phone">+91 84088 41998</string>
+    <string name="helpline_email">support@b2bindia.site</string>
+    <string name="escrow_guarantee">100% Escrow &amp; Trade Protection</string>
+    <string name="escrow_desc">All payments on B2B India remain securely held in escrow until goods pass physical quality inspection at delivery.</string>
+    <string name="mandi_offline_title">APMC Mandi Bhav Desk</string>
+    <string name="mandi_offline_desc">For current spot rates on Salem Turmeric, Spices, Grains, and Pulses across 500+ mandis, call our trading desk directly.</string>
 </resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_nav_home"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/nav_directory"
+        android:icon="@drawable/ic_nav_directory"
+        android:title="Directory" />
+
+    <item
+        android:id="@+id/nav_mandi"
+        android:icon="@drawable/ic_nav_mandi"
+        android:title="Mandi Bhav" />
+
+    <item
+        android:id="@+id/nav_orders"
+        android:icon="@drawable/ic_nav_orders"
+        android:title="Orders" />
+
+    <item
+        android:id="@+id/nav_support"
+        android:icon="@drawable/ic_nav_support"
+        android:title="Support" />
+
+</menu>
