@@ -82,6 +82,10 @@ export default function LoginPage() {
         setAuthReason(reasonParam);
       }
 
+      if (params.get('show_sub') === '1' || params.get('subscription') === '1') {
+        setShowSubscriptionModal(true);
+      }
+
       if (params.get('verified') === 'true') {
         setSuccess('🎉 Your email has been verified successfully! Please sign in to access your dashboard.');
         setIsLogin(true);
