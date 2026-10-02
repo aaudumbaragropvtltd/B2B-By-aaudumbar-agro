@@ -17,6 +17,7 @@ import SmartRFQForm from '@/components/SmartRFQForm';
 import PriceTrackerWidget from '@/components/PriceTrackerWidget';
 import EditProfileModal from '@/components/EditProfileModal';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import SubscriptionModal from '@/components/SubscriptionModal';
 // ── Demo dashboard data ──
 const DEMO_STATS = {
   buyer: [
@@ -131,6 +132,7 @@ function DashboardContent() {
   const [upgradingPlan, setUpgradingPlan] = useState(null);
   const [upgradeSuccessModal, setUpgradeSuccessModal] = useState(null);
   const [showUpgradeGateModal, setShowUpgradeGateModal] = useState(false);
+  const [showDashboardSubscriptionModal, setShowDashboardSubscriptionModal] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(10);
   const [pricingInfo, setPricingInfo] = useState({
     originalPrice: 20000,
@@ -198,6 +200,31 @@ function DashboardContent() {
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [fetchMembershipStatus, user]);
+
+  // Auto-show subscription modal once per session for free-tier / expired users
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) return;
+    if (membershipInfo === null) return; // not loaded yet
+    try {
+      // Only show if user does NOT have a valid paid plan
+      const hasPaidPlan = membershipInfo?.canUpload === true && membershipInfo?.plan !== 'FREE TIER' && !membershipInfo?.isExpired;
+      if (hasPaidPlan) return;
+
+      // For expired plans, use an expiry-specific key so the modal re-shows each time the plan lapses
+      const expiryTag = membershipInfo?.isExpired
+        ? `expired_${membershipInfo?.expiresAt?.slice(0, 10) || 'x'}`
+        : 'free';
+      const sessionKey = `sub_modal_shown_${user.id}_${expiryTag}`;
+
+      if (!sessionStorage.getItem(sessionKey)) {
+        setShowDashboardSubscriptionModal(true);
+        sessionStorage.setItem(sessionKey, '1');
+      }
+    } catch { /* private browsing */ }
+  }, [authLoading, user, membershipInfo]);
+
+
 
   useEffect(() => {
     if (profile?.membership_plan) {
@@ -1870,6 +1897,19 @@ function DashboardContent() {
 
           {/* Razorpay Checkout Script */}
           <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+
+          {/* ── Subscription Purchase Modal (auto-shows for non-subscribers) ── */}
+          <SubscriptionModal
+            isOpen={showDashboardSubscriptionModal}
+            userEmail={user?.email || ''}
+            companyName={activeProfile?.company_name || activeProfile?.full_name || ''}
+            onClose={(reason) => {
+              setShowDashboardSubscriptionModal(false);
+              if (reason === 'activated') {
+                fetchMembershipStatus();
+              }
+            }}
+          />
         </div>
       </main>
     </>

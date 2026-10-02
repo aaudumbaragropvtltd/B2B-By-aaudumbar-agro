@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/services/supabase';
 import B2BLogo from '@/components/B2BLogo';
+import SubscriptionModal from '@/components/SubscriptionModal';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -52,6 +53,12 @@ export default function LoginPage() {
   const [resendMessage, setResendMessage] = useState('');
   const [returnUrl, setReturnUrl] = useState('');
   const [authReason, setAuthReason] = useState('');
+
+  // Subscription modal states
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [pendingRedirect, setPendingRedirect] = useState('');
+  const [loggedInUserEmail, setLoggedInUserEmail] = useState('');
+  const [loggedInCompanyName, setLoggedInCompanyName] = useState('');
 
   // Detect verification callback query params and reset recovery requests
   useEffect(() => {
@@ -141,10 +148,27 @@ export default function LoginPage() {
           throw signInError;
         }
 
-        // Redirect to requested return URL or dashboard
-        const destination = returnUrl || '/dashboard';
-        router.push(destination);
-        router.refresh();
+          // After login: check subscription status before redirecting
+          const destination = returnUrl || '/dashboard';
+          setLoggedInUserEmail(emailTrimmed);
+          try {
+            const memRes = await fetch('/api/membership', { cache: 'no-store' });
+            if (memRes.ok) {
+              const memData = await memRes.json();
+              const mem = memData?.membership;
+              // Only show modal if user has NO active paid plan
+              const hasPaidPlan = mem?.canUpload === true && mem?.plan !== 'FREE TIER' && !mem?.isExpired;
+              if (!hasPaidPlan) {
+                // Show subscription modal — user can close & continue to dashboard
+                setPendingRedirect(destination);
+                setShowSubscriptionModal(true);
+                setLoading(false);
+                return;
+              }
+            }
+          } catch { /* fallback: proceed normally */ }
+          router.push(destination);
+          router.refresh();
       } else {
         // ── Sign Up with Email/Password via Backend Dispatch Engine ──
         const res = await fetch('/api/auth/register', {
@@ -234,12 +258,11 @@ export default function LoginPage() {
 
       if (verifyErr) throw verifyErr;
 
-      setSuccess('🎉 Account verified successfully! Redirecting...');
-      setTimeout(() => {
-        const destination = returnUrl || '/onboarding';
-        router.push(destination);
-        router.refresh();
-      }, 800);
+      setSuccess('🎉 Account verified successfully!');
+      // Show subscription modal after new account verification before onboarding
+      setPendingRedirect(returnUrl || '/onboarding');
+      setLoggedInUserEmail(registeredEmail || formData.email.trim());
+      setShowSubscriptionModal(true);
     } catch (err) {
       setOtpError(err.message || 'Invalid or expired verification code. Please check your code or click resend.');
     } finally {
@@ -1163,6 +1186,20 @@ export default function LoginPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* ── Subscription Purchase Modal ── */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        userEmail={loggedInUserEmail}
+        companyName={loggedInCompanyName}
+        onClose={(reason) => {
+          setShowSubscriptionModal(false);
+          if (pendingRedirect) {
+            router.push(pendingRedirect);
+            router.refresh();
+          }
+        }}
+      />
     </div>
   );
 }
